@@ -199,7 +199,7 @@
     /iPad|iPhone/.test(navigator.userAgent) && document.body.classList.add('ios');
     customElements.whenDefined('great-icosahedron').then(() => Q('body').hidden = false);
     (observer => Q('meter,progress', el => observer.observe(el, {attributes: true, attributeFilter: ['value']})))(
-        new MutationObserver(([{target}]) => new A({'--value': target.value}).apply(target))
+        new MutationObserver(([{target}]) => new A({'--value': target.value}).set(target))
     );
     (observer => Q('body>*', el => observer.observe(el)))(
         new IntersectionObserver(entries => entries.forEach(en => en.target.classList.toggle('seeing', en.isIntersecting)))

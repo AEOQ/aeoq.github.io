@@ -195,8 +195,8 @@ h3::before {
 </article>
 
 <script>
-['--x','--y','--z','--a'].forEach( p => new A({p: Math.random()*360+360}).apply(Q('section')) );
-['--rx','--ry'].forEach( p => new A({p: 0}).apply(Q('section')) );
+['--x','--y','--z','--a'].forEach( p => new A({p: Math.random()*360+360}).set(Q('section')) );
+['--rx','--ry'].forEach( p => new A({p: 0}).set(Q('section')) );
 
 const setRange = hedron => {
     Q('input[type=range]', input => {
@@ -284,8 +284,8 @@ const Polyhedra = {
         [trS, reS].map(shadow => shadow.querySelector('polygon')).forEach(polygon => defs.appendChild(polygon.cloneNode(true)) );
     
         [trS, reS] = [trS, reS].map(shadow => shadow.querySelector('figure').style);
-        const diameter = new E(reS).get('--diameter').replace('em','');
-        new A({'--diameter': diameter * scaled + 'em'}).apply(cloneS.querySelector('figure+figure'));
+        const diameter = E(reS).get('--diameter').replace('em','');
+        new A({'--diameter': diameter * scaled + 'em'}).set(cloneS.querySelector('figure+figure'));
         
         if (Q('#full:checked'))
             Q('figure.merge h3', (h3, i) => Polyhedra.setName(h3, ['A7','A6'][i]) );
@@ -310,11 +310,11 @@ Q('nav h3', h3 => h3.onclick = ev => h3.classList.toggle('shown'));
 //        end = [event.clientX || event.touches[0].clientX, event.clientY || event.touches[0].clientY];
 //        const diff = [end[0] - start[0], end[1] - start[1]].map(c => -parseInt(c/50));
 //        if (Math.abs(diff[0]) >= 1) {
-//            new A({'--ry': new E(figure).get('--ry') - diff[0]*30}).apply(figure);
+//            new A({'--ry': new E(figure).get('--ry') - diff[0]*30}).set(figure);
 //            start[0] = end[0];
 //        }
 //        if (Math.abs(diff[1]) >= 1) {
-//            new A({'--rx': new E(figure).get('--rx') + diff[1]*30}).apply(figure);
+//            new A({'--rx': new E(figure).get('--rx') + diff[1]*30}).set(figure);
 //            start[1] = end[1];
 //        }
 //    };

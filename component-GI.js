@@ -25,19 +25,19 @@ customElements.define('great-icosahedron', class extends HTMLElement {
             ...polygons(this.face%this.portion)
         ]);            
         for (let i = 1; i <= this.around; i++)
-            figure.Q(`div svg:nth-child(${i})`, svg => new A({'--centerA': 360/this.around*i + 'deg'}).apply(svg));
+            figure.Q(`div svg:nth-child(${i})`, svg => E(svg).set({'--centerA': 360/this.around*i + 'deg'}));
         return [svg, figure];
     }
     callback() {
-        this.onclick = () => new A({'--paused': 'paused'}).apply(this);
-        this.hasAttribute('paused') && new A({'--paused': 'paused'}).apply(this);
+        this.onclick = () => E(this).set({'--paused': 'paused'});
+        this.hasAttribute('paused') && E(this).set({'--paused': 'paused'});
         this.shadow.replaceChildren(E('style', this.css), ...this.elements);
         this.variables();
         setTimeout(() => this.color());
-        ['--x', '--y', '--z', '--a'].forEach(p => new A({[p]: Math.random() * 360 + 360}).apply(this));
+        ['--x', '--y', '--z', '--a'].forEach(p => E(this).set({[p]: Math.random() * 360 + 360}));
     }
     color() {
-        let hue = new E(this).get('--hue');
+        let hue = E(this).get('--hue');
         [
             [[1, 1], [2, 1], [3, 4], [4, 4]],
             [[1, 2], [2, 5], [3, 5], [4, 3]],
@@ -45,7 +45,7 @@ customElements.define('great-icosahedron', class extends HTMLElement {
             [[1, 4], [2, 3], [3, 2], [4, 1]],
             [[1, 5], [2, 2], [3, 3], [4, 5]]
         ].forEach((colgroup, i) => colgroup.forEach(([g, t]) =>
-            new A({'--c': hue - i * 20}).apply(this.sQ(`div:nth-of-type(${g}) svg:nth-child(${t}) use`))
+            E(this.sQ(`div:nth-of-type(${g}) svg:nth-child(${t}) use`)).set({'--c': hue - i * 20})
         ));
     }
     static observedAttributes = ['stroke'];
@@ -66,7 +66,7 @@ customElements.define('great-icosahedron', class extends HTMLElement {
     variable = new Proxy({}, {
         set: (obj, p, v) => {
             obj[p] = v;
-            new A({[`--${p}`]: v}).apply(this);
+            E(this).set({[`--${p}`]: v});
             return true;
         }
     })

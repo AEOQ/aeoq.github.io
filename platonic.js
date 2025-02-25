@@ -75,13 +75,13 @@ customElements.define('hedron-p', class extends HTMLElement {
             ...polygons(this.face%this.portion)
         ]);            
         for (let i = 1; i <= this.around; i++)
-            figure.Q(`div svg:nth-child(${i})`, svg => new A({'--centerA': 360/this.around*i + 'deg'}).apply(svg));
+            figure.Q(`div svg:nth-child(${i})`, svg => E(svg).set({'--centerA': 360/this.around*i + 'deg'}));
         
         this.color(figure);
         return [svg, figure];
     }
     color(place) {
-        place.Q(`use`, gon => new A({'--c': this.getAttribute('color') || Math.random()*360}).apply(gon));
+        place.Q(`use`, gon => E(gon).set({'--c': this.getAttribute('color') || Math.random()*360}));
     }
     connectedCallback() {
         this.face = parseInt(this.getAttribute('face'));
@@ -116,7 +116,7 @@ customElements.define('hedron-p', class extends HTMLElement {
                 style.innerHTML = style.innerHTML.replace(/(?=}})/, `--${p}:${v};`);
                 v = 2;
             }
-            new A({[`--${p}`]: v}).apply(this);
+            E(this).set({[`--${p}`]: v});
             return true;
         }
     })

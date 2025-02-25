@@ -123,9 +123,9 @@ dd {
         [0   ,'🎰'   ,0   ,0      ,0   ,0    ,0     ,0       ]  /*13*/
     ].map( (tr, i) => E('tr', tr.map( td => E('td', td || '', {title: disks[i]}) )) ));
 
-    Q('tr', (tr, i) => new A({'--index': i+1}).apply(tr));
+    Q('tr', (tr, i) => new A({'--index': i+1}).set(tr));
     const table = Q('table');
-    new A({'--rows': table.Q('tr').length}).apply(table);
+    new A({'--rows': table.Q('tr').length}).set(table);
 
     let got = JSON.parse(cookie.got || null) || [];
     got.forEach(coor => {
@@ -143,8 +143,8 @@ dd {
     table.spin = n => {
         let cylinder = Q('tbody');
         Q('tr', tr => tr.removeAttribute('class'));
-        let k = new E(cylinder).get('--checked') + n;
-        new A({'--checked': k}).apply(cylinder);
+        let k = E(cylinder).get('--checked') + n;
+        new A({'--checked': k}).set(cylinder);
     };
     table.spin(0);
 

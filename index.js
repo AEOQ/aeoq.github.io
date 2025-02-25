@@ -1,8 +1,8 @@
 const Knob = {
     init (knob) {
-        knob.minθ = new E(knob).get('--min');
+        knob.minθ = E(knob).get('--min');
         knob.maxθ = 360 - knob.minθ;
-        knob.currentθ = () => new E(knob).get('--angle');
+        knob.currentθ = () => E(knob).get('--angle');
         knob.onpointerdown = ev => Knob.press(ev);
     },
     press ({ target: knob, clientY }) {
@@ -21,11 +21,11 @@ const Knob = {
         let currentY = ev.clientY;
         let updatedθ = Math.max(knob.minθ, Math.min(knob.startθ - (currentY - knob.startY), knob.maxθ));
         (updatedθ == knob.minθ || updatedθ == knob.maxθ) && (knob.startY = currentY);
-        new A({'--angle': `${updatedθ}deg`}).apply(knob);
+        E(knob).set({'--angle': `${updatedθ}deg`});
 
         let value = (updatedθ - knob.minθ) / (knob.maxθ - knob.minθ);
         knob.Q('input').value = Q(`progress`).value = value;
-        new A({'--value': value}).apply(Q(`progress`).parentElement);
+        E(Q(`progress`).parentElement).set({'--value': value});
     
     },
     lift (knob) {
@@ -37,21 +37,21 @@ const Fader = {
     init (input) {
         input.value = Math.random()*100;
         let pillar = Q(`#faders p:nth-child(${input.tabIndex})`);
-        new A({'--w-size': 5.5 - input.tabIndex + 1 + '%'}).apply(pillar);
+        E(pillar).set({'--w-size': 5.5 - input.tabIndex + 1 + '%'});
         
         input.oninput = ev => Fader.move(input, pillar);
         input.onpointerup = ev => Fader.confirm();
         setTimeout(() => input.dispatchEvent(new InputEvent('input')));
     },
     move (input, pillar) {
-        new A({'--w-pos': 100 - input.value + '%'}).apply(pillar);
-        new A({'--value': input.value}).apply(input);
+        E(pillar).set({'--w-pos': 100 - input.value + '%'});
+        E(input).set({'--value': input.value});
         let until = Fader.penetrated();
-        new A({'--laser': until === 0 ? '5000px' : Q(`#faders p:nth-child(${until})`).getBoundingClientRect().x+'px'}).apply(Q('#faders'));
+        E(Q('#faders')).set({'--laser': until === 0 ? '5000px' : Q(`#faders p:nth-child(${until})`).getBoundingClientRect().x+'px'});
     },
     confirm: () => Q('#faders').classList.toggle('done', Fader.penetrated() === 0),
     penetrated: () => Q('#faders p').findIndex(p => {
-        let [pos, size] = new E(p).get('--w-pos', '--w-size').map(parseFloat);
+        let [pos, size] = E(p).get('--w-pos', '--w-size');
         return pos < 10 - (2*size/5 - .35) || pos > 10 + (2*size/5 - .35);
     }) + 1
 }
@@ -60,12 +60,12 @@ const BD =  {
         BD.diverter = diverter.sQ('article');
         BD.control = Q('#knob input'), BD.meter = Q('meter');
     },
-    get angle() {return parseFloat(new E(BD.diverter).get('--angle'));},
-    set angle(angle) {new A({'--angle': angle + 'deg'}).apply(BD.diverter)},
+    get angle() {return E(BD.diverter).get('--angle');},
+    set angle(angle) {E(BD.diverter).set({'--angle': angle + 'deg'})},
     spin (time) {
         if (Q('#bd.seeing:not(.blurred)')) {
             let speed = BD.meter.value = Math.max(.05, parseFloat(BD.control.value)) + (Math.random() - .5)/100;
-            //new A({'--tilt': Math.max(0, (speed - .5 + Math.random(}).apply(Q('bird-diverter'))/10)*90) + 'deg');
+            //E(Q('bird-diverter'))/10)*90) + 'deg').set({'--tilt': Math.max(0, (speed - .5 + Math.random(});
             BD.angle += Math.min(100, time - BD.last)*speed*2;
         }
         BD.last = time;
@@ -137,17 +137,17 @@ const Scroll = {
     truncate (which) {
         Scroll.truncated[which] = true;
         Q(`aside div:nth-of-type(${which+1}) hedron-p`).sQ('polygon', polygon => {
-            let side = parseInt(polygon.id), stroke = new E(polygon).get('--stroke');
+            let side = parseInt(polygon.id), stroke = E(polygon).get('--stroke');
             const r = new Polygon(side, stroke).normal;
             const strokeAdjusted = r - (new Polygon(side, stroke, r).radius.stroked - r);
             const points = Polygon.points(side, strokeAdjusted, -Math.PI / side, true);
     
             const animate = polygon.Q(`animate`);
-            new A({
+            E(animate).set({
                 from: animate.getAttribute('to') || animate.parentNode.getAttribute('points'),
                 to: points
-            }).apply(animate);
-            new A({points}).apply(animate.parentNode);
+            });
+            E(animate.parentNode).set({points});
             animate.beginElement();
         });
     },

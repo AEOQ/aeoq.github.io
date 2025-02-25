@@ -5,8 +5,8 @@ class A extends Set {
         this.assign(...objs?.flat() ?? []);
     }
     assign (...objs) {return Object.assign(this, new O(...objs));}
-    apply (el) {
-        if (Array.isArray(el)) return el.forEach(el => this.apply(el));
+    set (el) {
+        if (Array.isArray(el)) return el.forEach(el => this.set(el));
         el.append(...this);
         Array.isArray(this.classList) && (this.classList = this.classList.filter(c => c).join(' '));
 
@@ -24,18 +24,33 @@ class A extends Set {
 }
 
 const E = function (el, ...props) {
-    if (el instanceof HTMLElement || el instanceof SVGElement)
-        return (this.el = el) && this;
+    if (typeof el == 'object')
+        return new.target ? (this.el = el) && this : new E(el);
     props = A.already(...props);
     el == 'img' && props.assign({alt: props.src?.match(/([^/.]+)(\.[^/.]+)$/)?.[1], onerror: ev => ev.target.remove()});
     el = E.SVG.includes(el) ? document.createElementNS('http://www.w3.org/2000/svg', el) : document.createElement(el);
-    props.apply(el);
+    props.set(el);
     return el;
 }
-E.prototype.get = function(...props) {return props.length > 1 ? 
-    props.map(p => this.get(p)) : 
-    parseFloat(getComputedStyle(this.el).getPropertyValue(props[0]));
-}
+Object.assign(E.prototype, {
+    get (...props) {
+        return props.length > 1 ? 
+            props.map(p => this.get(p)) : 
+            /^--/.test(props[0]) ? parseFloat(getComputedStyle(this.el).getPropertyValue(props[0])) : this.getAttribute(props[0]);
+    },
+    set (...props) {
+        props = new A(...props);
+        this.el.append(...props);
+        Array.isArray(props.classList) && (props.classList = props.classList.filter(c => c).join(' '));
+
+        let isSVG = E.SVG.includes(this.el.tagName);
+        let {true: vari, false: attr} = Object.groupBy(new O({...props}), ([a]) => a.includes('--'));
+        vari && new O(vari).each(([a, v]) => this.el.style.setProperty(a, v));
+        attr && new O(attr).each(([a, v]) => typeof v == 'object' ? 
+            Object.assign(this.el[a], v) : isSVG ? this.el.setAttribute(a, v) : this.el[a] = v
+        );
+    }
+});
 Object.assign(E, {
     SVG: ['svg', 'defs', 'use', 'path', 'line', 'polygon', 'rect', 'circle', 'animate'],
 

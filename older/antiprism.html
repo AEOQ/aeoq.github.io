@@ -72,10 +72,10 @@ svg~svg[class='3-gon'] {
                     '--l': (Math.cos(2 * Math.PI / this.n * i) + Math.cos(2 * Math.PI / this.n * (i+1))) / 2,
                     '--t': (Math.sin(2 * Math.PI / this.n * i) + Math.sin(2 * Math.PI / this.n * (i+1))) / 2,
                     '--r': (2 * Math.PI / this.n * i + Math.PI / this.n) + 'rad'
-                }).apply(tri)
+                }).set(tri)
             );
             shadow.append(shadow.Q('div').cloneNode(true));
-            new A({'--r': (this.n % 2 == 0 ? Math.PI / this.n : 0) + 'rad'}).apply(shadow.Q('div:last-child'));
+            new A({'--r': (this.n % 2 == 0 ? Math.PI / this.n : 0) + 'rad'}).set(shadow.Q('div:last-child'));
         }
         calculate(stroke) {
             stroke = parseFloat(stroke);
@@ -88,11 +88,11 @@ svg~svg[class='3-gon'] {
                 '--rel-diameter': 2*gon.radius.stroked,
                 '--slant': Math.acos((gon.radius.stroked - gon.normal) / (tri.height * ratio)) + 'rad',
                 '--extend': Math.sqrt(Math.pow(tri.height * ratio, 2) - Math.pow(gon.radius.stroked - gon.normal, 2))
-            }).apply(this);
+            }).set(this);
         }
         attributeChangedCallback(attr, before, after) {
             this.calculate(after);
-            new A({'--stroke': after}).apply(this);
+            new A({'--stroke': after}).set(this);
         }
         static observedAttributes = ['stroke'];
         randomize() {
@@ -107,7 +107,7 @@ svg~svg[class='3-gon'] {
                 '--tx0': this.rand(40) + 'vw', ty0: this.rand(40) + 'vh', tz0: this.rand(40) + 'vmin', 
                 '--rx1': this.rand(1), ry1: this.rand(1), rz1: this.rand(1), ra1: this.rand(2000) + 'turn',
                 '--tx1': this.rand(40) + 'vw', ty1: this.rand(40) + 'vh', tz1: this.rand(40) + 'vmin',
-            }).apply(this)
+            }).set(this)
         }
         rand(r) {return (Math.random()*2-1)*r;}
         static generate = () => document.body.append(new Antiprism(Math.round(Math.random()+3)))
