@@ -44,12 +44,12 @@ typeof Polygon == 'undefined' && (Polygon = class {
         return points;
     }
     static viewBox(svgs, {stroke}) {
-        svgs.forEach(svg => E(svg, {viewBox: [-1,-1,2,2].map(
+        svgs.forEach(svg => E(svg).set({viewBox: [-1,-1,2,2].map(
             (gon => m => m * gon.radius.stroked)(new Polygon(svg.classList[0].split('-')[0], stroke))
         ).join(' ')}));
     }
     polygon() {
         return E('polygon', {points: Polygon.points(this.n)});
     }
-    svg = () => E('svg', [this.polygon()], {classList: `${this.n}-gon`});
+    svg = () => E('svg', [this.polygon()], {class: `${this.n}-gon`});
 })

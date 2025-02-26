@@ -4,7 +4,7 @@
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width, initial-scale=1.0">
 <link rel=stylesheet href='common.css'>
-<script src='../index.js'></script>
+<script src='../AEOQ.js'></script>
 <script src='../platonic.js'></script>
 <script src='common.js'></script>
 <hedron-p face="20" stroke=".02"></hedron-p> 
@@ -123,9 +123,9 @@ dd {
         [0   ,'🎰'   ,0   ,0      ,0   ,0    ,0     ,0       ]  /*13*/
     ].map( (tr, i) => E('tr', tr.map( td => E('td', td || '', {title: disks[i]}) )) ));
 
-    Q('tr', (tr, i) => new A({'--index': i+1}).set(tr));
+    Q('tr', (tr, i) => E(tr).set({'--index': i+1}));
     const table = Q('table');
-    new A({'--rows': table.Q('tr').length}).set(table);
+    E(table).set({'--rows': table.Q('tr').length});
 
     let got = JSON.parse(cookie.got || null) || [];
     got.forEach(coor => {
@@ -144,7 +144,7 @@ dd {
         let cylinder = Q('tbody');
         Q('tr', tr => tr.removeAttribute('class'));
         let k = E(cylinder).get('--checked') + n;
-        new A({'--checked': k}).set(cylinder);
+        E(cylinder).set({'--checked': k});
     };
     table.spin(0);
 

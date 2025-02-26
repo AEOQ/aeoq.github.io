@@ -1,7 +1,7 @@
 customElements.define('great-icosahedron', class extends HTMLElement {
     constructor() {
         super();
-        this.shadow = this.attachShadow({ mode: 'open' });
+        this.attachShadow({ mode: 'open' });
         [this.face, this.side, this.portion, this.around] = [20, 3, 5, 5];
         setTimeout(() => this.callback());
     }
@@ -31,7 +31,7 @@ customElements.define('great-icosahedron', class extends HTMLElement {
     callback() {
         this.onclick = () => E(this).set({'--paused': 'paused'});
         this.hasAttribute('paused') && E(this).set({'--paused': 'paused'});
-        this.shadow.replaceChildren(E('style', this.css), ...this.elements);
+        this.shadowRoot.replaceChildren(E('style', this.css), ...this.elements);
         this.variables();
         setTimeout(() => this.color());
         ['--x', '--y', '--z', '--a'].forEach(p => E(this).set({[p]: Math.random() * 360 + 360}));
@@ -50,26 +50,19 @@ customElements.define('great-icosahedron', class extends HTMLElement {
     }
     static observedAttributes = ['stroke'];
     attributeChangedCallback() {
-        this.shadow.Q('figure') ? this.variables() : this.callback();
+        this.sQ('figure') ? this.variables() : this.callback();
     }
     variables() {
         this.gon = new Polygon(this.side, this.stroke);
         this.constants();
-        Object.assign(this.variable, {
-            stroke: this.stroke,
-            slant: this.constant.slant + 'rad',
-            inR: this.constant.inR * this.gon.side,
-            circumR: 1 || this.constant.circumR * this.gon.side,
-            midSlant: this.constant.foldA - this.constant.slant + 'rad',
+        E(this).set({
+            '--stroke': this.stroke,
+            '--slant': this.constant.slant + 'rad',
+            '--inR': this.constant.inR * this.gon.side,
+            '--circumR': 1 || this.constant.circumR * this.gon.side,
+            '--midSlant': this.constant.foldA - this.constant.slant + 'rad',
         });
     }
-    variable = new Proxy({}, {
-        set: (obj, p, v) => {
-            obj[p] = v;
-            E(this).set({[`--${p}`]: v});
-            return true;
-        }
-    })
     constants() {
         let [inR, circumR] = [(3 * Math.sqrt(3) + Math.sqrt(15)) / 12, Math.sqrt(10 + 2 * Math.sqrt(5)) / 4];
         this.constant = {

@@ -1,22 +1,10 @@
 class A extends Set {
     constructor(...stuff) {
         let {true: objs, false: others} = Object.groupBy(stuff, s => Object.prototype.toString.call(s).includes('Object'));
-        super(others?.filter(o => o).flat() ?? []);
+        super([...others?.filter(o => o).flat() ?? []]);
         this.assign(...objs?.flat() ?? []);
     }
     assign (...objs) {return Object.assign(this, new O(...objs));}
-    set (el) {
-        if (Array.isArray(el)) return el.forEach(el => this.set(el));
-        el.append(...this);
-        Array.isArray(this.classList) && (this.classList = this.classList.filter(c => c).join(' '));
-
-        let isSVG = E.SVG.includes(el.tagName);
-        let {true: vari, false: attr} = Object.groupBy(new O({...this}), ([a]) => a.includes('--'));
-        vari && new O(vari).each(([a, v]) => el.style.setProperty(a, v));
-        attr && new O(attr).each(([a, v]) => typeof v == 'object' ? 
-            Object.assign(el[a], v) : isSVG ? el.setAttribute(a, v) : el[a] = v
-        );
-    }
     static already (...stuff) {
         let {true: already, false: others} = Object.groupBy(stuff, s => s instanceof A);
         return already ? already[0].assign(...others ?? []) : new A(...stuff);
@@ -24,13 +12,10 @@ class A extends Set {
 }
 
 const E = function (el, ...props) {
-    if (el instanceof HTMLElement || el instanceof SVGElement)
+    if (typeof el == 'object')
         return new.target ? (this.el = el) && this : new E(el);
-    props = A.already(...props);
-    el == 'img' && props.assign({alt: props.src?.match(/([^/.]+)(\.[^/.]+)$/)?.[1], onerror: ev => ev.target.remove()});
     el = E.SVG.includes(el) ? document.createElementNS('http://www.w3.org/2000/svg', el) : document.createElement(el);
-    props.set(el);
-    return el;
+    return E(el).set(...props);
 }
 Object.assign(E.prototype, {
     get (...props) {
@@ -41,14 +26,17 @@ Object.assign(E.prototype, {
     set (...props) {
         props = new A(...props);
         this.el.append(...props);
+
+        this.el.tagName == 'IMG' && props.assign({alt: props.src?.match(/([^/.]+)(\.[^/.]+)$/)?.[1], onerror: ev => ev.target.remove()});
         Array.isArray(props.classList) && (props.classList = props.classList.filter(c => c).join(' '));
 
         let isSVG = E.SVG.includes(this.el.tagName);
-        let {true: vari, false: attr} = Object.groupBy(new O({...props}), ([a]) => a.includes('--'));
-        vari && new O(vari).each(([a, v]) => this.el.style.setProperty(a, v));
-        attr && new O(attr).each(([a, v]) => typeof v == 'object' ? 
+        let {true: vari, false: attr} = new O({...props}).groupBy(([a]) => a.includes('--'));
+        vari?.each(([a, v]) => this.el.style.setProperty(a, v));
+        attr?.each(([a, v]) => typeof v == 'object' ? 
             Object.assign(this.el[a], v) : isSVG ? this.el.setAttribute(a, v) : this.el[a] = v
         );
+        return this.el;
     }
 });
 Object.assign(E, {
@@ -80,6 +68,7 @@ class O extends Map {
     }
     url () {return new URLSearchParams([...this]).toString();}
     each (f) {this.forEach((v, k) => f([k, v]));}
+    groupBy (...arg) {return new O(Object.groupBy(this, ...arg)).map(([k, v]) => [k, new O(v)]);}
     prepend (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, (o[k] ?? '') + v]), this);}
 }
 ['map','filter'].forEach(f => O.prototype[f] = function(...p) {return new O([...this][f](...p));});

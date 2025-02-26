@@ -8,6 +8,7 @@
 <script src="component-BD.js"></script>
 <script src="index.js"></script>
 <script src="platonic.js"></script>
+<script src="drag-knob/drag-knob.js" type="module"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:ital,wght@0,400;1,900&display=swap" rel="stylesheet">
@@ -35,11 +36,11 @@
 
 <section id="knob" style="--light:hsl(40,100%,60%); --dark:hsl(40,50%,30%); --base-bg:hsl(40,50%,15%)">
     <div>
-        <label class="knob"><input type="range" value="0" max="1" step="any"></label>
+        <continuous-knob min="0" max="1"></continuous-knob>
         <h3>
             <progress></progress>
             <b>DRAG THE KNOB UP AND DOWN</b>
-            <b>It is made of a single element with conic gradient.</b>
+            <b>The inspiration came from DAW controls.</b>
         </h3>
     </div>
 </section>
@@ -199,14 +200,14 @@
     /iPad|iPhone/.test(navigator.userAgent) && document.body.classList.add('ios');
     customElements.whenDefined('great-icosahedron').then(() => Q('body').hidden = false);
     (observer => Q('meter,progress', el => observer.observe(el, {attributes: true, attributeFilter: ['value']})))(
-        new MutationObserver(([{target}]) => new A({'--value': target.value}).set(target))
+        new MutationObserver(([{target}]) => E(target).set({'--value': target.value}))
     );
     (observer => Q('body>*', el => observer.observe(el)))(
         new IntersectionObserver(entries => entries.forEach(en => en.target.classList.toggle('seeing', en.isIntersecting)))
     );
     document.addEventListener('visibilitychange', () => Q('.seeing', el => el.classList.toggle('blurred', document.hidden)));
     
-    Knob.init(Q('#knob label'));
+    Knob.init(Q('continuous-knob'));
     Q('#faders input', Fader.init);
     BD.init(Q('bird-diverter'));
     Scroll.init();

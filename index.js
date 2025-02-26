@@ -1,36 +1,10 @@
 const Knob = {
     init (knob) {
-        knob.minθ = E(knob).get('--min');
-        knob.maxθ = 360 - knob.minθ;
-        knob.currentθ = () => E(knob).get('--angle');
-        knob.onpointerdown = ev => Knob.press(ev);
-    },
-    press ({ target: knob, clientY }) {
-        knob.startY = clientY;
-        knob.startθ = knob.currentθ();
-
-        Q('html').classList.add('dragging');
-        document.onpointermove = ev => Knob.drag(ev, knob);
-        document.onpointerup = ev => Knob.lift(knob);
-    },
-    drag (ev, knob) {
-        ev.preventDefault();
-        let currentθ = knob.currentθ();
-        (currentθ == knob.minθ || currentθ == knob.maxθ) && (knob.startθ = currentθ);
-
-        let currentY = ev.clientY;
-        let updatedθ = Math.max(knob.minθ, Math.min(knob.startθ - (currentY - knob.startY), knob.maxθ));
-        (updatedθ == knob.minθ || updatedθ == knob.maxθ) && (knob.startY = currentY);
-        E(knob).set({'--angle': `${updatedθ}deg`});
-
-        let value = (updatedθ - knob.minθ) / (knob.maxθ - knob.minθ);
-        knob.Q('input').value = Q(`progress`).value = value;
-        E(Q(`progress`).parentElement).set({'--value': value});
-    
-    },
-    lift (knob) {
-        Q('html').classList.remove('dragging');
-        document.onpointermove = null;
+        knob.oninput = ev => {
+            let progress = Q('progress');
+            progress.value = ev.target.value;
+            E(progress.parentElement).set({'--value': progress.value});
+        }
     }
 };
 const Fader = {
@@ -57,15 +31,15 @@ const Fader = {
 }
 const BD =  {
     init (diverter) {
-        BD.diverter = diverter.sQ('article');
-        BD.control = Q('#knob input'), BD.meter = Q('meter');
+        BD.diverter = diverter;
+        BD.control = Q('continuous-knob'), BD.meter = Q('meter');
     },
     get angle() {return E(BD.diverter).get('--angle');},
     set angle(angle) {E(BD.diverter).set({'--angle': angle + 'deg'})},
     spin (time) {
         if (Q('#bd.seeing:not(.blurred)')) {
-            let speed = BD.meter.value = Math.max(.05, parseFloat(BD.control.value)) + (Math.random() - .5)/100;
-            //E(Q('bird-diverter'))/10)*90) + 'deg').set({'--tilt': Math.max(0, (speed - .5 + Math.random(});
+            let speed = BD.meter.value = Math.max(.05, BD.control.value || 0) + (Math.random() - .5)/100;
+            E(BD.diverter).set({'--tilt': Math.max(0, (speed - .5 + Math.random()*speed/3)*90) + 'deg'});
             BD.angle += Math.min(100, time - BD.last)*speed*2;
         }
         BD.last = time;

@@ -144,7 +144,7 @@ great-icosahedron {
 @keyframes move {to {transform:translateZ(0);}}
 
 #knob {
-    --base-bg:hsl(330,50%,20%);;
+    --base-bg:hsl(330,50%,20%);
 }
 #knob h3 {
     position:relative;
@@ -165,6 +165,16 @@ h3 b:last-of-type {
     font-size:1.25em;
     opacity:var(--value,0);
     mix-blend-mode:difference;
+}
+continuous-knob {
+    font-size:2em;
+
+    &::part(output) {
+        color:transparent;
+    }
+    &::part(output)::after {
+        background:conic-gradient(#a3a3a8,#e0eaf1,#a3a3a8,#e0eaf1,#a3a3a8,#e0eaf1,#a3a3a8,#e0eaf1,#a3a3a8,#e0eaf1,#a3a3a8);
+    }
 }
 
 #faders {
