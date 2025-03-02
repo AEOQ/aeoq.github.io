@@ -63,7 +63,7 @@ Object.assign(E, {
 class O extends Map {
     constructor(...objs) {
         super();
-        objs.flatMap(obj => typeof obj[Symbol.iterator] == 'function' ? obj : Object.entries(obj))
+        objs.flatMap(obj => [...typeof obj[Symbol.iterator] == 'function' ? obj : Object.entries(obj)])
             .forEach(([k, v]) => [this[k] = v, this.set(k, v)]);
     }
     url () {return new URLSearchParams([...this]).toString();}
