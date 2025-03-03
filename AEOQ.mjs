@@ -37,6 +37,13 @@ Object.assign(E.prototype, {
             Object.assign(this.el[a], v) : isSVG ? this.el.setAttribute(a, v) : this.el[a] = v
         );
         return this.el;
+    },
+    contains ({x, y}) {
+        let {x: x0, y: y0, width, height} = this.el.getBoundingClientRect();
+        return (x != null ? x0 < x && x < x0 + width : true) && (y != null ? y0 < y && y < y0 + height : true);
+    },
+    getBoundingPageRect () {
+        return (({x, y}) => ({x: x + scrollX, y: y + scrollY}))(this.el.getBoundingClientRect())
     }
 });
 Object.assign(E, {
