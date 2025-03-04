@@ -73,6 +73,7 @@ class O extends Map {
         objs.flatMap(obj => [...typeof obj[Symbol.iterator] == 'function' ? obj : Object.entries(obj)])
             .forEach(([k, v]) => [this[k] = v, this.set(k, v)]);
     }
+    get (props) {return props.split(/[-.]/).reduce((obj, prop) => obj?.[prop], this);}
     url () {return new URLSearchParams([...this]).toString();}
     each (f) {this.forEach((v, k) => f([k, v]));}
     groupBy (...arg) {return new O(Object.groupBy(this, ...arg)).map(([k, v]) => [k, new O(v)]);}
