@@ -25,7 +25,7 @@ Object.assign(E.prototype, {
     },
     set (...props) {
         props = new A(...props);
-        this.el.append(...props);
+        props.size && this.el.replaceChildren(...props);
 
         this.el.tagName == 'IMG' && props.assign({alt: props.src?.match(/([^/.]+)(\.[^/.]+)$/)?.[1], onerror: ev => ev.target.remove()});
         Array.isArray(props.classList) && (props.classList = props.classList.filter(c => c).join(' '));
@@ -73,9 +73,12 @@ class O extends Map {
         objs.flatMap(obj => [...typeof obj[Symbol.iterator] == 'function' ? obj : Object.entries(obj)])
             .forEach(([k, v]) => [this[k] = v, this.set(k, v)]);
     }
+    get (props) {return props.split(/[-.]/).reduce((obj, prop) => obj?.[prop], this);}
     url () {return new URLSearchParams([...this]).toString();}
     each (f) {this.forEach((v, k) => f([k, v]));}
     groupBy (...arg) {return new O(Object.groupBy(this, ...arg)).map(([k, v]) => [k, new O(v)]);}
+    add (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, (o[k] ?? 0) + v]), this);}
+    minus (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, (o[k] ?? 0) - v]), this);}
     prepend (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, (o[k] ?? '') + v]), this);}
 }
 ['map','filter'].forEach(f => O.prototype[f] = function(...p) {return new O([...this][f](...p));});
