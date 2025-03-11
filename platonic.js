@@ -1,56 +1,42 @@
+import {A,E,O,Q} from './AEOQ.mjs';
+class Polygon {
+    constructor(n, stroke = 0, r = 1) {
+        this.n = n;
+        this.r = r;
+        this.stroke = parseFloat(stroke);
+
+        this.angle = {
+            half: Math.PI * (1 - 2 / this.n) / 2,
+            center: 2 * Math.PI / this.n
+        };
+        this.normal = this.r * Math.sin(this.angle.half) + this.stroke / 2;
+        this.side = this.normal / Math.tan(this.angle.half) * 2;
+        this.radius = {
+            stroked: this.normal / Math.sin(this.angle.half),
+            //truncated: this.r * Math.sin(this.angle.half) / Math.sin(Math.PI - new Polygon(this.n * 2).angle.center / 2 - this.angle.half)
+        };
+        this.height = this.radius.stroked * (1 + Math.cos(this.angle.center / 2));
+    }
+    static points(n, r = 1, start = 0, alt = false) {
+        const point = i => [Math.cos(2 * Math.PI / n * i + start), Math.sin(2 * Math.PI / n * i + start)].map(c => Math.round(c * r * 100000) / 100000);
+        const points = [...Array(n).keys()].map(i => [...point(i), ...n < 6 ? point(i) : []]).flat();
+        return (alt ? [...points.slice(2), ...points.slice(0, 2)] : points).join(' ');
+    }
+    static viewBox(svgs, {stroke}) {
+        svgs.forEach(svg => E(svg).set({viewBox: [-1,-1,2,2].map(
+            (gon => m => m * gon.radius.stroked)(new Polygon(svg.classList[0].split('-')[0], stroke))
+        ).join(' ')}));
+    }
+    polygon() {
+        return E('polygon', {points: Polygon.points(this.n)});
+    }
+    svg = () => E('svg', [this.polygon()], {class: `${this.n}-gon`});
+}
 customElements.define('hedron-p', class extends HTMLElement {
     constructor(animate) {
         super();
         this.shadow = this.attachShadow( {mode: 'open'} );
-        this.css = `
-        figure {
-            display: inline-flex; justify-content: center; align-items: center;
-            margin: 0;
-            text-align:left;
-            width: calc(var(--circumR)*10em); height :calc(var(--circumR)*10em);
-	        transform-style: preserve-3d;
-        }
-        figure.extend {
-            --inR: var(--extendR) !important;
-        }
-        div, svg {
-            position: absolute;
-            width: 10em; height: 10em;
-            overflow: visible;
-            transform-style: preserve-3d;
-        }
-        use {
-            stroke: hsl(var(--c),50%,50%); stroke-width: var(--stroke);
-            fill: hsla(var(--c),80%,80%,0.85);
-            transition: .5s;
-        }
-        div:nth-of-type(odd) {
-            transform: translateZ(calc(var(--inR)*10em/2));
-        }
-        div:nth-of-type(even) {
-            transform: rotateY(180deg) translateZ(calc(var(--inR)*10em/2));
-        }
-        div svg {
-            transform-origin: 50% 50% calc(10em*var(--inR)/-2);
-            transform: rotate(var(--centerA)) rotateY(calc(-1rad*var(--slant)));
-        }
-        div:nth-of-type(n+3) svg {
-            transform: rotate(calc(var(--centerA) + 36deg)) rotateY(calc(-1rad*var(--midSlant)));
-        }
-        figure[part='f12'] svg {
-            transform: rotate(var(--centerA)) rotateY(calc(1rad*var(--slant)));
-
-            &:last-child {transform: rotate(36deg);}
-        }
-        figure[part='f6'] div svg {
-            transform: rotate(calc(var(--centerA) - 45deg)) rotateX(45deg) rotateY(90deg);
-        }
-        figure[part='f6']>svg:first-of-type {
-            transform: translateZ(calc(var(--inR)*10em/2));
-        }
-        figure:is([part='f6'],[part='f4'])>svg:last-of-type {
-            transform: translateZ(calc(var(--inR)*10em/-2));
-        }`;
+        this.animation = animate;
     }
     get stroke()  {return this.getAttribute('stroke');}
     get side()    {return {20:3, 12:5, 8:3, 6:4, 4:3}[this.face];}
@@ -60,9 +46,9 @@ customElements.define('hedron-p', class extends HTMLElement {
         const svg = 
         E('svg', [
             E('defs', [
-                E('polygon', {id: this.side, points: Polygon.points(this.side)}, this.animation ? [
+                E('polygon', {id: this.side, points: Polygon.points(this.side)}, [
                     E('animate', {attributeName: 'points', dur: '1000ms'})
-                ] : [])
+                ])
             ])
         ]);
         const polygons = n => [...new Array(n)].map(_ => 
@@ -87,7 +73,7 @@ customElements.define('hedron-p', class extends HTMLElement {
         this.face = parseInt(this.getAttribute('face'));
         if (!this.face) return;
         this.animation ??= this.getAttribute('animate') === '' && true;
-        this.shadow.replaceChildren(E('style', this.css), ...this.elements);
+        this.shadow.replaceChildren(E('style', this.#css), ...this.elements);
         this.shadow.Q('figure').part = `f${this.face}`;
         this.variables();
     }
@@ -141,28 +127,54 @@ customElements.define('hedron-p', class extends HTMLElement {
     attributeChangedCallback(attr) {
         attr == 'color' ? this.color(this.shadow) : this.variables();
     }
-});
-class Polygon {
-    constructor(n, stroke = 0, r = 1) {
-        this.n = n;
-        this.r = r;
-        this.stroke = parseFloat(stroke);
+    #css = `
+    figure {
+        display: inline-flex; justify-content: center; align-items: center;
+        margin: 0;
+        text-align:left;
+        width: calc(var(--circumR)*10em); height :calc(var(--circumR)*10em);
+        transform-style: preserve-3d;
+    }
+    figure.extend {
+        --inR: var(--extendR) !important;
+    }
+    div, svg {
+        position: absolute;
+        width: 10em; height: 10em;
+        overflow: visible;
+        transform-style: preserve-3d;
+    }
+    use {
+        stroke: hsl(var(--c),50%,50%); stroke-width: var(--stroke);
+        fill: hsla(var(--c),80%,80%,0.85);
+        transition: .5s;
+    }
+    div:nth-of-type(odd) {
+        transform: translateZ(calc(var(--inR)*10em/2));
+    }
+    div:nth-of-type(even) {
+        transform: rotateY(180deg) translateZ(calc(var(--inR)*10em/2));
+    }
+    div svg {
+        transform-origin: 50% 50% calc(10em*var(--inR)/-2);
+        transform: rotate(var(--centerA)) rotateY(calc(-1rad*var(--slant)));
+    }
+    div:nth-of-type(n+3) svg {
+        transform: rotate(calc(var(--centerA) + 36deg)) rotateY(calc(-1rad*var(--midSlant)));
+    }
+    figure[part='f12'] svg {
+        transform: rotate(var(--centerA)) rotateY(calc(1rad*var(--slant)));
 
-        this.angle = {
-            half: Math.PI * (1 - 2 / this.n) / 2,
-            center: 2 * Math.PI / this.n
-        };
-        this.normal = this.r * Math.sin(this.angle.half) + this.stroke / 2;
-        this.side = this.normal / Math.tan(this.angle.half) * 2;
-        this.radius = {
-            stroked: this.normal / Math.sin(this.angle.half),
-            //truncated: this.r * Math.sin(this.angle.half) / Math.sin(Math.PI - new Polygon(this.n * 2).angle.center / 2 - this.angle.half)
-        };
-        this.height = this.radius.stroked * (1 + Math.cos(this.angle.center / 2));
+        &:last-child {transform: rotate(36deg);}
     }
-    static points(n, r = 1, start = 0, alt = false) {
-        const point = i => [Math.cos(2 * Math.PI / n * i + start), Math.sin(2 * Math.PI / n * i + start)].map(c => Math.round(c * r * 100000) / 100000);
-        const points = [...Array(n).keys()].map(i => [...point(i), ...n < 6 ? point(i) : []]).flat();
-        return (alt ? [...points.slice(2), ...points.slice(0, 2)] : points).join(' ');
+    figure[part='f6'] div svg {
+        transform: rotate(calc(var(--centerA) - 45deg)) rotateX(45deg) rotateY(90deg);
     }
-}
+    figure[part='f6']>svg:first-of-type {
+        transform: translateZ(calc(var(--inR)*10em/2));
+    }
+    figure:is([part='f6'],[part='f4'])>svg:last-of-type {
+        transform: translateZ(calc(var(--inR)*10em/-2));
+    }`;
+});
+export default Polygon

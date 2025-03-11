@@ -3,12 +3,9 @@
 <meta name=viewport content='width=device-width,initial-scale=1,maximum-scale=1'>
 <link href="index.css" rel="stylesheet">
 <link href="components.css" rel="stylesheet">
-<script src="AEOQ.js"></script>
-<script src="component-GI.js"></script>
-<script src="component-BD.js"></script>
-<script src="index.js"></script>
-<script src="platonic.js"></script>
-<script src="drag-knob/script.js" type="module"></script>
+<script type="module" src="component-GI.js"></script>
+<script type="module" src="component-BD.js"></script>
+<script type="module" src="drag-knob/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:ital,wght@0,400;1,900&display=swap" rel="stylesheet">
@@ -196,7 +193,9 @@
     <p>Scroll up</p>
 </aside>
 
-<script>
+<script type="module">
+    import {A,E,O,Q} from './AEOQ.mjs';
+    
     /iPad|iPhone/.test(navigator.userAgent) && document.body.classList.add('ios');
     customElements.whenDefined('great-icosahedron').then(() => Q('body').hidden = false);
     (observer => Q('meter,progress', el => observer.observe(el, {attributes: true, attributeFilter: ['value']})))(
@@ -207,6 +206,7 @@
     );
     document.addEventListener('visibilitychange', () => Q('.seeing', el => el.classList.toggle('blurred', document.hidden)));
     
+    import {Knob, Fader, BD, Drum, Scroll} from './index.js'
     Knob.init(Q('continuous-knob'));
     Q('#faders input', Fader.init);
     BD.init(Q('bird-diverter'));

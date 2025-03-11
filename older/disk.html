@@ -4,9 +4,6 @@
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width, initial-scale=1.0">
 <link rel=stylesheet href='common.css'>
-<script src='../AEOQ.js'></script>
-<script src='../platonic.js'></script>
-<script src='common.js'></script>
 <hedron-p face="20" stroke=".02"></hedron-p> 
 <style>
 table {
@@ -100,68 +97,70 @@ dd {
         <tbody style="--checked:1"></tbody>
     </table>
 </main>
-<script>
-(() => {
-    const disks = ['00','0','1','1′','2','3','4','5','6','7','8','8′','10','11','12','13'];
-    Q('tbody').append(...[
-        /*Br   Go/Y    G    B       PB   P     R      Bl*/
-        [0   ,'🛍️'   ,0   ,'🎰🛍️' ,0   ,0    ,'🎰🛍️','💻'  ], /*00*/
-        [0   ,'🛍️🥈' ,0   ,0      ,0   ,'🈂️','🎰💻','🎰💻' ], /*0*/
-        [0   ,'🎰'   ,0   ,0      ,0   ,0    ,0     ,0       ], /*1*/
-        [0   ,0      ,0   ,0      ,0   ,0    ,'🛍️'  ,0       ], /*1'*/
-        [0   ,'🥈'   ,0   ,'💻'   ,0   ,0    ,0     ,0       ], /*2*/
-        [0   ,0      ,0   ,'🎮'   ,0   ,0    ,'🛒'  ,0       ], /*3*/
-        [0   ,0      ,0   ,'💻'   ,0   ,0    ,'🛒'  ,'🥈🛍️💻'], /*4*/
-        [0   ,'🎁'   ,0   ,0      ,0   ,0    ,0     ,0       ], /*5*/
-        ['🥉','🥇'   ,0   ,'🎰'   ,0   ,'💻' ,'🎰'  ,0      ], /*6*/
-        [0   ,'🛍️'   ,'🛒',0      ,0   ,0    ,'🎰🎁','🈂️'   ], /*7*/
-        [0   ,0      ,0   ,'🎫🈂️',0   ,'🎰' ,'🎫'  ,0       ], /*8*/
-        [0   ,'🎰'   ,0   ,0      ,0   ,0    ,0     ,'💻'    ], /*8'*/
-        [0   ,'🎰🈂️','🛍️','🎰'   ,0   ,0    ,'🈂️' ,0        ], /*10*/
-        ['🥉','🥇'   ,0   ,'🎰💻' ,0   ,0    ,'🛒'  ,0      ], /*11*/
-        [0   ,0      ,0   ,'🛒'   ,'💻',0    ,0     ,0       ], /*12*/
-        [0   ,'🎰'   ,0   ,0      ,0   ,0    ,0     ,0       ]  /*13*/
-    ].map( (tr, i) => E('tr', tr.map( td => E('td', td || '', {title: disks[i]}) )) ));
+<script type="module">
+import {A,E,O,Q} from '../AEOQ.mjs'
+import Polygon from '../platonic.js'
 
-    Q('tr', (tr, i) => E(tr).set({'--index': i+1}));
-    const table = Q('table');
-    E(table).set({'--rows': table.Q('tr').length});
+const disks = ['00','0','1','1′','2','3','4','5','6','7','8','8′','10','11','12','13'];
+Q('tbody').append(...[
+    /*Br   Go/Y    G    B       PB   P     R      Bl*/
+    [0   ,'🛍️'   ,0   ,'🎰🛍️' ,0   ,0    ,'🎰🛍️','💻'  ], /*00*/
+    [0   ,'🛍️🥈' ,0   ,0      ,0   ,'🈂️','🎰💻','🎰💻' ], /*0*/
+    [0   ,'🎰'   ,0   ,0      ,0   ,0    ,0     ,0       ], /*1*/
+    [0   ,0      ,0   ,0      ,0   ,0    ,'🛍️'  ,0       ], /*1'*/
+    [0   ,'🥈'   ,0   ,'💻'   ,0   ,0    ,0     ,0       ], /*2*/
+    [0   ,0      ,0   ,'🎮'   ,0   ,0    ,'🛒'  ,0       ], /*3*/
+    [0   ,0      ,0   ,'💻'   ,0   ,0    ,'🛒'  ,'🥈🛍️💻'], /*4*/
+    [0   ,'🎁'   ,0   ,0      ,0   ,0    ,0     ,0       ], /*5*/
+    ['🥉','🥇'   ,0   ,'🎰'   ,0   ,'💻' ,'🎰'  ,0      ], /*6*/
+    [0   ,'🛍️'   ,'🛒',0      ,0   ,0    ,'🎰🎁','🈂️'   ], /*7*/
+    [0   ,0      ,0   ,'🎫🈂️',0   ,'🎰' ,'🎫'  ,0       ], /*8*/
+    [0   ,'🎰'   ,0   ,0      ,0   ,0    ,0     ,'💻'    ], /*8'*/
+    [0   ,'🎰🈂️','🛍️','🎰'   ,0   ,0    ,'🈂️' ,0        ], /*10*/
+    ['🥉','🥇'   ,0   ,'🎰💻' ,0   ,0    ,'🛒'  ,0      ], /*11*/
+    [0   ,0      ,0   ,'🛒'   ,'💻',0    ,0     ,0       ], /*12*/
+    [0   ,'🎰'   ,0   ,0      ,0   ,0    ,0     ,0       ]  /*13*/
+].map( (tr, i) => E('tr', tr.map( td => E('td', td || '', {title: disks[i]}) )) ));
 
-    let got = JSON.parse(cookie.got || null) || [];
-    got.forEach(coor => {
-        let [r, d] = coor.split(',').map(n => parseInt(n));
-        Q(`tr:nth-child(${r+1}) td:nth-child(${d+1})`).classList.add('got');
-    });
-    Q('td', td => td.onclick = () => {
-        if (!td.innerText) return;
-        let coor = [...td.parentElement.parentElement.children].indexOf(td.parentElement) + ',' + [...td.parentElement.children].indexOf(td);
-        got = td.classList.contains('got')? got.filter(c => c != coor) : [...got, coor];
-        td.classList.toggle('got');
-        document.cookie = `got=${JSON.stringify(got)};path=/;max-age=888888`;
-    });
+Q('tr', (tr, i) => E(tr).set({'--index': i+1}));
+const table = Q('table');
+E(table).set({'--rows': table.Q('tr').length});
 
-    table.spin = n => {
-        let cylinder = Q('tbody');
-        Q('tr', tr => tr.removeAttribute('class'));
-        let k = E(cylinder).get('--checked') + n;
-        E(cylinder).set({'--checked': k});
-    };
-    table.spin(0);
+const cookie = document.cookie.split(/;\s?/).map(o => o.split('=')).reduce( (obj, [k,v]) => ({...obj, [k]:v}) , {});
+let got = JSON.parse(cookie.got || null) || [];
+got.forEach(coor => {
+    let [r, d] = coor.split(',').map(n => parseInt(n));
+    Q(`tr:nth-child(${r+1}) td:nth-child(${d+1})`).classList.add('got');
+});
+Q('td', td => td.onclick = () => {
+    if (!td.innerText) return;
+    let coor = [...td.parentElement.parentElement.children].indexOf(td.parentElement) + ',' + [...td.parentElement.children].indexOf(td);
+    got = td.classList.contains('got')? got.filter(c => c != coor) : [...got, coor];
+    td.classList.toggle('got');
+    document.cookie = `got=${JSON.stringify(got)};path=/;max-age=888888`;
+});
 
-    let [start, end] = [0, 0];
+table.spin = n => {
+    let cylinder = Q('tbody');
+    Q('tr', tr => tr.removeAttribute('class'));
+    let k = E(cylinder).get('--checked') + n;
+    E(cylinder).set({'--checked': k});
+};
+table.spin(0);
 
-    table.onpointerdown = ev => start = ev.clientX;
-    document.onpointerup = () => start = 0;
-    table.onpointermove = ev => {
-        if (!start) return;
-        end = ev.clientX;
-        let diff = - parseInt((end - start) / 50);
-        if (Math.abs(diff) >= 1) {
-            table.spin(diff);
-            start = end;
-        }
-    };
-})();
+let [start, end] = [0, 0];
+
+table.onpointerdown = ev => start = ev.clientX;
+document.onpointerup = () => start = 0;
+table.onpointermove = ev => {
+    if (!start) return;
+    end = ev.clientX;
+    let diff = - parseInt((end - start) / 50);
+    if (Math.abs(diff) >= 1) {
+        table.spin(diff);
+        start = end;
+    }
+};
 </script>
 <!--
 B: r

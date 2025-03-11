@@ -1,3 +1,5 @@
+import {A,E,O,Q} from './AEOQ.mjs';
+import Polygon from "./platonic.js";
 const Knob = {
     init (knob) {
         knob.oninput = ev => {
@@ -134,3 +136,4 @@ const Scroll = {
         trS.host.remove();
     }  
 }
+export {Knob, Fader, BD, Drum, Scroll}

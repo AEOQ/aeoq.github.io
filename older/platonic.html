@@ -2,10 +2,7 @@
 <title>Platonic</title>
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width, initial-scale=1.0">
-<script src='../AEOQ.js'></script>
-<script src='common.js'></script>
 <link rel=stylesheet href='common.css'>
-<script src='../platonic.js'></script>
 <style>
 form {
     display:grid;grid-template:3em 3em 3em/ 4rem 4rem 1fr;gap:.5em;
@@ -136,6 +133,20 @@ h3::before {
     white-space:pre;
     font-size:.8em;color:grey;
 }
+#ring:not(:checked)~* label[for=ring],
+#spin:not(:checked)~* label[for=spin],
+#merge:not(:checked)~* label[for=merge],
+#cantellate:not(:checked)~* label[for=cantellate] {
+    border-color:silver; 
+    background:none; 
+    flex-direction:row-reverse;
+}
+#ring:not(:checked)~* label[for=ring]::after,
+#spin:not(:checked)~* label[for=spin]::after,
+#merge:not(:checked)~* label[for=merge]::after,
+#cantellate:not(:checked)~* label[for=cantellate]::after {
+    background:silver;
+}
 </style>
 
 <input type=checkbox id=ring>
@@ -194,7 +205,10 @@ h3::before {
     </nav>
 </article>
 
-<script>
+<script type="module">
+import {A,E,O,Q} from '../AEOQ.mjs'
+import Polygon from '../platonic.js'
+
 ['--x','--y','--z','--a'].forEach( p => E(Q('section')).set({p: Math.random()*360+360}) );
 ['--rx','--ry'].forEach( p => E(Q('section')).set({p: 0}) );
 
@@ -236,18 +250,18 @@ const Polyhedra = {
             let points;
             const h3 = hedron.nextElementSibling;
             if (level == 'none') {
-                points = Gon.points(hedron.side);
+                points = Polygon.points(hedron.side);
                 Polyhedra.setName(h3, `P${i+1}`);
             }
             if (level == 'semi') {
-                points = Gon.points(hedron.side*2, new Gon(hedron.side).truncatedR, Math.PI/hedron.side/-2);
+                points = Polygon.points(hedron.side*2, new Polygon(hedron.side).truncatedR, Math.PI/hedron.side/-2);
                 Polyhedra.setName(h3, `A${i+1}`);
             }
             if (level == 'full') {
-                const r = new Gon(hedron.side, hedron.stroke).normal;
-                const strokeAdjusted = r - (new Gon(hedron.side, hedron.stroke, r).strokedR - r);
-                points = Gon.points(hedron.side, strokeAdjusted, -Math.PI/hedron.side, true);
-                hedron.edge = new Gon(hedron.side, hedron.stroke, strokeAdjusted).side;
+                const r = new Polygon(hedron.side, hedron.stroke).normal;
+                const strokeAdjusted = r - (new Polygon(hedron.side, hedron.stroke, r).strokedR - r);
+                points = Polygon.points(hedron.side, strokeAdjusted, -Math.PI/hedron.side, true);
+                hedron.edge = new Polygon(hedron.side, hedron.stroke, strokeAdjusted).side;
                 Polyhedra.setName(h3, ['A7','A7','A6','A6','P3'][i]);
             }
             const animate = hedron.sQ(`[id='${hedron.side}'] animate`);
@@ -294,10 +308,6 @@ const Polyhedra = {
 
 Q('figure:not(.merge) h3', (h3, i) => Polyhedra.setName(h3, `P${i+1}`) );
 Q('input[name=truncate]', input => input.onchange = ev => Polyhedra.truncate(ev.target.id));
-
-const inputs = new Inputs('input[type=checkbox]', false);
-inputs.labels().setCSS('{border-color:silver; background:none; flex-direction:row-reverse;}');
-inputs.labels('::after').setCSS('{background:silver}');
 
 Q('nav h3', h3 => h3.onclick = ev => h3.classList.toggle('shown'));
 
