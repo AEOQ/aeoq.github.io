@@ -77,9 +77,9 @@ class O extends Map {
     url () {return new URLSearchParams([...this]).toString();}
     each (f) {this.forEach((v, k) => f([k, v]));}
     groupBy (...arg) {return new O(Object.groupBy(this, ...arg)).map(([k, v]) => [k, new O(v)]);}
-    add (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, (o[k] ?? 0) + v]), this);}
-    minus (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, (o[k] ?? 0) - v]), this);}
-    prepend (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, (o[k] ?? '') + v]), this);}
+    add (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, (o?.[k] ?? 0) + v]), this);}
+    minus (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, (o?.[k] ?? 0) - v]), this);}
+    prepend (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, (o?.[k] ?? '') + v]), this);}
 }
 ['map','filter'].forEach(f => O.prototype[f] = function(...p) {return new O([...this][f](...p));});
 ['flatMap','find','every'].forEach(f => O.prototype[f] = function(...p) {return [...this][f](...p);});
