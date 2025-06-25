@@ -27,7 +27,10 @@ Object.assign(E.prototype, {
         props = new A(...props);
         props.size && this.el.replaceChildren(...props);
 
-        this.el.tagName == 'IMG' && props.assign({alt: props.src?.match(/([^/.]+)(\.[^/.]+)$/)?.[1], onerror: ev => ev.target.remove()});
+        this.el.tagName == 'IMG' && props.assign({
+            alt: (this.el.alt || props.alt) ?? props.src?.match(/([^/.]+)(\.[^/.]+)$/)?.[1], 
+            onerror: ev => ev.target.remove()
+        });
         Array.isArray(props.classList) && (props.classList = props.classList.filter(c => c).join(' '));
 
         let isSVG = E.SVG.includes(this.el.tagName);
