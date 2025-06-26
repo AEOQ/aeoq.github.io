@@ -28,7 +28,7 @@ Object.assign(E.prototype, {
         props.size && this.el.replaceChildren(...props);
 
         this.el.tagName == 'IMG' && props.assign({
-            alt: (this.el.alt || props.alt) ?? props.src?.match(/([^/.]+)(\.[^/.]+)$/)?.[1], 
+            alt: (this.el.alt || props.alt) ?? (this.el.src || props.src)?.match(/([^/.]+)(\.[^/.]+)$/)?.[1], 
             onerror: ev => ev.target.remove()
         });
         Array.isArray(props.classList) && (props.classList = props.classList.filter(c => c).join(' '));
