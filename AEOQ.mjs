@@ -19,9 +19,13 @@ const E = function (el, ...props) {
 }
 Object.assign(E.prototype, {
     get (...props) {
-        return props.length > 1 ? 
-            props.map(p => this.get(p)) : 
-            /^--/.test(props[0]) ? parseFloat(getComputedStyle(this.el).getPropertyValue(props[0])) : this.getAttribute(props[0]);
+        if (props.length > 1)
+            return props.map(p => this.get(p));
+        if (/^--/.test(props[0])) {
+            let value = getComputedStyle(this.el).getPropertyValue(props[0]);
+            return isNaN(parseFloat(value)) ? value : parseFloat(value);
+        }
+        return this.getAttribute(props[0]);
     },
     set (...props) {
         props = new A(...props);
