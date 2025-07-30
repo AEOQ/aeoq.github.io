@@ -21,11 +21,11 @@ Object.assign(E.prototype, {
     get (...props) {
         if (props.length > 1)
             return props.map(p => this.get(p));
-        if (/^--/.test(props[0])) {
-            let value = getComputedStyle(this.el).getPropertyValue(props[0]);
-            return isNaN(parseFloat(value)) ? value : parseFloat(value);
-        }
-        return this.getAttribute(props[0]);
+        let value = this.el.getAttribute(props[0]);
+        if (value)
+            return value;
+        value = getComputedStyle(this.el).getPropertyValue(props[0]);
+        return isNaN(parseFloat(value)) ? value : parseFloat(value);
     },
     set (...props) {
         props = new A(...props);
