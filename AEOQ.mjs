@@ -20,7 +20,9 @@ const E = function (el, ...props) {
 Object.assign(E.prototype, {
     get (...props) {
         if (props.length > 1)
-            return props.map(p => this.get(p));
+            return props.reduce((obj, p) => ({...obj, [p]: this.get(p)}), {});
+        if (Array.isArray(props[0]))
+            return props[0].map(p => this.get(p));
         let value = this.el.getAttribute(props[0]);
         if (value)
             return value;
