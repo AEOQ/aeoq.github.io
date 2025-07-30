@@ -27,7 +27,7 @@ const Fader = {
     },
     confirm: () => Q('#faders').classList.toggle('done', Fader.penetrated() === 0),
     penetrated: () => Q('#faders p').findIndex(p => {
-        let [pos, size] = E(p).get('--w-pos', '--w-size');
+        let [pos, size] = E(p).get(['--w-pos', '--w-size']);
         return pos < 10 - (2*size/5 - .35) || pos > 10 + (2*size/5 - .35);
     }) + 1
 }
