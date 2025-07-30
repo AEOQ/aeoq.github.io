@@ -23,10 +23,7 @@ Object.assign(E.prototype, {
             return props.reduce((obj, p) => ({...obj, [p]: this.get(p)}), {});
         if (Array.isArray(props[0]))
             return props[0].map(p => this.get(p));
-        let value = this.el.getAttribute(props[0]);
-        if (value)
-            return value;
-        value = getComputedStyle(this.el).getPropertyValue(props[0]);
+        let value = this.el.getAttribute(props[0]) || getComputedStyle(this.el).getPropertyValue(props[0]);
         return isNaN(parseFloat(value)) ? value : parseFloat(value);
     },
     set (...props) {
