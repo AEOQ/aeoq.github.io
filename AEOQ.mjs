@@ -99,7 +99,7 @@ class O extends Map {
         found.v ??= options?.default;
         
         if (found.v instanceof Function)
-            return options.evaluate ? found.v(found.k) : found.v;
+            return options?.evaluate ? found.v(found.k) : found.v;
         const interpolater = (item, into) => item?.replaceAll?.('${}', into) ?? item;
         if (found.v instanceof Array)
             return found.v.map(item => interpolater(item, found.k));
