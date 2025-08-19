@@ -79,16 +79,43 @@ class O extends Map {
         objs.flatMap(obj => [...typeof obj[Symbol.iterator] == 'function' ? obj : Object.entries(obj)])
             .forEach(([k, v]) => [this[k] = v, this.set(k, v)]);
     }
-    get (props) {return props.split(/[-.]/).reduce((obj, prop) => obj?.[prop], this);}
-    url () {return new URLSearchParams([...this]).toString();}
+    path (extractor) {
+        let keys = [], current = this, key, value;
+        while (current && typeof current == 'object' && !Array.isArray(current)) {
+            [key, value] = Object.entries(current)[0];
+            keys.push(key);
+            current = current[key];
+        }
+        return [...keys, ...extractor ? [extractor(value)] : []];
+    }
+    at (path) {return (typeof path == 'string' ? path.split('.') : path).reduce((obj, key) => obj?.[key], this);}
+    find (...targets) {
+        let options = (targets.at(-1).evaluate || targets.at(-1).default) && targets.pop(), found = {};
+        found.v = [...this].find(([k]) => (found.k = targets.find(t =>
+            k instanceof RegExp && k.test(t) || k instanceof Array && k.find(item => item == t) ||
+            k instanceof Function && k(t) || k == t
+        )) != null)?.[1];
+        found.k ??= targets[0];
+        found.v ??= options?.default;
+        
+        if (found.v instanceof Function)
+            return options.evaluate ? found.v(found.k) : found.v;
+        const interpolater = (item, into) => item?.replaceAll?.('${}', into) ?? item;
+        if (found.v instanceof Array)
+            return found.v.map(item => interpolater(item, found.k));
+        return interpolater(found.v, found.k);
+    }
     each (f) {this.forEach((v, k) => f([k, v]));}
     groupBy (...arg) {return new O(Object.groupBy(this, ...arg)).map(([k, v]) => [k, new O(v)]);}
-    add (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, v + (o?.[k] ?? 0)]), this);}
-    minus (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, v - (o?.[k] ?? 0)]), this);}
-    prepend (...objs) {return objs.reduce((summed, o) => new O({...summed}).map(([k, v]) => [k, (o?.[k] ?? '') + v]), this);}
+    
+    add (...objs) {return this.map(([k, v]) => [k, v + objs.reduce((sum, o) => sum += o?.[k] ?? 0, 0)]);}
+    minus (...objs) {return this.map(([k, v]) => [k, v - objs.reduce((sum, o) => sum += o?.[k] ?? 0, 0)]);}
+    prepend (...objs) {return this.map(([k, v]) => [k, objs.reduce((sum, o) => (o?.[k] ?? '') + sum, '') + v]);}
+
+    url () {return new URLSearchParams(this).toString();}
 }
 ['map','filter'].forEach(f => O.prototype[f] = function(...p) {return new O([...this][f](...p));});
-['flatMap','find','every'].forEach(f => O.prototype[f] = function(...p) {return [...this][f](...p);});
+['flatMap','every'].forEach(f => O.prototype[f] = function(...p) {return [...this][f](...p);});
 
 const Q = Node.prototype.Q = function(el, func) {
     let els = this?.querySelectorAll?.(el) ?? document.querySelectorAll(el);
