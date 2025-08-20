@@ -14,9 +14,12 @@ class A extends Set {
 const E = function (el, ...props) {
     if (el instanceof Element)
         return new.target ? (this.el = el) && this : new E(el);
+    let attrs;
+    [el, ...attrs] = el.split(/(?=[#.])/);
+    let {true: id, false: classList} = Object.groupBy(attrs, attr => attr.startsWith('#'));
     el = E.SVG.includes(el) ? document.createElementNS('http://www.w3.org/2000/svg', el) : document.createElement(el);
     props = props.map(prop => prop instanceof HTMLElement ? [prop] : prop);
-    return E(el).set(...props);
+    return E(el).set(id ? {id} : {}, classList.length ? {classList} : {}, ...props);
 }
 Object.assign(E.prototype, {
     get (...props) {
