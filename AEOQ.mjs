@@ -19,7 +19,7 @@ const E = function (el, ...props) {
     let {true: id, false: classList} = Object.groupBy(attrs, attr => attr.startsWith('#'));
     el = E.SVG.includes(el) ? document.createElementNS('http://www.w3.org/2000/svg', el) : document.createElement(el);
     props = props.map(prop => prop instanceof HTMLElement ? [prop] : prop);
-    return E(el).set(id ? {id} : {}, classList.length ? {classList} : {}, ...props);
+    return E(el).set(id ? {id} : {}, classList?.length ? {classList} : {}, ...props);
 }
 Object.assign(E.prototype, {
     get (...props) {
