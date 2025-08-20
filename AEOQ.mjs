@@ -86,6 +86,7 @@ class O extends Map {
         objs.flatMap(obj => [...typeof obj[Symbol.iterator] == 'function' ? obj : Object.entries(obj)])
             .forEach(([k, v]) => [this[k] = v, this.set(k, v)]);
     }
+    [Symbol.toPrimitive] (type) {return type == 'string' && Object.keys(this).join('');}
     path (extractor) {
         let keys = [], current = this, key, value;
         while (current && typeof current == 'object' && !Array.isArray(current)) {
