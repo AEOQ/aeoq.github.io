@@ -12,9 +12,10 @@ class A extends Set {
 }
 
 const E = function (el, ...props) {
-    if (typeof el == 'object')
+    if (el instanceof HTMLElement)
         return new.target ? (this.el = el) && this : new E(el);
     el = E.SVG.includes(el) ? document.createElementNS('http://www.w3.org/2000/svg', el) : document.createElement(el);
+    props = props.map(prop => prop instanceof HTMLElement ? [prop] : prop);
     return E(el).set(...props);
 }
 Object.assign(E.prototype, {
