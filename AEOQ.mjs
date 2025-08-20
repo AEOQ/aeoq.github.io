@@ -18,8 +18,11 @@ const E = function (el, ...props) {
     [el, ...attrs] = el.split(/(?=[#.])/);
     let {true: id, false: classList} = Object.groupBy(attrs, attr => attr.startsWith('#'));
     el = E.SVG.includes(el) ? document.createElementNS('http://www.w3.org/2000/svg', el) : document.createElement(el);
-    props = props.map(prop => prop instanceof HTMLElement ? [prop] : prop);
-    return E(el).set(id ? {id} : {}, classList?.length ? {classList} : {}, ...props);
+    return E(el).set(
+        id ? {id: id.substring(1)} : {}, 
+        classList?.length ? {classList: classList.map(c => c.substring(1))} : {},
+        ...props.map(prop => prop instanceof HTMLElement ? [prop] : prop)
+    );
 }
 Object.assign(E.prototype, {
     get (...props) {
@@ -40,11 +43,11 @@ Object.assign(E.prototype, {
         });
         Array.isArray(props.classList) && (props.classList = props.classList.filter(c => c).join(' '));
 
-        let isSVG = E.SVG.includes(this.el.tagName);
         let {true: vari, false: attr} = new O({...props}).groupBy(([a]) => a.includes('--'));
         vari?.each(([a, v]) => this.el.style.setProperty(a, v));
-        attr?.each(([a, v]) => typeof v == 'object' ? 
-            Object.assign(this.el[a], v) : isSVG ? this.el.setAttribute(a, v) : this.el[a] = v
+        attr?.each(([a, v]) => 
+            typeof v == 'object' ? Object.assign(this.el[a], v) : 
+            this.el instanceof SVGElement && a != 'classList' ? this.el.setAttribute(a, v) : this.el[a] = v
         );
         return this.el;
     },
