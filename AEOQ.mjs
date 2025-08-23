@@ -10,6 +10,7 @@ class A extends Set {
         return already ? already[0].assign(...others ?? []) : new A(...stuff);
     }
 }
+['map','filter'].forEach(f => A.prototype[f] = function(...p) {return new A([...this][f](...p), {...this});});    
 
 const E = function (el, ...props) {
     if (el instanceof Element)
