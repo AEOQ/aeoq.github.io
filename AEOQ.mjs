@@ -15,7 +15,7 @@ const E = function (el, ...props) {
     if (el instanceof Element)
         return new.target ? (this.el = el) && this : new E(el);
     if (el.includes('>'))
-        return (tags => tags.reverse().slice(1).reduce((tree, tag) => E(tag, tree), E(tags[0], ...props)))(el.split('>'));
+        return (tags => tags.reverse().slice(1).reduce((tree, tag) => E(tag, tree), E(tags[0], ...props)))(el.split(/ ?> ?/));
     let attrs;
     [el, ...attrs] = el.split(/(?=[#.])/);
     let {true: id, false: classList} = Object.groupBy(attrs, attr => attr.startsWith('#'));
