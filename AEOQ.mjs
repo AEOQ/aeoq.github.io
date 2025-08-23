@@ -38,7 +38,7 @@ Object.assign(E.prototype, {
     },
     set (...props) {
         props = new A(...props);
-        props.size && this.el.replaceChildren(...props);
+        props.size && this.el.replaceChildren(...props.filter(el => el));
 
         this.el.tagName == 'IMG' && props.assign({
             alt: (this.el.alt || props.alt) ?? (this.el.src || props.src)?.match(/([^/.]+)(\.[^/.]+)$/)?.[1], 
