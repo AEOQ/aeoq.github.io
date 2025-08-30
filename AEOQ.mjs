@@ -124,6 +124,7 @@ class O extends Map {
     
     add (...objs) {return this.map(([k, v]) => [k, v + objs.reduce((sum, o) => sum += o?.[k] ?? 0, 0)]);}
     minus (...objs) {return this.map(([k, v]) => [k, v - objs.reduce((sum, o) => sum += o?.[k] ?? 0, 0)]);}
+    append (...objs) {return this.map(([k, v]) => [k, objs.reduce((sum, o) => sum + (o?.[k] ?? ''), '') + v]);}
     prepend (...objs) {return this.map(([k, v]) => [k, objs.reduce((sum, o) => (o?.[k] ?? '') + sum, '') + v]);}
 
     url () {return new URLSearchParams(this).toString();}
