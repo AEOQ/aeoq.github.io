@@ -4,7 +4,7 @@ class A extends Set {
         super([...others?.filter(o => o).flat() ?? []]);
         this.assign(...objs?.flat() ?? []);
     }
-    assign (...objs) {return Object.assign(this, new O(...objs));}
+    assign (...objs) {return objs.forEach(obj => Object.assign(this, obj));}
     static already (...stuff) {
         let {true: already, false: others} = Object.groupBy(stuff, s => s instanceof A);
         return already ? already[0].assign(...others ?? []) : new A(...stuff);
