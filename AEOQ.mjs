@@ -1,7 +1,7 @@
 class A {
   #arr; #obj;
   constructor(...stuff) {
-    let { true: objs, false: others } = Object.groupBy(stuff, s => Object.getPrototypeOf(s) == Object.prototype);
+    let { true: objs, false: others } = Object.groupBy(stuff, s => s && Object.getPrototypeOf(s) == Object.prototype);
     this.#arr = [...others ?? []].flat();
     this.#obj = Object.assign({}, ...objs ?? []);
 
