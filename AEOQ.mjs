@@ -12,10 +12,10 @@ class A {
         p in target.#obj ? target.#obj[p] :
         p == 'length' ? target.#arr[p] : Reflect.get(target, p)
       ,
-      set: (target, p, v) =>
+      set: (target, p, v) => (
         /^\d+$/.test(p) ? target.#arr[Number(p)] = v :
         typeof p === 'string' ? target.#obj[p] = v : Reflect.set(target, p, v)
-      ,
+      , true),
       ownKeys: target => Object.keys(target.#obj),
       getOwnPropertyDescriptor: (target, p) =>
         p in target.#obj ? {
