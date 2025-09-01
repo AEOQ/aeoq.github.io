@@ -1,16 +1,37 @@
-class A extends Set {
-    constructor(...stuff) {
-        let {true: objs, false: others} = Object.groupBy(stuff, s => Object.prototype.toString.call(s).includes('Object'));
-        super([...others?.filter(o => o).flat() ?? []]);
-        this.assign(...objs?.flat() ?? []);
-    }
-    assign (...objs) {return Object.assign(this, new O(...objs));}
-    static already (...stuff) {
-        let {true: already, false: others} = Object.groupBy(stuff, s => s instanceof A);
-        return already ? already[0].assign(...others ?? []) : new A(...stuff);
-    }
+class A {
+  #arr; #obj;
+  constructor(...stuff) {
+    let { true: objs, false: others } = Object.groupBy(stuff, s => Object.getPrototypeOf(s) == Object.prototype);
+    this.#arr = [...others ?? []].flat();
+    this.#obj = Object.assign({}, ...objs ?? []);
+
+    return new Proxy(this, {
+      get: (target, p) =>
+        p === Symbol.iterator ? function* () { yield* target.#arr; } :
+        /^\d+$/.test(p) ? target.#arr[Number(p)] :
+        p in target.#obj ? target.#obj[p] :
+        p == 'length' ? target.#arr[p] : Reflect.get(target, p)
+      ,
+      set: (target, p, v) =>
+        /^\d+$/.test(p) ? target.#arr[Number(p)] = v :
+        typeof p === 'string' ? target.#obj[p] = v : Reflect.set(target, p, v)
+      ,
+      ownKeys: target => Object.keys(target.#obj),
+      getOwnPropertyDescriptor: (target, p) =>
+        p in target.#obj ? {
+          value: target.#obj[p],
+          enumerable: true,
+          configurable: true
+        } : null
+    });
+  }
+  push(...objs) { return Object.assign(this, ...objs); }
+  static already(...stuff) {
+    let { true: already, false: others } = Object.groupBy(stuff, s => s instanceof A);
+    return already ? Object.assign(already[0], ...others ?? []) : new A(...stuff);
+  }
 }
-['map','filter'].forEach(f => A.prototype[f] = function(...p) {return new A([...this][f](...p), {...this});});    
+['map', 'filter'].forEach(f => A.prototype[f] = function (...p) { return new A([...this][f](...p), { ...this }); });
 
 const E = function (el, ...props) {
     if (el instanceof Element)
@@ -38,9 +59,9 @@ Object.assign(E.prototype, {
     },
     set (...props) {
         props = new A(...props);
-        props.size && this.el.replaceChildren(...props.filter(el => el));
+        props.length && this.el.replaceChildren(...props.filter(el => el));
 
-        this.el.tagName == 'IMG' && props.assign({
+        this.el.tagName == 'IMG' && props.push({
             alt: (this.el.alt || props.alt) ?? (this.el.src || props.src)?.match(/([^/.]+)(\.[^/.]+)$/)?.[1], 
             onerror: ev => ev.target.remove()
         });
