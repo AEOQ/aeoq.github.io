@@ -99,6 +99,7 @@ class O extends Map {
                     super.set(p, v) : Reflect.set(target, p, v)
         });
     }
+    [Symbol.toPrimitive] = type => type == 'string' && [...this.keys()].join('');
     at(path) {
         return (typeof path == 'string' ? path.split('.') : path).reduce((obj, key) => obj?.[key], this);
     }
@@ -110,7 +111,7 @@ class O extends Map {
     find(...targets) {
         if (targets.length === 1 && targets[0] instanceof Function) //.find(([k,v]))
             return [...this].find(targets[0]);
-        
+
         let options = (targets.at(-1).evaluate || targets.at(-1).default) && targets.pop(), found = {};
         found.v = [...this].find(([k]) => (found.k = targets.find(t =>
             k instanceof RegExp && k.test(t) || k instanceof Array && k.find(item => item == t) ||
