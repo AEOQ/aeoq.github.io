@@ -86,25 +86,28 @@ Object.assign(E, {
 class O extends Map {
     constructor(...objs) {
         super();
-        objs.flatMap(obj => [...typeof obj[Symbol.iterator] == 'function' ? obj : Object.entries(obj)])
-            .forEach(([k, v]) => this.set(k, v));
+        objs.flatMap(obj => [...obj[Symbol.iterator] ? obj : Object.entries(obj)]).forEach(([p, v]) => super.set(p, v));
+
+        return new Proxy(this, {
+            get: (target, p) =>
+                typeof p === 'string' && !Reflect.has(target, p) ? target.get(p) :
+                [Symbol.iterator, 'entries', 'keys', 'values', 'forEach'].includes(p) ?
+                    Reflect.get(target, p).bind(target) : Reflect.get(target, p),
+
+            set: (target, p, v) =>
+                typeof p === 'string' && !Reflect.has(target, p) ?
+                    super.set(p, v) : Reflect.set(target, p, v)
+        });
     }
-    set (k, v) {this[k] = v; super.set(k, v); return this;}
-    [Symbol.toPrimitive] (type) {return type == 'string' && Object.keys(this).join('');}
-    path (extractor) {
-        let keys = [], current = this, key, value;
-        while (current && typeof current == 'object' && !Array.isArray(current)) {
-            [key, value] = Object.entries(current)[0];
-            keys.push(key);
-            current = current[key];
-        }
-        return [...keys, ...extractor ? [extractor(value)] : []];
+    at(path) {
+        return (typeof path == 'string' ? path.split('.') : path).reduce((obj, key) => obj?.[key], this);
     }
-    at (path) {return (typeof path == 'string' ? path.split('.') : path).reduce((obj, key) => obj?.[key], this);}
-    find (...targets) {
-        if (targets.length === 1 && targets[0] instanceof Function)
-            return [...this].find(targets[0]);
-        
+    set(path, v) {
+        path = typeof path == 'string' ? path.split('.') : path;
+        path.length > 1 ? this.at(path.slice(0, -1))[path.at(-1)] = v : super.set(path[0], v);
+        return this;
+    }
+    find(...targets) {
         let options = (targets.at(-1).evaluate || targets.at(-1).default) && targets.pop(), found = {};
         found.v = [...this].find(([k]) => (found.k = targets.find(t =>
             k instanceof RegExp && k.test(t) || k instanceof Array && k.find(item => item == t) ||
@@ -112,26 +115,35 @@ class O extends Map {
         )) != null)?.[1];
         found.k ??= targets[0];
         found.v ??= options?.default;
-        
-        if (found.v instanceof Function)
-            return options?.evaluate ? found.v(found.k) : found.v;
-        const interpolater = (item, into) => item?.replaceAll?.('${}', into) ?? item;
-        if (found.v instanceof Array)
-            return found.v.map(item => interpolater(item, found.k));
-        return interpolater(found.v, found.k);
+        return found.v instanceof Function && options?.evaluate ? found.v(found.k) : found.v;
     }
-    each (f) {this.forEach((v, k) => f([k, v]));}
-    groupBy (...arg) {return new O(Object.groupBy(this, ...arg)).map(([k, v]) => [k, new O(v)]);}
-    
-    add (...objs) {return this.map(([k, v]) => [k, v + objs.reduce((sum, o) => sum += o?.[k] ?? 0, 0)]);}
-    minus (...objs) {return this.map(([k, v]) => [k, v - objs.reduce((sum, o) => sum += o?.[k] ?? 0, 0)]);}
-    append (...objs) {return this.map(([k, v]) => [k, v + objs.reduce((sum, o) => sum += o?.[k] ?? '', '')]);}
-    prepend (...objs) {return this.map(([k, v]) => [k, objs.reduce((sum, o) => (o?.[k] ?? '') + sum, '') + v]);}
+    flatten(transformation) {
+        let result = new O({});
+        let enter = (current, oldPath = []) => {
+            if (current && (current instanceof O || Object.getPrototypeOf(current) == Object.prototype)) {
+                new O(current).each(([key, value]) => enter(value, oldPath.concat(key)));
+            } else {
+                let newPath = transformation([...oldPath]).filter(k => k);
+                newPath.some(k => k.includes('undefined')) && (newPath = oldPath);
+                let level = result;
+                newPath.forEach((key, i) => level = level[key] ??= i == newPath.length - 1 ? current : new O({}));
+            }
+        }
+        enter(this);
+        return result;
+    }
+    each(f) { this.forEach((v, k) => f([k, v])); }
+    groupBy(...arg) { return new O(Object.groupBy(this, ...arg)).map(([k, v]) => [k, new O(v)]); }
 
-    url () {return new URLSearchParams(this).toString();}
+    add(...objs) { return this.map(([k, v]) => [k, v + objs.reduce((sum, o) => sum += o?.[k] ?? 0, 0)]); }
+    minus(...objs) { return this.map(([k, v]) => [k, v - objs.reduce((sum, o) => sum += o?.[k] ?? 0, 0)]); }
+    append(...objs) { return this.map(([k, v]) => [k, v + objs.reduce((sum, o) => sum += o?.[k] ?? '', '')]); }
+    prepend(...objs) { return this.map(([k, v]) => [k, objs.reduce((sum, o) => (o?.[k] ?? '') + sum, '') + v]); }
+
+    url() { return new URLSearchParams(this).toString(); }
 }
-['map','filter'].forEach(f => O.prototype[f] = function(...p) {return new O([...this][f](...p));});
-['flatMap','every'].forEach(f => O.prototype[f] = function(...p) {return [...this][f](...p);});
+['map', 'filter'].forEach(f => O.prototype[f] = function (...p) { return new O([...this][f](...p)); });
+['flatMap', 'every'].forEach(f => O.prototype[f] = function (...p) { return [...this][f](...p); });
 
 const Q = Node.prototype.Q = function(el, func) {
     let els = this?.querySelectorAll?.(el) ?? document.querySelectorAll(el);
