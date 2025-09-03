@@ -91,7 +91,7 @@ Object.assign(E, {
         .flatMap(([dt, dds]) => [E('dt', dt), ...[dds].flat().map(dd => E('dd', dd instanceof HTMLElement ? [dd] : dd))])),
 
     fieldset: (obj, attr = {}) => E('fieldset', attr, (obj instanceof O ? obj : new O(obj))
-        .flatMap(([legend, labels]) => [E('legend', legend), labels])),
+        .flatMap(([legend, labels]) => [E('legend', legend), ...labels])),
     
     input (...stuff) {
         stuff = A.already(...stuff);
