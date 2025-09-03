@@ -89,6 +89,9 @@ Object.assign(E, {
     ul: lis => E('ul', lis.filter(li => li).map(li => E('li', li))),
     dl: (obj, attr = {}) => E('dl', attr, (obj instanceof O ? obj : new O(obj))
         .flatMap(([dt, dds]) => [E('dt', dt), ...[dds].flat().map(dd => E('dd', dd instanceof HTMLElement ? [dd] : dd))])),
+
+    fieldset: (obj, attr = {}) => E('fieldset', attr, (obj instanceof O ? obj : new O(obj))
+        .flatMap(([legend, labels]) => [E('legend', legend), labels])),
     
     input (...stuff) {
         stuff = A.already(...stuff);
