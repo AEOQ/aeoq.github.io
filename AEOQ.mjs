@@ -65,7 +65,7 @@ Object.assign(E.prototype, {
             alt: (this.el.alt || props.alt) ?? (this.el.src || props.src)?.match(/([^/.]+)(\.[^/.]+)$/)?.[1], 
             onerror: ev => ev.target.remove()
         });
-        Array.isArray(props.classList) && (props.classList = props.classList.filter(c => c).join(' '));
+        Array.isArray(props.classList) && (props.classList = [...new Set(props.classList)].filter(c => c).join(' '));
 
         let {true: vari, false: attr} = new O({...props}).groupBy(([a]) => a.includes('--'));
         vari?.each(([a, v]) => this.el.style.setProperty(a, v));
