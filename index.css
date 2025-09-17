@@ -29,6 +29,7 @@ html {
     user-select:none;
 }
 html.dragging {touch-action:none;}
+body#show:not(:target) {display: none;}
 body>*:not(.seeing),.blurred {
     --paused:paused; animation-play-state:paused !important;
     visibility:hidden;
