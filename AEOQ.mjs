@@ -19,7 +19,6 @@ class A {
       ownKeys: target => Object.keys(target.#obj),
       getOwnPropertyDescriptor: (target, p) =>
         p in target.#obj ? {
-          value: target.#obj[p],
           enumerable: true,
           configurable: true
         } : null
@@ -125,12 +124,13 @@ class O extends Map {
 
       ownKeys: target => [...target.keys()],
 
-      getOwnPropertyDescriptor: (target, p) => 
-        Reflect.getOwnPropertyDescriptor(target, p) || typeof p === 'string' && target.has(p) ? {
-          value: target.get(p),
+      getOwnPropertyDescriptor: (target, p) => {
+        target.get(p) instanceof O && (target[p] = {...target.get(p)});
+        return Reflect.getOwnPropertyDescriptor(target, p) || typeof p === 'string' && target.has(p) ? {
           enumerable: true,
           configurable: true
         } : null
+      }
     });
   }
   [Symbol.toPrimitive] (type) {return type == 'string' && [...this.keys()].join('');}
