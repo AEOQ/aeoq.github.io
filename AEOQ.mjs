@@ -99,10 +99,10 @@ Object.assign(E, {
     },
     inputs: contents => contents.map(content => E.input(content)),
 
-    radio: (...stuff) => E.input(...stuff, {type: 'radio'}),
+    radio: (...stuff) => E.input({type: 'radio'}, ...stuff),
     radios: contents => contents.map(content => E.radio(content)),
     
-    checkbox: (...stuff) => E.input(...stuff, {type: 'checkbox'}),
+    checkbox: (...stuff) => E.input({type: 'checkbox'}, ...stuff),
     checkboxes: contents => contents.map(content => E.checkbox(content)),
 });
 
