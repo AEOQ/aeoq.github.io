@@ -43,7 +43,7 @@ const E = function (el, ...props) {
     el = E.SVG.includes(el) ? document.createElementNS('http://www.w3.org/2000/svg', el) : document.createElement(el);
     return E(el).set(
         id?.length > 1 ? {id: id[0].substring(1)} : {}, 
-        classList?.length > 1 ? {classList: classList.map(c => c.substring(1))} : {},
+        classList?.length ? {classList: classList.map(c => c.substring(1))} : {},
         ...props.map(prop => prop instanceof HTMLElement ? [prop] : prop)
     );
 }
