@@ -95,7 +95,8 @@ Object.assign(E, {
     input (...stuff) {
         stuff = A.already(...stuff);
         let {input: order, label, ...other} = stuff;
-        return E('label', label || '', order == 'last' ? [...stuff, E('input', {...other})] : [E('input', {...other}), ...stuff]);
+        label = A.already(label);
+        return E('label', {...label}, order == 'last' ? [...label, E('input', {...other})] : [E('input', {...other}), ...label]);
     },
     inputs: contents => contents.map(content => E.input(content)),
 
