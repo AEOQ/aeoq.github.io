@@ -3,15 +3,14 @@ customElements.define('bird-diverter', class extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' }).innerHTML = this.css;
-        this.shadowRoot.append(E('article', [
-            E('div.darken', [
-                E('svg.darken', {viewBox: '10 0 2 17.5'}, [
-                    E('path', {d: 'M10,1 L10,17.5 L11,17.5 A1,1 0 0,0 11.75,16.5 Z'})
-                ]),
-                E('p.dim'),
-                E('p.glow')
-            ])
-        ]))
+        this.shadowRoot.append(E('article>div.darken', [
+            E('svg.darken', {viewBox: '10 0 2 17.5'}, 
+                E('path', {d: 'M10,1 L10,17.5 L11,17.5 A1,1 0 0,0 11.75,16.5 Z'})
+            ),
+            E('p.dim'),
+            E('p.glow')
+        ])
+        )
     }
     connectedCallback() {
         this.sQ('article').append(this.sQ('div').cloneNode(true));

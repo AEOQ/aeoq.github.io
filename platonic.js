@@ -30,7 +30,7 @@ class Polygon {
     polygon() {
         return E('polygon', {points: Polygon.points(this.n)});
     }
-    svg = () => E('svg', [this.polygon()], {class: `${this.n}-gon`});
+    svg = () => E('svg', this.polygon(), {class: `${this.n}-gon`});
 }
 customElements.define('hedron-p', class extends HTMLElement {
     constructor(animate) {
@@ -45,16 +45,14 @@ customElements.define('hedron-p', class extends HTMLElement {
     get elements() {
         const svg = 
         E('svg', [
-            E('defs', [
-                E('polygon', {id: this.side, points: Polygon.points(this.side)}, [
-                    E('animate', {attributeName: 'points', dur: '1000ms'})
-                ])
-            ])
+            E(`defs>polygon#${this.side}`, {points: Polygon.points(this.side)}, 
+                E('animate', {attributeName: 'points', dur: '1000ms'})
+            )
         ]);
         const polygons = n => [...new Array(n)].map(_ => 
-            E('svg', {viewBox: '-1,-1 2,2'}, [
+            E('svg', {viewBox: '-1,-1 2,2'}, 
                 E('use', {href: `#${this.side}`})
-            ])
+            )
         );
         const figure = E('figure', [
             ...[...new Array(Math.floor(this.face/this.portion))].map(_ => E('div', polygons(this.portion))),

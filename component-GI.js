@@ -12,15 +12,13 @@ customElements.define('great-icosahedron', class extends HTMLElement {
     }
     get elements() {
         const svg = 
-        E('svg', [
-            E('defs', [
-                E('polygon', {id: this.side, points: Polygon.points(this.side)})
-            ])
-        ]);
+        E('svg',
+            E(`defs>polygon#${this.side}`, {points: Polygon.points(this.side)})
+        );
         const polygons = n => [...new Array(n)].map(_ => 
-            E('svg', {viewBox: '-1,-1 2,2'}, [
+            E('svg', {viewBox: '-1,-1 2,2'}, 
                 E('use', {href: `#${this.side}`})
-            ])
+            )
         );
         const figure = E('figure', [
             ...[...new Array(Math.floor(this.face/this.portion))].map(_ => E('div', polygons(this.portion))),
