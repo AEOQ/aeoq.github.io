@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<title>Geometric</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width, initial-scale=1.0">
+<link rel=stylesheet href='common.css'>
+<style>
+@keyframes turning {
+    from {transform: rotate3d(var(--rx0),var(--ry0),var(--rz0),var(--ra0)) translate3d(var(--tx0),var(--ty0),var(--tz0));}
+    to {transform: rotate3d(var(--rx1),var(--ry1),var(--rz1),var(--ra1)) translate3d(var(--tx1),var(--ty1),var(--tz1));} 
+}
+body {overflow:hidden;}
+input {z-index:9;position:relative;}
+anti-prism {
+    animation:turning var(--time) linear infinite alternate;
+    position:absolute; left:50%; top:50%;
+}
+</style>
+<input type="range" min="1" max="10" value="10">
+
+<style id="antiprism">
+:host,div,svg {
+    width:1em; height:1em;
+    transform-style:preserve-3d;
+    display:block;
+}
+:host {
+    transform:rotateX(80deg);
+    font-size:var(--size);
+    --fill:hsla(var(--h),var(--s),var(--l),var(--a)); --stroke-c:hsl(var(--h),var(--s),calc(var(--l) - 20%));
+}
+div {
+    position:absolute;
+}
+div:last-child {
+    transform:translateZ(calc(var(--extend)*-1em/var(--rel-diameter))) rotate(var(--r)) rotateY(180deg);
+}
+svg {
+    overflow:visible;
+    position:absolute;
+    fill:var(--fill);
+    stroke-width:var(--stroke); stroke:var(--stroke-c);
+}
+svg~svg[class='3-gon'] {
+    width:calc(1em*var(--ratio)); height:calc(1em*var(--ratio));
+    stroke-width:calc(var(--stroke)/var(--ratio));
+    left:calc((var(--l) + 1)*50% - 1em*var(--ratio)/4); top:calc((var(--t) + 1)*50% - 1em*var(--ratio)/2);
+    transform-origin:25% 50%; transform:rotate(var(--r)) rotateY(var(--slant));
+}
+</style>
+<script type="module">
+import {A,E,O,Q} from '../AEOQ.mjs'
+import Polygon from '../platonic.js'
+class Antiprism extends HTMLElement {
+    constructor(n) {
+        super();
+        this.n = n;
+        this.attachShadow({mode: 'open'}).append(Q('#antiprism').cloneNode(true), E('div'));
+    }
+    connectedCallback() {
+        this.populate();
+        this.setAttribute('stroke', .02);
+        this.randomize();
+    }
+    populate() {
+        this.sQ('div').append(
+            new Polygon(this.n).svg(),
+            ...Array(this.n).fill().map(_ => new Polygon(3).svg())
+        );
+        this.sQ('svg~svg[class="3-gon"]', (tri, i) => E(tri).set({
+            '--l': (Math.cos(2 * Math.PI / this.n * i) + Math.cos(2 * Math.PI / this.n * (i+1))) / 2,
+            '--t': (Math.sin(2 * Math.PI / this.n * i) + Math.sin(2 * Math.PI / this.n * (i+1))) / 2,
+            '--r': (2 * Math.PI / this.n * i + Math.PI / this.n) + 'rad'
+        }));
+        this.shadowRoot.append(this.sQ('div').cloneNode(true));
+        E(this.sQ('div:last-child')).set({'--r': (this.n % 2 == 0 ? Math.PI / this.n : 0) + 'rad'});
+    }
+    calculate(stroke) {
+        stroke = parseFloat(stroke);
+        Polygon.viewBox(this.sQ('svg'), {stroke});
+
+        let gon = new Polygon(this.n, stroke), tri = new Polygon(3, stroke);
+        let ratio = gon.side / tri.side;
+        E(this).set({
+            '--ratio': ratio,
+            '--rel-diameter': 2*gon.radius.stroked,
+            '--slant': Math.acos((gon.radius.stroked - gon.normal) / (tri.height * ratio)) + 'rad',
+            '--extend': Math.sqrt(Math.pow(tri.height * ratio, 2) - Math.pow(gon.radius.stroked - gon.normal, 2))
+        });
+    }
+    attributeChangedCallback(attr, before, after) {
+        this.calculate(after);
+        E(this).set({'--stroke': after});
+    }
+    static observedAttributes = ['stroke'];
+    randomize() {
+        E(this).set({
+            '--size': Math.random()*10 + 'em',
+            '--h': Math.random()*360,
+            '--s': Math.random()*40+60 + '%',
+            '--l': Math.random()*40+60 + '%',
+            '--a': Math.random()*0.5+0.5,
+            '--time': (Math.random()*20+20) + 's',
+            '--rx0': this.rand(1), '--ry0': this.rand(1), '--rz0': this.rand(1), '--ra0': this.rand(2000) + 'turn',
+            '--tx0': this.rand(40) + 'vw', '--ty0': this.rand(40) + 'vh', '--tz0': this.rand(40) + 'vmin', 
+            '--rx1': this.rand(1), '--ry1': this.rand(1), '--rz1': this.rand(1), '--ra1': this.rand(2000) + 'turn',
+            '--tx1': this.rand(40) + 'vw', '--ty1': this.rand(40) + 'vh', '--tz1': this.rand(40) + 'vmin',
+        })
+    }
+    rand(r) {return (Math.random()*2-1)*r;}
+    static generate = () => document.body.append(new Antiprism(Math.round(Math.random()+3)))
+}
+customElements.define('anti-prism', Antiprism);
+Q('input').oninput = ev => {
+    let amount = parseInt(ev.target.value), current = document.querySelectorAll('anti-prism').length;
+    if (amount === current) return;
+    amount < current ? Q('anti-prism:last-of-type').remove() : Antiprism.generate();
+    ev.target.dispatchEvent(new InputEvent('input'));
+}
+Q('input').dispatchEvent(new InputEvent('input'));
+</script>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<title>Platonic</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width, initial-scale=1.0">
+<link rel=stylesheet href='common.css'>
+<style>
+form {
+    display:grid;grid-template:3em 3em 3em/ 4rem 4rem 1fr;gap:.5em;
+}
+form>* {
+    align-self:center;
+}
+form label:not([value]) {
+    color:grey;
+}
+#ring:checked~* hedron-p::before,#ring:checked~* hedron-p::after,#ring:checked~* hedron-p {
+    border:.1em solid var(--theme);border-radius:99em;
+    content:'';
+}
+#spin:not(:checked)~* hedron-p::before,#spin:not(:checked)~* hedron-p::after,#spin:not(:checked)~* hedron-p {
+    animation-play-state:paused;
+}
+form label[for^=S] {
+    display:block;
+    width:100%;
+    text-align:right;
+}
+input[type=range] {
+    width:calc(100% - 7.5rem);
+    margin:0 .5rem;
+}
+label[for=Stroke] {
+    grid-area:1/3/2/4;
+}
+label[for=Size] {
+    grid-area:2/3/3/4;
+}
+label[for^=S]::before {
+    content:attr(for);
+}
+label[for^=S]::after {
+    display:inline-block;width:2.2em;
+    text-align:left;
+    content:attr(value);
+}
+label[for^=S]::before,input[type=range],label[for^=S]::after {
+    vertical-align:middle;
+}
+figure {
+    margin:2rem 1rem;
+    display:inline-flex;
+    transform:rotateY(calc(1deg*var(--ry))) rotateZ(calc(1deg*var(--rx))) ;
+    line-height:0;
+    vertical-align:middle;
+    border:.5em solid transparent;
+    position:relative;
+}
+figure[checked] {
+    border-color:var(--theme);
+}
+figure,hedron-p {
+    transition:.5s;
+}
+figure.merge,#merge:checked~* figure:not(.merge) {
+    display:none;
+}
+#merge:checked~* figure.merge {
+    display:inline-flex;
+}
+hedron-p {
+    animation:spin 30s infinite linear;
+    transform-style:preserve-3d;
+}
+@keyframes spin {
+    to {transform:rotateX(360deg) rotateY(720deg) rotateZ(1080deg);}
+}
+hedron-p::before,hedron-p::after {
+    content:'';
+    position:absolute;left:0;top:0;
+    width:100%;height:100%;
+}
+hedron-p::before {
+    animation:before-spin 10s linear infinite alternate;
+}
+hedron-p::after {
+    animation:after-spin 10s linear infinite alternate;
+}
+@keyframes before-spin {
+    to {transform:rotate3d(var(--x),var(--y),var(--z),calc(1deg*var(--a)));}
+}
+@keyframes after-spin {
+    to {transform:rotate3d(var(--x),var(--y),var(--z),calc(-1deg*var(--a)));}
+}
+.toggle.single,label[for=merge] {
+    display:none;
+}
+#none:checked~* label[for=semi],
+#semi:checked~* label[for=full],
+#full:checked~* label[for=none],
+#full:checked~* label[for=merge],
+#cantellate:checked~* label[for=merge] {
+    display:inline-flex;
+}
+
+article {
+    margin-top:3em;
+}
+nav {
+    display:flex;flex-wrap:wrap;justify-content:space-between
+}
+h2 {
+    font-size:1.5em;
+    margin:1em 0;
+}
+h3 {
+    font-size:1.2em;color:white;
+    margin:.5em 1em;padding:.2em 1em .4em 1em;
+    background:silver;border-radius:9em;
+    position:relative;
+    text-align:left;
+}
+figure h3 {
+    position:absolute;top:105%;left:50%;transform:translate(-50%,0);
+    line-height:initial;
+    margin:0;
+}
+figure h3,h3.got {
+    cursor:pointer;
+    background:var(--theme);
+}
+h3::before {
+    content:attr(data-no) '\A';
+    white-space:pre;
+    font-size:.8em;color:grey;
+}
+#ring:not(:checked)~* label[for=ring],
+#spin:not(:checked)~* label[for=spin],
+#merge:not(:checked)~* label[for=merge],
+#cantellate:not(:checked)~* label[for=cantellate] {
+    border-color:silver; 
+    background:none; 
+    flex-direction:row-reverse;
+}
+#ring:not(:checked)~* label[for=ring]::after,
+#spin:not(:checked)~* label[for=spin]::after,
+#merge:not(:checked)~* label[for=merge]::after,
+#cantellate:not(:checked)~* label[for=cantellate]::after {
+    background:silver;
+}
+</style>
+
+<input type=checkbox id=ring>
+<input type=checkbox id=spin checked>
+<input type=checkbox id=merge>
+<input type=radio name=truncate id=none checked>
+<input type=radio name=truncate id=semi>
+<input type=radio name=truncate id=full>
+<input type=checkbox id=cantellate>
+
+<form>
+    <label for=ring class=toggle data-icon=🪐 title='Circumsphere rings'></label>
+    <label for=spin class=toggle data-icon=⏯ title='Spin animation'></label>
+    <label for=none class='toggle single' data-icon=🔪 style='justify-content:flex-end'></label>
+    <label for=semi class='toggle single' data-icon=🔪></label>
+    <label for=full class='toggle single' data-icon=🔪 style='justify-content:center'></label>
+    <label class=toggle data-icon=🎨 title='Color' onclick="Q('hedron-p',solid=>solid.setAttribute('color',''))"></label>
+    <label for=cantellate class=toggle data-icon=💠 title='Cantellate' onclick="Polyhedra.cantellate()"></label>
+    <label for=merge class=toggle data-icon=↔️ title='Merge' onclick="Polyhedra.merge(20,12);Polyhedra.merge(8,6)"></label>
+    <label for=Stroke><input type=range min=0 max=.5 step=.01 id=Stroke></label>
+    <label for=Size><input type=range min=0 max=5 step=.01 id=Size></label>
+</form>
+<section>
+    <figure><hedron-p color='60' stroke='0.02' diameter='6.6' face='20'></hedron-p><h3></h3></figure>
+    <figure><hedron-p color='80' stroke='0.02' diameter='6.6' face='12'></hedron-p><h3></h3></figure>
+    <figure class=merge><h3></h3></figure>
+    <figure><hedron-p color='100' stroke='0.02' diameter='8.8' face='8'></hedron-p><h3></h3></figure>
+    <figure><hedron-p color='120' stroke='0.02' diameter='8.9' face='6'></hedron-p><h3></h3></figure>
+    <figure class=merge><h3></h3></figure>
+    <figure><hedron-p color='140' stroke='0.02' diameter='10.2' face='4'></hedron-p><h3></h3></figure>
+</section>
+<article>
+    <h2>Platonic solids</h2>
+    <nav>
+        <h3 class=got data-no=P1>Icosahedron</h3>
+        <h3 class=got data-no=P2>Dodecahedron</h3>
+        <h3 class=got data-no=P3>Octahedron</h3>
+        <h3 class=got data-no=P4>Cube</h3>
+        <h3 class=got data-no=P5>Tetrahedron</h3>
+    </nav>
+    <h2>Archimedean solids</h2>
+    <nav>
+        <h3 data-no=A1>Truncated Icosahedron</h3>
+        <h3 data-no=A2>Truncated Dodecahedron</h3>
+        <h3 data-no=A3>Truncated Octahedron</h3>
+        <h3 data-no=A4>Truncated Cube</h3>
+        <h3 data-no=A5>Truncated Tetrahedron</h3>
+        <h3 data-no=A6>Cuboctahedron</h3>
+        <h3 data-no=A7>Icosidodecahedron</h3>
+        <h3 data-no=A8>Rhombicuboctahedron</h3>
+        <h3 data-no=A9>Rhombicosidodecahedron</h3>
+        <h3 data-no=A10>Truncated Cuboctahedron</h3>
+        <h3 data-no=A11>Truncated Icosidodecahedron</h3>
+        <h3 data-no=A12>Snub Cuboctahedron</h3>
+        <h3 data-no=A13>Snub Icosidodecahedron</h3>
+    </nav>
+</article>
+
+<script type="module">
+import {A,E,O,Q} from '../AEOQ.mjs'
+import Polygon from '../platonic.js'
+
+['--x','--y','--z','--a'].forEach( p => E(Q('section')).set({p: Math.random()*360+360}) );
+['--rx','--ry'].forEach( p => E(Q('section')).set({p: 0}) );
+
+const setRange = hedron => {
+    Q('input[type=range]', input => {
+        let value = input.id == 'Stroke'? hedron.getAttribute(input.id) : hedron.style.fontSize.replace('em','') || 1;
+        input.value = value;
+        Q(`label[for=${input.id}]`).setAttribute('value', value);
+    });
+};
+
+const showWidth = id =>
+    Q( id? `label[for='${id}']`:`menu label`, label => label.setAttribute('data-width',
+        window.getComputedStyle( Q(`hedron-p[face='${label.getAttribute('for')}']`).sQ('figure') ).width));
+showWidth();
+
+Q('section figure', figure => figure.onclick = ev => {
+    Q('section figure', other => other != figure? other.removeAttribute('checked') : null);
+    figure[figure.hasAttribute('checked')? 'removeAttribute':'setAttribute']('checked', '');
+    setRange(figure.Q('hedron-p'));
+});
+
+Q('input[type=range]', input => input.onchange = ev => {
+    if (input.id == 'Size')
+        Q(`figure[checked] hedron-p`).style.fontSize = ev.target.value + 'em';
+    else
+        Q(`figure[checked] hedron-p`).setAttribute(input.id, ev.target.value);
+    ev.target.parentNode.setAttribute('value', ev.target.value);
+    showWidth(Q(`figure[checked] hedron-p`).getAttribute('face'));
+});
+
+const Polyhedra = {
+    setName: (h3, no) => {
+        h3.setAttribute('data-no', no);
+        h3.innerText = Q(`nav h3[data-no=${no}]`).innerText;
+    },
+    truncate: level => {
+        Q('figure:not(.merge) hedron-p', (hedron, i) => {
+            let points;
+            const h3 = hedron.nextElementSibling;
+            if (level == 'none') {
+                points = Polygon.points(hedron.side);
+                Polyhedra.setName(h3, `P${i+1}`);
+            }
+            if (level == 'semi') {
+                points = Polygon.points(hedron.side*2, new Polygon(hedron.side).truncatedR, Math.PI/hedron.side/-2);
+                Polyhedra.setName(h3, `A${i+1}`);
+            }
+            if (level == 'full') {
+                const r = new Polygon(hedron.side, hedron.stroke).normal;
+                const strokeAdjusted = r - (new Polygon(hedron.side, hedron.stroke, r).strokedR - r);
+                points = Polygon.points(hedron.side, strokeAdjusted, -Math.PI/hedron.side, true);
+                hedron.edge = new Polygon(hedron.side, hedron.stroke, strokeAdjusted).side;
+                Polyhedra.setName(h3, ['A7','A7','A6','A6','P3'][i]);
+            }
+            const animate = hedron.sQ(`[id='${hedron.side}'] animate`);
+            animate.setAttribute('from', animate.getAttribute('to') || animate.parentNode.getAttribute('points'));
+            animate.setAttribute('to', points);
+            animate.parentNode.setAttribute('points', points);
+            animate.beginElement();
+        });
+    },
+    cantellate: () => {
+        Polyhedra.merge(20,12);Polyhedra.merge(8,6);
+        Q('hedron-p', hedron => hedron.sQ('figure', figure => figure.classList.toggle('extend')));
+        Q('figure.merge h3', (h3, i) => Polyhedra.setName(h3, ['A9','A8'][i]) );
+    },
+    snubify: () => {
+        
+    },
+    merge: (transfer, receive) => {
+        const slot = Q(`hedron-p[face="${receive}"]`).parentNode.nextElementSibling;
+        if (slot.Q('hedron-p')) return;
+
+        const clone = Q(`hedron-p[face="${receive}"]`).cloneNode(true);
+        clone.removeAttribute('face');
+        slot.insertAdjacentElement('afterbegin', clone);
+        
+        let [trS, reS] = [Q(`hedron-p[face="${transfer}"]`), Q(`hedron-p[face="${receive}"]`)];
+        const scaled = reS.edge / trS.edge;
+        [trS, reS] = [trS, reS].map(hedron => hedron.shadowRoot);
+        let cloneS = clone.shadowRoot;
+        cloneS.innerHTML += trS.Q('figure').outerHTML;
+        
+        const defs = cloneS.Q('defs');
+        defs.innerHTML = '';
+        [trS, reS].map(shadow => shadow.Q('polygon')).forEach(polygon => defs.appendChild(polygon.cloneNode(true)) );
+    
+        [trS, reS] = [trS, reS].map(shadow => shadow.Q('figure').style);
+        const diameter = E(reS).get('--diameter').replace('em','');
+        E(cloneS.Q('figure+figure')).set({'--diameter': diameter * scaled + 'em'});
+        
+        if (Q('#full:checked'))
+            Q('figure.merge h3', (h3, i) => Polyhedra.setName(h3, ['A7','A6'][i]) );
+    }
+}
+
+Q('figure:not(.merge) h3', (h3, i) => Polyhedra.setName(h3, `P${i+1}`) );
+Q('input[name=truncate]', input => input.onchange = ev => Polyhedra.truncate(ev.target.id));
+
+Q('nav h3', h3 => h3.onclick = ev => h3.classList.toggle('shown'));
+
+//let [start, end] = [null, null];
+//Q('figure', figure => {
+//    figure.onmousedown = figure.ontouchstart = () => 
+//        start = [event.clientX || event.touches[0].clientX, event.clientY || event.touches[0].clientY];
+//    figure.onmousemove = figure.ontouchmove = () => {
+//        if (!start) return;
+//        end = [event.clientX || event.touches[0].clientX, event.clientY || event.touches[0].clientY];
+//        const diff = [end[0] - start[0], end[1] - start[1]].map(c => -parseInt(c/50));
+//        if (Math.abs(diff[0]) >= 1) {
+//            E(figure).set({'--ry': new E(figure).get('--ry') - diff[0]*30});
+//            start[0] = end[0];
+//        }
+//        if (Math.abs(diff[1]) >= 1) {
+//            E(figure).set({'--rx': new E(figure).get('--rx') + diff[1]*30});
+//            start[1] = end[1];
+//        }
+//    };
+//});
+//document.onmouseup = document.ontouchend = () => start = null;
+</script>

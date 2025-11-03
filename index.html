@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<meta charset=UTF-8>
+<meta name=viewport content='width=device-width,initial-scale=1,maximum-scale=1'>
+<link href="index.css" rel="stylesheet">
+<link href="components.css" rel="stylesheet">
+<script type="module" src="component-GI.js"></script>
+<script type="module" src="component-BD.js"></script>
+<script type="module" src="drag-knob/script.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:ital,wght@0,400;1,900&display=swap" rel="stylesheet">
+<style></style>
+<title>About me</title>
+
+<body hidden id="show">
+<header>
+    <div>
+        <h1>VEIGA</h1>
+        <great-icosahedron title='GREAT ICOSAHEDRON' diameter='6' stroke='0.01'></great-icosahedron>
+        <h1>MAN</h1>
+    </div>
+</header>
+
+<article id="skill">
+    <div>
+        <h2 title="WEB APPLICATION &#xa; DEVELOPER">WEB APPLICATION<br>DEVELOPER</h2>
+        <dl>
+            <dt>Backend<dd>Node.js・PHP・MySQL<dd>Python Django・MongoDB・Linux
+            <dt>Frontend<dd>Javascript<dd>PWA・Web components・IndexedDB
+        </dl>
+    </div>
+</article>
+
+<section id="knob" style="--light:hsl(40,100%,60%); --dark:hsl(40,50%,30%); --base-bg:hsl(40,50%,15%)">
+    <div>
+        <continuous-knob min="0" max="1"></continuous-knob>
+        <h3>
+            <progress></progress>
+            <b>DRAG THE KNOB UP AND DOWN</b>
+            <b>The inspiration came from DAW controls.</b>
+        </h3>
+    </div>
+</section>
+
+<article id="demo">
+    <div>
+        <h2 title="DEMO &#xa; WEB APPS">DEMO<br>WEB APPS</h2>
+        <dl>
+            <dt><img src="image/demo1.png"><a href="https://beyblade-burst.github.io/">BBB unofficial site</a>
+            <dd>A PWA providing essential hobby-oriented information for players
+            <dd>Service worker・Cache storage・IndexedDB・Web component・SVG
+            <dt><img src="image/demo4.png"><a href="https://beyblade-ex.github.io/customize/sheet.html">Sheet customizer</a>
+            <dd>An image editor with layers and DAW-inspired UI
+            <dd>Canvas・PDFLib・Web component
+            <dt><img src="image/demo2.png"><a href="https://gc-classic.github.io/rune/simulator/">GCC rune simulator</a>
+            <dd>A web replica of a game system
+            <dd>IndexedDB・Web component・Mutation observer
+            <dt><img src="image/demo3.png"><a href="http://vocarevo.rf.gd">VCRV project</a> <small>(End Of Life)</small>
+            <dd>An SPA of web-scraped content in database for result randomization and data statistics
+            <dd>MySQL・PHP
+        </dl>
+    </div>
+</article>
+
+<section id="faders" style="--base-bg:hsl(170,50%,15%)">
+    <div>
+        <p><em>DRAG THE FADERS</em></p>
+        <p><em>SO THAT</em></p>
+        <p><em>THE LASER CAN</em></p>
+        <p><em>PASS THROUGH</em></p>
+        <p></p>
+    </div>
+    <div>
+        <label class="fader"><input type="range" step="any" tabindex="1"></label>
+        <label class="fader"><input type="range" step="any" tabindex="2"></label>
+        <label class="fader"><input type="range" step="any" tabindex="3"></label>
+        <label class="fader"><input type="range" step="any" tabindex="4"></label>
+        <label class="fader"><input type="range" step="any" tabindex="5"></label>
+        <b>They are input[type="range"].</b>
+    </div>
+</section>
+
+<article id="work">
+    <div>
+        <h2 title="PAST WORKS">PAST WORKS</h2>
+        <dl>
+            <div>
+                <dt><img src="https://hanlunai.github.io/assets/projects/mkass-6.jpg" alt="mkass">MKASS
+                <dd>DevOps of an <a href="https://openedx.org/">OpenEdx platform</a> hosting courses of the company
+                <dd>Python Django・MySQL・MongoDB・Linux
+            </div>
+            <div>
+                <dt><img src="https://hanlunai.github.io/assets/projects/ns-1.png" alt="Noisense"><a href="https://github.com/HanlunAI/Noisense">Noisense</a>
+                <dd>A real time noise monitoring website receiving data from sound level meters
+                <dd>Web socket・Node.js
+            </div>
+            <div>
+                <dt><img src="image/site.png" alt="HAIL"><a href="https://github.com/HanlunAI/HanlunAI.github.io">HAIL website</a>
+                <dd>Original 3D-CSS-rich design
+                <dd>Web components
+            </div>
+        </dl>
+    </div>
+</article>
+
+<section id="bd">
+    <div>
+        <bird-diverter title="FIREFLY BIRD DIVERTER"></bird-diverter>
+        <h3>CONTROL THE WIND SPEED SOMEWHERE ON THIS PAGE</h3>
+        <meter></meter>
+    </div>
+</section>
+
+<article id="knowledge">
+    <div>
+        <h2 title="OTHER KNOWLEDGE">OTHER KNOWLEDGE</h2>
+        <dl>
+            <dt>Artificial Intelligence
+            <dd>Python: TensorFlow, NumPy, Pandas, Matplotlib
+            <dd><a href="https://www.credential.net/c5b75a20-2c4f-4e78-8761-5ec5a7b12f17#gs.3l39gr">Google certified TensorFlow Developer</a>
+            <dt>Economics & Finance
+            <dd>University major
+            <dd>Chartered Financial Analyst (Level III)
+        </dl>
+    </div>
+</article>
+
+<section id="drum" title="requestAnimationFrame!">
+    <div>
+        <p>
+            <button id="tom-h"></button>
+            <button id="crash"></button>
+            <button id="hi-hat"></button>
+            <button id="tom-m"></button>
+            <button id="ride"></button>
+            <button id="kick"></button>
+            <button id="snare"></button>
+            <button id="tom-l"></button>
+        </p>
+        <h2>THANK YOU<br>Click here for more</h2>
+    </div>
+</section>
+
+<aside hidden>
+    <div>
+        <style>
+        @keyframes spin {
+            100% {font-size:2em;}
+            80%,60% {font-size:1em;}
+            50%,70% {font-size:1.5em;}
+            0% {font-size:2em;transform:rotateX(-500deg) rotateY(1070deg) rotateZ(-1690deg);}
+        }
+        @keyframes emerge-left {
+            100% {right:100%;}
+            70%,0% {right:50%;}
+        }
+        @keyframes emerge-right {
+            100% {left:100%;}
+            70%,0% {left:50%;}
+        }
+        @keyframes merge {
+            100%,65% {transform:translate(0,-50%);}
+            55%,0% {transform:translate(calc(50%*var(--left)),-50%);}
+        }
+        </style>    
+        <hedron-p animate color='70' stroke='0.04587' scale='1.09' face='20'></hedron-p>
+        <hedron-p animate color='220' stroke='0.05' face='12'></hedron-p>
+    </div>
+    <div>
+        <style>
+        @keyframes spin {
+            50% {font-size:2em;}
+            30%,10% {font-size:1em;}
+            20% {font-size:1.5em;}
+            0% {font-size:1.5em;transform:rotateX(520deg) rotateY(1050deg) rotateZ(1420deg);}
+        }
+        @keyframes emerge-left {
+            100%,50% {right:100%;}
+            30%,0% {right:50%;}
+        }
+        @keyframes emerge-right {
+            100%,50% {left:100%;}
+            30%,0% {left:50%;}
+        }
+        @keyframes merge {
+            50%,30% {transform:translate(0,-50%);}
+            20%,0% {transform:translate(calc(50%*var(--left)),-50%);}
+        }
+        </style>    
+        <hedron-p animate color='130' stroke='0.04355' scale='1.14807' face='8'></hedron-p>
+        <hedron-p animate color='350' stroke='0.05' face='6'></hedron-p>
+    </div>
+    <p>Scroll up</p>
+</aside>
+
+<script type="module">
+    import {A,E,O,Q} from './AEOQ.mjs';
+    
+    /iPad|iPhone/.test(navigator.userAgent) && document.body.classList.add('ios');
+    customElements.whenDefined('great-icosahedron').then(() => Q('body').hidden = false);
+    (observer => Q('meter,progress', el => observer.observe(el, {attributes: true, attributeFilter: ['value']})))(
+        new MutationObserver(([{target}]) => E(target).set({'--value': target.value}))
+    );
+    (observer => Q('body>*', el => observer.observe(el)))(
+        new IntersectionObserver(entries => entries.forEach(en => en.target.classList.toggle('seeing', en.isIntersecting)))
+    );
+    document.addEventListener('visibilitychange', () => Q('.seeing', el => el.classList.toggle('blurred', document.hidden)));
+    
+    import {Knob, Fader, BD, Drum, Scroll} from './index.js'
+    Knob.init(Q('continuous-knob'));
+    Q('#faders input', Fader.init);
+    BD.init(Q('bird-diverter'));
+    Scroll.init();
+
+    requestAnimationFrame(time => {
+        BD.spin(time);
+        Drum.playback(time, 80);
+    });
+</script>
+</body>

@@ -1,0 +1,99 @@
+input[type=range],::-webkit-slider-thumb,progress,meter {
+    appearance:none;
+}
+::-webkit-meter-bar,::-webkit-meter-optimum-value { /*safari*/
+    background:none;
+}
+
+.fader {
+    justify-self:center;
+    text-align:center;
+    background:#333;
+    width:3em;
+    padding:.5em 0;
+}
+.fader input {
+    transform:rotate(-90deg);
+    --w:20em; width:var(--w); height:var(--track);
+    --fader:4em; --track:.25em;
+    margin:calc(var(--w)/2) calc(var(--w)/-2);
+    touch-action:none;
+    background:linear-gradient(to right, 
+        transparent calc(var(--fader)/2), 
+        black calc(var(--fader)/2) calc(100% - var(--fader)/2), 
+        transparent calc(100% - var(--fader)/2)
+    );
+}
+.fader input::-webkit-slider-runnable-track {
+    height:var(--track);
+    background:linear-gradient(to right, 
+        transparent calc(var(--fader)/2), 
+        var(--light) calc(var(--fader)/2) calc((100% - var(--fader))/100*var(--value,0)),
+        transparent calc((100% - var(--fader))/100*var(--value,0)) calc(100% - var(--fader)/2)
+    );
+    filter:drop-shadow(0 0 .25em var(--light));
+}
+.fader input::-webkit-slider-thumb {
+    width:var(--fader); height:2em;
+    background:linear-gradient(to left,
+        #181818 calc(50% - .1em), 
+        var(--light) calc(50% - .1em) calc(50% + .1em),
+        #181818 calc(50% + .1em)
+    );
+    transform:translateY(calc(-50% + var(--track)/2));
+    border:.2em solid var(--light);
+}
+
+progress {
+    width:100%; height:2.5rem;
+    border-top-right-radius:4em; border-bottom-right-radius:4em;
+    animation:flow 2s linear infinite;
+}
+progress::-webkit-progress-inner-element {}
+progress::-webkit-progress-bar {background:none;content:'22';}
+progress::-webkit-progress-value {
+    background:linear-gradient(to bottom,#ffffff88,transparent),linear-gradient(-45deg,
+        var(--light) 25%, var(--dark) 25%,
+        var(--dark) 50%, var(--light) 50%,
+        var(--light) 75%, var(--dark) 75%,
+        var(--dark)
+    ) var(--pos) 0 / 2em 2em;
+    border-top-right-radius:4em; border-bottom-right-radius:4em;
+}
+@property --pos {
+    syntax:'<length>';
+    inherits:true;
+    initial-value:0;
+}
+@keyframes flow {
+    from {--pos:0;}
+    to {--pos:2em;}
+}
+
+meter {
+    width:5em; height:5em;
+    --until:330deg;
+    background:conic-gradient(white,
+        hsl(200,80%,60%),hsl(170,80%,60%),hsl(140,80%,60%),
+        hsl(110,80%,60%),hsl(80,80%,60%),hsl(65,80%,60%),
+        hsl(50,80%,60%),hsl(40,80%,60%),hsl(30,80%,60%),
+        hsl(20,80%,60%),hsl(0,80%,60%),hsl(-20,80%,60%),
+        hsl(-40,80%,60%) var(--until),gray var(--until) 360deg);
+    border-radius:50%; border:.15rem inset silver;
+    transform:rotate(calc(360deg - var(--until)/2));
+    --min:0; --max:1; --value:0;
+}
+meter::before {
+    content:'';
+    width:80%; height:80%;
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    background:#eee;
+    border-radius:50%; border:.15rem outset silver;
+}
+meter::after {
+    content:'';
+    border-style:solid; border-width:0 .1em 2.5em .1em;
+    border-color:transparent transparent black transparent;
+    position:absolute; left:calc(50% - .1em); top:25%;
+    transform:rotate(calc(min(1,var(--value) - var(--min))/(var(--max) - var(--min))*var(--until))) translate(0%,-1.1em);
+}
