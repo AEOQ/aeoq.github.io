@@ -136,7 +136,7 @@ class O extends Map {
   }
   [Symbol.toPrimitive] (type) {return type == 'string' && [...this.keys()].join('');}
   at(path) {
-    return (typeof path == 'string' ? path.split('.') : path).reduce((obj, key) => obj?.[key], this);
+    return (typeof path == 'string' ? path.split('.') : path.filter(p => p)).reduce((obj, key) => obj?.[key], this);
   }
   set(path, v) {
     path = typeof path == 'string' ? path.split('.') : path;

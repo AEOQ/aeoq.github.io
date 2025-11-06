@@ -19,7 +19,6 @@ class A {
       ownKeys: target => Object.keys(target.#obj),
       getOwnPropertyDescriptor: (target, p) =>
         p in target.#obj ? {
-          value: target.#obj[p],
           enumerable: true,
           configurable: true
         } : null
@@ -43,8 +42,8 @@ const E = function (el, ...props) {
     let {true: id, false: classList} = Object.groupBy(attrs, attr => attr.startsWith('#'));
     el = E.SVG.includes(el) ? document.createElementNS('http://www.w3.org/2000/svg', el) : document.createElement(el);
     return E(el).set(
-        id?.length ? {id: id[0].substring(1)} : {}, 
-        classList?.length ? {classList: classList.map(c => c.substring(1))} : {},
+        id?.[0].length > 1 ? {id: id[0].substring(1)} : {}, 
+        classList ? {classList: classList.filter(c => c.length > 1).map(c => c.substring(1))} : {},
         ...props.map(prop => prop instanceof HTMLElement ? [prop] : prop)
     );
 }
@@ -95,15 +94,16 @@ Object.assign(E, {
     
     input (...stuff) {
         stuff = A.already(...stuff);
-        let {input: order, title} = stuff;
-        return E('label', title ? {title} : '', order == 'last' ? [...stuff, E('input', {...stuff})] : [E('input', {...stuff}), ...stuff]);
+        let {input: order, label, ...other} = stuff;
+        label = A.already(label);
+        return E('label', {...label}, order == 'last' ? [...label, E('input', {...other})] : [E('input', {...other}), ...label]);
     },
     inputs: contents => contents.map(content => E.input(content)),
 
-    radio: (...stuff) => E.input(...stuff, {type: 'radio'}),
+    radio: (...stuff) => E.input({type: 'radio'}, ...stuff),
     radios: contents => contents.map(content => E.radio(content)),
     
-    checkbox: (...stuff) => E.input(...stuff, {type: 'checkbox'}),
+    checkbox: (...stuff) => E.input({type: 'checkbox'}, ...stuff),
     checkboxes: contents => contents.map(content => E.checkbox(content)),
 });
 
@@ -125,17 +125,18 @@ class O extends Map {
 
       ownKeys: target => [...target.keys()],
 
-      getOwnPropertyDescriptor: (target, p) => 
-        Reflect.getOwnPropertyDescriptor(target, p) || typeof p === 'string' && target.has(p) ? {
-          value: target.get(p),
+      getOwnPropertyDescriptor: (target, p) => {
+        target.get(p) instanceof O && (target[p] = {...target.get(p)});
+        return Reflect.getOwnPropertyDescriptor(target, p) || typeof p === 'string' && target.has(p) ? {
           enumerable: true,
           configurable: true
         } : null
+      }
     });
   }
   [Symbol.toPrimitive] (type) {return type == 'string' && [...this.keys()].join('');}
   at(path) {
-    return (typeof path == 'string' ? path.split('.') : path).reduce((obj, key) => obj?.[key], this);
+    return (typeof path == 'string' ? path.split('.') : path.filter(p => p)).reduce((obj, key) => obj?.[key], this);
   }
   set(path, v) {
     path = typeof path == 'string' ? path.split('.') : path;
