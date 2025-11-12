@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<meta charset=UTF-8>
+<meta name=viewport content='width=device-width,initial-scale=1,maximum-scale=1'>
+<base href="https://developer.mozilla.org/en-US/docs/Web/API/">
+<title>API</title>
+<style>
+    a[href]::before {content:attr(href)': ';}
+</style>
+<h2>Browser processing</h2>
+<ul>
+    <li><a href="Service_Worker_API">✅</a></li>
+    <li><a href="Web_Workers_API"></a></li>
+    <li><a href="Web_Periodic_Background_Synchronization_API"></a></li>
+    <li><a href="Background_Tasks_API"></a></li>
+    <li><a href="Channel_Messaging_API"></a></li>
+    <li><a href="Broadcast_Channel_API"></a></li>
+    <li><a href="Cookie_Store_API">better cookies</a></li>
+    <li><a href="Web_Storage_API">✅</a></li>
+    <li><a href="IndexedDB_API">✅</a></li>
+    <li><a href="Storage_API">controls space usage of indexeddb, caches etc.</a></li>
+    <li><a href="File_API">uploaded file</a></li>
+    <li><a href="File_and_Directory_Entries_API">multiple uploaded files</a></li>
+    <li><a href="URL_API">✅</a></li>
+    <li><a href="URL_Pattern_API">🔆</a></li>
+    <li><a href="HTML_Sanitizer_API"></a></li>
+    <li><a href="Clipboard_API">✅</a></li>
+    <li><a href="Web_Locks_API"></a></li>
+    <li><a href="Web_Crypto_API">cryptopgraphy</a></li>
+    <li><a href="Trusted_Types_API">prevent code injection</a></li>
+    <li><a href="Storage_Access_API">3rd party cookies</a></li>
+    <li><a href="Prioritized_Task_Scheduling_API"></a></li>
+    <li><a href="Performance_API">measurements</a></li>
+    <li><a href="JS_Self-Profiling_API">JS performance</a></li>
+    <li><a href="Encoding_API">UTF-8 to/from bytes</a></li>
+    <li><a href="Content_Index_API">offline content</a></li>
+    <li><a href="Compression_Streams_API">gzip</a></li>
+</ul>
+<h2>Browser UI</h2>
+<ul>
+    <li><a href="UI_Events">✅</a></li>
+    <li><a href="Touch_events">✅</a></li>
+    <li><a href="Pointer_events">✅</a></li>
+    <li><a href="Invoker_Commands_API">add event listener as attributes and catch all with .oncommand</a></li>
+    <li><a href="Canvas_API">✅</a></li>
+    <li><a href="WebGL_API">graphics library</a></li>
+    <li><a href="Navigation_API">navigate event: intercept, history</a></li>
+    <li><a href="History_API"></a></li>
+    <li><a href="Page_Visibility_API">visibilitychange event</a></li>
+    <li><a href="Window_Management_API">multiple windows</a></li>
+    <li><a href="Document_Picture-in-Picture_API">floating video/any content</a></li>
+    <li><a href="Web_Share_API">share popup</a></li>
+    <li><a href="Notifications_API"></a></li>
+    <li><a href="Badging_API"></a></li>
+    <li><a href="Permissions_API"></a></li>
+    <li><a href="Payment_Request_API"></a></li>
+    <li><a href="Selection_API">text selected by user</a></li>
+    <li><a href="Pointer_Lock_API">for games, 3D</a></li>
+    <li><a href="Launch_Handler_API">PWA launch mode</a></li>
+    <li><a href="HTML_Drag_and_Drop_API"></a></li>
+    <li><a href="Fullscreen_API"></a></li>
+    <li><a href="EyeDropper_API">select colors</a></li>
+    <li><a href="EditContext_API">text editing in canvas</a></li>
+</ul>
+<h2>Server</h2>
+<ul>
+    <li><a href="Fetch_API">✅</a></li>
+    <li><a href="Background_Fetch_API">better than background sync</a></li>
+    <li><a href="Beacon_API">before tab closes</a></li>
+    <li><a href="fetchLater_API">after tab closes</a></li>
+    <li><a href="WebTransport_API">better WebSocket</a></li>
+    <li><a href="Server-sent_events">from server to browser</a></li>
+    <li><a href="WebOTP_API">one time password</a></li>
+    <li><a href="FedCM_API">signin with trusted third-party identity provider</a></li>
+    <li><a href="Web_Authentication_API">passwordless authentication</a></li>
+    <li><a href="Streams_API"></a></li>
+    <li><a href="Speculation_Rules_API">prefetch resources</a></li>
+    <li><a href="Reporting_API">report crashes to site owner</a></li>
+    <li><a href="Push_API">push notifications from server</a></li>
+    <li><a href="Payment_Handler_API"></a></li>
+    <li><a href="Attribution_Reporting_API">measure ad conversion</a></li>
+</ul>
+<h2>Media</h2>
+<ul>
+    <li><a href="WebRTC_API">streaming</a></li>
+    <li><a href="Media_Capture_and_Streams_API"></a></li>
+    <li><a href="MediaStream_Recording_API"></a></li>
+    <li><a href="Insertable_Streams_for_MediaStreamTrack_API">video processing</a></li>
+    <li><a href="Media_Source_Extensions_API"></a></li>
+    <li><a href="WebCodecs_API">video/audio codecs</a></li>
+    <li><a href="Web_Audio_API">✅</a></li>
+    <li><a href="Encrypted_Media_Extensions_API">playing DRM</a></li>
+    <li><a href="Barcode_Detection_API">on images</a></li>
+</ul>
+<h2>CSS</h2>
+<ul>
+    <li><a href="Web_components">✅</a></li>
+    <li><a href="Popover_API">✅</a></li>
+    <li><a href="Resize_Observer_API"></a></li>
+    <li><a href="Intersection_Observer_API"></a></li>
+    <li><a href="Window_Controls_Overlay_API">PWA title bar</a></li>
+    <li><a href="WebVTT_API">subtitles on video</a></li>
+    <li><a href="Web_Animations_API">timeline</a></li>
+    <li><a href="VirtualKeyboard_API">styles during keyboard popup</a></li>
+    <li><a href="Viewport_segments_API">for foldables</a></li>
+    <li><a href="Device_Posture_API">for foldables</a></li>
+    <li><a href="View_Transition_API">page transition🔆</a></li>
+    <li><a href="URL_Fragment_Text_Directives">text selector with url🔆</a></li>
+    <li><a href="Houdini_APIs">access CSS values</a></li>
+    <li><a href="Geometry_interfaces">matrix, point</a></li>
+    <li><a href="CSS_Painting_API">canvas on elements</a></li>
+    <li><a href="CSS_Custom_Highlight_API"></a></li>
+</ul>
+<h2>Device</h2>
+<ul>
+    <li><a href="Web_Speech_API">text to speech, speech to text</a></li>
+    <li><a href="Translator_and_Language_Detector_APIs">AI</a></li>
+    <li><a href="Summarizer_API">AI</a></li>
+    <li><a href="User-Agent_Client_Hints_API">device data</a></li>
+    <li><a href="Screen_Orientation_API"></a></li>
+    <li><a href="Network_Information_API"></a></li>
+    <li><a href="Media_Capabilities_API">check device support for codecs</a></li>
+    <li><a href="InputDeviceCapabilities_API">check whether it firesTouchEvents</a></li>
+    <li><a href="Ink_API">replace pointer events for free drawing to reduce latency</a></li>
+    <li><a href="File_System_API"></a></li>
+    <li><a href="WebGPU_API"></a></li>
+    <li><a href="Device_Memory_API">check RAM</a></li>
+    <li><a href="Compute_Pressure_API">check CPU</a></li>
+    <li><a href="Battery_Status_API"></a></li>
+    <li><a href="Sensor_APIs"></a></li>
+    <li><a href="Web_NFC_API"></a></li>
+    <li><a href="Web_Bluetooth_API"></a></li>
+    <li><a href="Audio_Output_Devices_API">select device</a></li>
+    <li><a href="Device_orientation_events"></a></li>
+    <li><a href="Geolocation_API"></a></li>
+    <li><a href="Idle_Detection_API"></a></li>
+    <li><a href="Vibration_API"></a></li>
+    <li><a href="MediaStream_Image_Capture_API">using device camera</a></li>
+    <li><a href="Contact_Picker_API"></a></li>
+    <li><a href="Local_Font_Access_API"></a></li>
+    <li><a href="Screen_Wake_Lock_API">prevent screen lock</a></li>
+    <li><a href="Screen_Capture_API">screen recording</a></li>
+    <li><a href="Media_Session_API">'now playing' UI</a></li>
+    <li><a href="Credential_Management_API"></a></li>
+</ul>
+<h2>Peripherals</h2>
+<ul>
+    <li><a href="WebXR_Device_API">AR XR</a></li>
+    <li><a href="WebUSB_API"></a></li>
+    <li><a href="WebHID_API">human interface device</a></li>
+    <li><a href="Web_Serial_API"></a></li>
+    <li><a href="Keyboard_API">physical</a></li>
+    <li><a href="Web_MIDI_API"></a></li>
+    <li><a href="Remote_Playback_API">play on TVs</a></li>
+    <li><a href="Presentation_API">controls another device</a></li>
+    <li><a href="Gamepad_API"></a></li>
+    <li><a href=""></a></li>
+    <li><a href=""></a></li>
+    <li><a href=""></a></li>
+</ul>
