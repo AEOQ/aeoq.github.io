@@ -60,10 +60,10 @@ Object.assign(E.prototype, {
         props = new A(...props);
         props.length && this.el.replaceChildren(...props.filter(el => el));
 
-        this.el.tagName == 'IMG' && props.push({
-            alt: (this.el.alt || props.alt) ?? (this.el.src || props.src)?.match(/([^/.]+)(\.[^/.]+)$/)?.[1], 
-            onerror: ev => ev.target.remove()
-        });
+        this.el.tagName == 'IMG' && props.push(
+            {alt: (this.el.alt || props.alt) ?? (this.el.src || props.src)?.match(/([^/.]+)(\.[^/.]+)$/)?.[1]}, 
+            props.onerror ? null : {onerror: ev => ev.target.remove()}
+        );
         Array.isArray(props.classList) && (props.classList = [...new Set(props.classList)].filter(c => c).join(' '));
 
         let {true: vari, false: attr} = new O({...props}).groupBy(([a]) => a.includes('--'));
