@@ -87,7 +87,6 @@ class Knob extends HTMLElement {
         }
         this.#internals.setFormValue(this.value);
         this.output.Q('input') || (this.output.value = this.value + (this.unit || ''));
-        this.matches('.symmetric') && this.classList.toggle('negative', this.#v < 0);
         this.dispatchEvent(new InputEvent('input', {bubbles: true}));
     }
     set angle (_) {
@@ -100,6 +99,7 @@ class Knob extends HTMLElement {
             (this.#θ == this.minθ || this.#θ == this.maxθ) && ([PI.$press.y, PI.$press.θ] = [PI.$drag.y, this.#θ]);
             this.value = this.convert.from.angle;
         } 
+        this.matches('.symmetric') && this.classList.toggle('negative', this.#θ < 180);
         E(this).set({'--angle': this.#θ});
     }
     round ({value, step} = {}) {
