@@ -1,11 +1,11 @@
 :host {
     text-align: center;
-    --dark: color-mix(in srgb,var(--glow) 35%,black);
-    display: inline-grid; grid-template: 'top' auto 'main' 4em 'void' .1em / 4em; gap:.1em 0;
     cursor: ns-resize;
+    --glow: oklch(1 0.5 230); --dark: color-mix(in oklch,var(--glow) 35%,black);
+    display: inline-grid; grid-template: 'top' auto 'main' 4em 'void' .1em / 4em; gap:.1em 0;
     touch-action: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
 }
-:host(.animate) {transition:--angle .5s;}
+:host(.animate) {transition: --angle .5s;}
 :host([title])::before {content: attr(title);}
 ::slotted(*) {z-index: 1;}
 :host([data-icon])::after,::slotted(.center) {
