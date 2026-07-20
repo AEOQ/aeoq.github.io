@@ -76,7 +76,8 @@ class Knob extends HTMLElement {
         let str = this.getAttribute(attr);
         try {return JSON.parse(str);} 
         catch {return str;}
-    }    
+    }
+    get value () {return this.list?.[this.#v] ?? this.#v;}
     set value (v) {
         if (v == this.convert.from.angle) {
             this.#v = this.round({value: this.convert.from.angle(this.#θ)});
@@ -84,9 +85,8 @@ class Knob extends HTMLElement {
             this.#v = v;
             this.angle = this.convert.from.value;
         }
-        let value = this.list?.[this.#v] ?? this.#v;
-        this.#internals.setFormValue(value);
-        this.output.Q('input') || (this.output.value = value + (this.unit || ''));
+        this.#internals.setFormValue(this.value);
+        this.output.Q('input') || (this.output.value = this.value + (this.unit || ''));
         this.matches('.symmetric') && this.classList.toggle('negative', this.#v < 0);
         this.dispatchEvent(new InputEvent('input', {bubbles: true}));
     }
