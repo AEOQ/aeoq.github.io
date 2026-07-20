@@ -1,0 +1,88 @@
+:host {
+    text-align: center;
+    --dark: color-mix(in srgb,var(--glow) 35%,black);
+    display: inline-grid; grid-template: 'top' auto 'main' 4em 'void' .1em / 4em; gap:.1em 0;
+    touch-action: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
+}
+:host(.animate) {transition:--angle .5s;}
+:host([title])::before {content: attr(title);}
+::slotted(*) {z-index: 1;}
+:host([data-icon])::after,::slotted(.center) {
+    content: attr(data-icon);
+    z-index: 1;
+    grid-area: main; justify-self: center; align-self: center;
+    pointer-events: none;
+}
+:host>input {display: none;}
+output,svg {
+    grid-area: main;
+    pointer-events: none;
+    overflow: visible;
+}
+circle {
+    fill: none;
+    --r: calc(1 - var(--track-width, 7.5) / 50 / 2); r: var(--r); /*100%=2*/
+    --start: var(--min);
+    --circum: calc(2 * pi * var(--r)); 
+    --sector-angle: calc((360 - var(--start) * 2) / var(--count-1));
+    --arc-length: calc(clamp(0, var(--angle) - var(--start), 360 - var(--start) * 2) / 360 * var(--circum)); /*colored*/
+    stroke-width: calc(var(--track-width, 7.5) / 50); stroke-linecap: round;
+    stroke-dashoffset: calc((90 + var(--start)) / -360 * var(--circum));
+    stroke-dasharray: var(--arc-length) calc(var(--circum) - var(--arc-length));
+    
+    &#track {
+        stroke: var(--dark);
+        --angle: calc(360 - var(--start));
+
+        :host(.discrete) & {
+            --arc-length: calc(var(--sector-angle) / 360 * var(--circum)); /*empty*/
+        }
+    }
+    &#fill {
+        stroke: var(--glow); 
+        filter: drop-shadow(0 0 .1px var(--glow));
+    
+        :host(.symmetric) & {
+            --arc-length: calc(min(abs(var(--angle) - 180), 180 - var(--min)) / 360 * var(--circum)); /*colored*/
+            --start: 180;
+        } 
+        :host(.negative) & {transform: scaleX(-1);}
+        :host(.discrete) & {
+            --arc-length: 0; 
+            --discrete-angle: round(var(--angle) - var(--start), var(--sector-angle));
+            stroke-dashoffset: calc((90 + var(--discrete-angle) + var(--start)) / -360 * var(--circum));
+        }
+    }
+}
+output {
+    font-size:.8em; line-height: 0;
+    display: flex; align-items: end; justify-content: center;
+    position: relative;
+
+    &::before,&::after {
+        position: absolute;
+        transform: scaleY(-1) rotate(calc(var(--angle)*-1deg));
+    }
+    &::after {
+        content: '·'; font-family: serif; font-size: 1.5em;
+        color: var(--glow); text-shadow: 0 0 .1em var(--glow);
+        inset: calc(60% - var(--knob-size,65)*.5%);
+    }
+    &::before {
+        content: '';
+        border-radius: 9em; background: var(--dark);
+        inset: calc(50% - var(--knob-size,65)*.5%);
+        box-shadow: 0 0 .4em rgba(0,0,0,.5);
+    }
+    input {
+        width: 50%;
+        text-align: center;
+        appearance: none; border: none; outline: none;
+        padding: 0 .1em;
+        transform: translateY(.6em);
+    }
+    input::-webkit-outer-spin-button,input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+}
