@@ -22,7 +22,7 @@ output,svg {
 }
 circle {
     fill: none;
-    --r: calc(1 - var(--track-width, 7.5) / 50 / 2); r: var(--r); /*100%=2*/
+    --r: calc(1 - var(--track-width, 7.5) / 50 / 2); r: calc(var(--r)*1px); /*100%=2*/
     --start: var(--min);
     --circum: calc(2 * pi * var(--r)); 
     --sector-angle: calc((360 - var(--start) * 2) / var(--count-1));

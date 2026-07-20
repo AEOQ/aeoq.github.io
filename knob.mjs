@@ -12,7 +12,7 @@ class Knob extends HTMLElement {
         super();
         this.#internals = this.attachInternals();
         this.attachShadow({mode: 'open'}).append(
-            E('svg', {viewBox: '-1 -1 2 2'}, [E('circle#track', {r: 1}), E('circle#fill', {r: 'var(--r)'})]),
+            E('svg', {viewBox: '-1 -1 2 2'}, [E('circle#track'), E('circle#fill')]),
             this.output = E('output', {part: 'output'}),
             this.input = E('input', {
                 type: 'number',
@@ -47,6 +47,7 @@ class Knob extends HTMLElement {
     }
     connectedCallback() {
         this.setup();
+        this.addEventListener('contextmenu', ev => ev.preventDefault());
         PointerInteraction.events([[this, {
             press: PI => {
                 PI.$press.θ = this.#θ;
