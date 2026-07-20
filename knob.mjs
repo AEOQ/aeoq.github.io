@@ -19,7 +19,7 @@ class Knob extends HTMLElement {
                 onchange: ev => this.value = ev.target.value === '' ? ev.target.getAttribute('value') : ev.target.value,
                 onblur: ev => (this.shadowRoot.append(ev.target), ev.target.onchange(ev)),
             }),
-            E('link', {rel: 'stylesheet', href: `./knob.css`}),
+            E('link', {rel: 'stylesheet', href: `https://aeoq.github.io/knob.css`}),
             E('slot'), 
 	    );
         Object.assign(this, props);
