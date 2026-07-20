@@ -2,6 +2,7 @@
     text-align: center;
     --dark: color-mix(in srgb,var(--glow) 35%,black);
     display: inline-grid; grid-template: 'top' auto 'main' 4em 'void' .1em / 4em; gap:.1em 0;
+    cursor: ns-resize;
     touch-action: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
 }
 :host(.animate) {transition:--angle .5s;}
