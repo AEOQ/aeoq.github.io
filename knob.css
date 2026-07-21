@@ -24,19 +24,18 @@ circle {
     fill: none;
     --r: calc((1 - var(--track-width, 7.5) / 50 / 2) * 1px); r: var(--r); /*100%=2*/
     --start: var(--min);
-    --circum: calc(2 * pi * var(--r)); 
-    --sector-angle: calc((360 - var(--start) * 2) / var(--count-1));
-    --arc-length: calc(clamp(0, var(--angle) - var(--start), 360 - var(--start) * 2) / 360 * var(--circum)); /*colored*/
+    --discrete-void: calc((360 - var(--start) * 2) / var(--count-1)); 
+    --sector-angle: calc(clamp(0, var(--angle) - var(--start), 360 - var(--start) * 2)); /*colored*/
     stroke-width: calc(var(--track-width, 7.5) / 50); stroke-linecap: round;
-    stroke-dashoffset: calc((90 + var(--start)) / -360 * var(--circum));
-    stroke-dasharray: var(--arc-length) calc(var(--circum) - var(--arc-length));
+    stroke-dashoffset: calc((90 + var(--start)) / -.9);
+    stroke-dasharray: var(--sector-angle) calc(360 - var(--sector-angle));
     
     &#track {
         stroke: var(--dark);
         --angle: calc(360 - var(--start));
 
         :host(.discrete) & {
-            --arc-length: calc(var(--sector-angle) / 360 * var(--circum)); /*empty*/
+            --sector-angle: calc(var(--discrete-void) / .9); 
         }
     }
     &#fill {
@@ -44,14 +43,14 @@ circle {
         filter: drop-shadow(0 0 .1px var(--glow));
     
         :host(.symmetric) & {
-            --arc-length: calc(min(abs(var(--angle) - 180), 180 - var(--min)) / 360 * var(--circum)); /*colored*/
+            --sector-angle: calc(min(abs(var(--angle) - 180), 180 - var(--min)) / .9); /*colored*/
             --start: 180;
         } 
         :host(.negative) & {transform: scaleX(-1);}
         :host(.discrete) & {
-            --arc-length: 0px; 
-            --discrete-angle: round(var(--angle) - var(--start), var(--sector-angle));
-            stroke-dashoffset: calc((90 + var(--discrete-angle) + var(--start)) / -360 * var(--circum));
+            --sector-angle: 0; 
+            --discrete-angle: round(var(--angle) - var(--start), var(--discrete-void));
+            stroke-dashoffset: calc((90 + var(--discrete-angle) + var(--start)) / -.9);
         }
     }
 }

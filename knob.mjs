@@ -12,7 +12,9 @@ class Knob extends HTMLElement {
         super();
         this.#internals = this.attachInternals();
         this.attachShadow({mode: 'open'}).append(
-            E('svg', {viewBox: '-1 -1 2 2'}, [E('circle#track'), E('circle#fill')]),
+            E('svg', {viewBox: '-1 -1 2 2'}, 
+                [E('circle#track', {pathLength: 360}), E('circle#fill', {pathLength: 360})]
+            ),
             this.output = E('output', {part: 'output'}),
             this.input = E('input', {
                 type: 'number',
