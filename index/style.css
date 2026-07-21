@@ -137,7 +137,6 @@ great-icosahedron {
     font-size:.5em; 
     display:inline-block;
     margin:0 1em;
-    overflow:hidden;
     --hue:220;--border:hsl(240,100%,30%); --ring:orange;
     transform:translateZ(20.5em); animation:move 1.5s forwards;
     z-index:9;

@@ -25,10 +25,10 @@ class Knob extends HTMLElement {
             Knob.isSafari ? '' : E('svg', {viewBox: '-1 -1 2 2'},
                 [E('circle#track', {pathLength: 360*.9}), E('circle#fill', {pathLength: 360*.9})]
             ),
-            E('link', {
-                rel: 'stylesheet', 
-                href: (location.hostname != "127.0.0.1" ? 'https://aeoq.github.io' : '.') + '/knob.css',
-                style: Knob.isSafari ? {display: 'block'} : {}
+            E.link({
+                href: 'https://aeoq.github.io/knob.css',
+                style: Knob.isSafari ? {display: 'block'} : {},
+                me: true
             }),
             E('slot'), 
 	    );

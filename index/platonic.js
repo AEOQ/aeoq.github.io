@@ -1,4 +1,4 @@
-import {A,E,O,Q} from './AEOQ.mjs';
+import {A,E,O,Q} from '../AEOQ.mjs';
 class Polygon {
     constructor(n, stroke = 0, r = 1) {
         this.n = n;
@@ -71,7 +71,9 @@ customElements.define('hedron-p', class extends HTMLElement {
         this.face = parseInt(this.getAttribute('face'));
         if (!this.face) return;
         this.animation ??= this.getAttribute('animate') === '' && true;
-        this.shadow.replaceChildren(E('style', this.#css), ...this.elements);
+        this.shadowRoot.replaceChildren(...this.elements, 
+            E.link({href: 'https://aeoq.github.io/index/polyhedra.css', me: true})
+        );
         this.shadow.Q('figure').part = `f${this.face}`;
         this.variables();
     }
@@ -125,54 +127,5 @@ customElements.define('hedron-p', class extends HTMLElement {
     attributeChangedCallback(attr) {
         attr == 'color' ? this.color(this.shadow) : this.variables();
     }
-    #css = `
-    figure {
-        display: inline-flex; justify-content: center; align-items: center;
-        margin: 0;
-        text-align:left;
-        width: calc(var(--circumR)*10em); height :calc(var(--circumR)*10em);
-        transform-style: preserve-3d;
-    }
-    figure.extend {
-        --inR: var(--extendR) !important;
-    }
-    div, svg {
-        position: absolute;
-        width: 10em; height: 10em;
-        overflow: visible;
-        transform-style: preserve-3d;
-    }
-    use {
-        stroke: hsl(var(--c),50%,50%); stroke-width: var(--stroke);
-        fill: hsla(var(--c),80%,80%,0.85);
-        transition: .5s;
-    }
-    div:nth-of-type(odd) {
-        transform: translateZ(calc(var(--inR)*10em/2));
-    }
-    div:nth-of-type(even) {
-        transform: rotateY(180deg) translateZ(calc(var(--inR)*10em/2));
-    }
-    div svg {
-        transform-origin: 50% 50% calc(10em*var(--inR)/-2);
-        transform: rotate(var(--centerA)) rotateY(calc(-1rad*var(--slant)));
-    }
-    div:nth-of-type(n+3) svg {
-        transform: rotate(calc(var(--centerA) + 36deg)) rotateY(calc(-1rad*var(--midSlant)));
-    }
-    figure[part='f12'] svg {
-        transform: rotate(var(--centerA)) rotateY(calc(1rad*var(--slant)));
-
-        &:last-child {transform: rotate(36deg);}
-    }
-    figure[part='f6'] div svg {
-        transform: rotate(calc(var(--centerA) - 45deg)) rotateX(45deg) rotateY(90deg);
-    }
-    figure[part='f6']>svg:first-of-type {
-        transform: translateZ(calc(var(--inR)*10em/2));
-    }
-    figure:is([part='f6'],[part='f4'])>svg:last-of-type {
-        transform: translateZ(calc(var(--inR)*10em/-2));
-    }`;
 });
 export default Polygon

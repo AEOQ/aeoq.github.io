@@ -1,4 +1,4 @@
-import {A,E,O,Q} from './AEOQ.mjs';
+import {A,E,O,Q} from '../AEOQ.mjs';
 customElements.define('bird-diverter', class extends HTMLElement {
     constructor() {
         super();

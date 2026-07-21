@@ -1,0 +1,104 @@
+*,*::before,*::after {box-sizing: border-box;}
+:host(great-icosahedron) {
+    --in: calc((3*sqrt(3) + sqrt(15))/12); --circum: calc(sqrt(10 + 2*sqrt(5))/4);
+    --inR: calc((sqrt(3) * (sqrt(5) - 3))/12*var(--side)); --circumR: 1;
+    --slant: calc(90deg - asin(var(--in)/var(--circum)));
+    --midSlant: calc(acos(sqrt(5)/-3) - var(--slant));
+    
+    min-width: calc(var(--circumR)*10em); height:calc(var(--circumR)*10em);
+
+    figure,figure::before,figure::after {
+        border: .1em dotted var(--ring, yellowgreen); border-radius: 9em;
+        animation-play-state: var(--paused) !important;
+    }
+    figure {
+        width: 100%; height: 100%;
+        margin: 0;
+        animation: spin 30s infinite linear;
+        transform-style: preserve-3d;
+    }
+    figure::before,figure::after {
+        content: '';
+        position: absolute; inset: 0;
+    }
+    figure::before {animation: before-spin 30s infinite linear alternate-reverse;}
+    figure::after  {animation:  after-spin 30s infinite linear alternate-reverse;}
+    div,svg {
+        position: absolute;
+        width: 10em;
+        overflow: visible;
+        transform-style: preserve-3d;
+    }
+    svg:has(defs:only-of-type) {display:none;}
+    use {
+        stroke: var(--border,hsl(268,100%,50%)); stroke-width: var(--stroke);
+        fill: hsl(var(--c),50%,50%,.8);
+    }
+    div {
+        transform: rotateY(var(--r,0deg)) translateZ(calc(var(--inR)*10em/2));
+
+        &:nth-of-type(even) {--r: 180deg;}
+        svg {
+            --centerA: calc(72deg*sibling-index());
+            transform-origin: 50% 50% calc(10em*var(--inR)/-2);
+            transform: rotate(var(--centerA)) rotateY(calc(-1*var(--slant)));
+        }
+        &:nth-of-type(n+3) svg {
+            transform: rotate(calc(var(--centerA) + 36deg)) rotateY(calc(-1*var(--midSlant)));
+        }
+    }
+}
+@keyframes spin {100% {transform: rotateX(360deg) rotateY(720deg) rotateZ(1080deg);}}
+@keyframes before-spin {to {transform:rotate3d(var(--x),var(--y),var(--z),calc(1deg*var(--a)));}}
+@keyframes after-spin  {to {transform:rotate3d(var(--x),var(--y),var(--z),calc(-1deg*var(--a)));}}
+
+:host(hedron-p) {
+    figure {
+        display: inline-flex; justify-content: center; align-items: center;
+        margin: 0;
+        text-align:left;
+        width: calc(var(--circumR)*10em); height :calc(var(--circumR)*10em);
+        transform-style: preserve-3d;
+    }
+    figure.extend {
+        --inR: var(--extendR) !important;
+    }
+    div, svg {
+        position: absolute;
+        width: 10em; height: 10em;
+        overflow: visible;
+        transform-style: preserve-3d;
+    }
+    use {
+        stroke: hsl(var(--c),50%,50%); stroke-width: var(--stroke);
+        fill: hsla(var(--c),80%,80%,0.85);
+        transition: .5s;
+    }
+    div:nth-of-type(odd) {
+        transform: translateZ(calc(var(--inR)*10em/2));
+    }
+    div:nth-of-type(even) {
+        transform: rotateY(180deg) translateZ(calc(var(--inR)*10em/2));
+    }
+    div svg {
+        transform-origin: 50% 50% calc(10em*var(--inR)/-2);
+        transform: rotate(var(--centerA)) rotateY(calc(-1rad*var(--slant)));
+    }
+    div:nth-of-type(n+3) svg {
+        transform: rotate(calc(var(--centerA) + 36deg)) rotateY(calc(-1rad*var(--midSlant)));
+    }
+    figure[part='f12'] svg {
+        transform: rotate(var(--centerA)) rotateY(calc(1rad*var(--slant)));
+
+        &:last-child {transform: rotate(36deg);}
+    }
+    figure[part='f6'] div svg {
+        transform: rotate(calc(var(--centerA) - 45deg)) rotateX(45deg) rotateY(90deg);
+    }
+    figure[part='f6']>svg:first-of-type {
+        transform: translateZ(calc(var(--inR)*10em/2));
+    }
+    figure:is([part='f6'],[part='f4'])>svg:last-of-type {
+        transform: translateZ(calc(var(--inR)*10em/-2));
+    }
+}
