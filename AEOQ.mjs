@@ -33,6 +33,7 @@ class A {
 ['map', 'filter'].forEach(f => A.prototype[f] = function (...p) { return new A([...this][f](...p), { ...this }); });
 
 const E = function (el, ...props) {
+    if (!el) return el == null ? undefined : new Text();
     if (el instanceof Element || el instanceof Text)
         return new.target ? (this.el = el) && this : new E(el);
     if (el.includes('>'))
@@ -40,7 +41,7 @@ const E = function (el, ...props) {
     let attrs;
     [el, ...attrs] = el.split(/(?=[#.])/);
     let {true: id, false: classList} = Object.groupBy(attrs, attr => attr.startsWith('#'));
-    el = el ? E.SVG.includes(el) ? document.createElementNS('http://www.w3.org/2000/svg', el) : document.createElement(el) : document.createTextNode('');
+    el = E.SVG.includes(el) ? document.createElementNS('http://www.w3.org/2000/svg', el) : document.createElement(el);
     return E(el).set(
         id?.[0].length > 1 ? {id: id[0].substring(1)} : {}, 
         classList ? {classList: classList.filter(c => c.length > 1).map(c => c.substring(1))} : {},

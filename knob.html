@@ -32,8 +32,8 @@ import * as Knob from './knob.mjs'
     <drag-knob name="knob-3" range=".1/.9/.1">
         <a href="./">Link</a>
     </drag-knob>
-    <drag-knob title="Choice" name="choice" value="A" range='["A","B","C","D","E"]'></drag-knob>
-    <drag-knob title="Number" name="speed" range="[8,7,6,5,4]"></drag-knob>
+    <drag-knob title="Choice" name="choice" value="A" range='["A","B","C","D","E"]'><b class="center">s</b></drag-knob>
+    <drag-knob title="Number" name="speed" range="[8,7,6,5,4]"><i>ss</i></drag-knob>
 </form>
 
 <button onclick="this.nextElementSibling.value=JSON.stringify([...new FormData(document.forms[0])])">

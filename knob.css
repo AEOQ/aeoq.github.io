@@ -2,31 +2,31 @@
     text-align: center;
     cursor: ns-resize;
     --color: oklch(1 0.5 230); --dark: color-mix(in oklch,var(--color) 40%,black);
-    display: inline-grid; grid-template: 'top' auto 'main' 4em 'void' .2em / 4em; gap: .1em 0;
+    display: inline-grid; grid-template: 'title' auto 'knob' 4em 'void' .2em / 4em; gap: .1em 0;
     touch-action: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
 }
 :host(.animate) {transition: --angle .5s;}
-:host([title])::before {content: attr(title);}
-:host::before {line-height: 1.1;}
-::slotted(*) {z-index: 1;}
-:host([data-icon])::after,::slotted(.center) {
-    content: attr(data-icon);
-    z-index: 1;
-    grid-area: main; justify-self: center; align-self: center;
-    pointer-events: none;
+:host([title])::before,::slotted(*) {
+    line-height: 1.1;
+    grid-area: title;
+    content: attr(title);
 }
-
-output:has(~svg)::before,:host>input {display: none;}
-output,svg,link {
-    grid-area: main;
+output,svg,link,::slotted(:is(i,.center)) {
+    grid-area: knob;
     pointer-events: none;
     overflow: visible;
 }
+::slotted(:is(i,.center)) {
+    place-self: center; 
+    z-index: 1;
+}
+output:has(~svg)::before,:host>input {display: none;}
+
+:host(.discrete) {--discrete-void: calc((360 - var(--min) * 2) / var(--count-1));}
 circle { /*2px=100%*/
     fill: none;
     --r: calc((1 - var(--track,7.5) / 50 / 2) * 1px); r: var(--r); 
     --start: var(--min);
-    --discrete-void: calc((360 - var(--start) * 2) / var(--count-1)); 
     --sector-angle: calc(clamp(0, var(--angle) - var(--start), 360 - var(--start) * 2)); /*colored*/
     stroke-width: calc(var(--track,7.5) / 50); stroke-linecap: round;
     stroke-dashoffset: calc((90 + var(--start)) / -1);
@@ -63,9 +63,9 @@ link::before,output::before { /*4em=100%*/
     transform: scale(-1);
     border: calc(var(--track,7.5)/100*4em/var(--f,1)) solid var(--color);
     --min-deg: calc(var(--min) * 1deg); 
-    mask: conic-gradient(
+    mask: var(--mask, conic-gradient(
         transparent var(--min-deg), black var(--min-deg) var(--max-deg), transparent var(--max-deg)
-    );
+    ));
 }
 link { /*4em=100% filter above mask*/ 
     position: relative;
@@ -79,6 +79,14 @@ link { /*4em=100% filter above mask*/
             transparent max(180deg,var(--max-deg))
         );
     }
+    :host(.discrete) &::before {
+        --max-deg: calc(round(var(--angle), var(--discrete-void)) * 1deg);
+        mask: var(--mask, conic-gradient(
+            transparent calc(var(--max-deg) - 2deg),
+            black calc(var(--max-deg) - 2deg) calc(var(--max-deg) + 2deg),
+            transparent calc(var(--max-deg) + 2deg)
+        ));
+    }
 }
 output { /*no glow*/
     position: relative;
@@ -88,6 +96,18 @@ output { /*no glow*/
     &::before {
         --max-deg: calc(360deg - var(--min-deg));
         --color: var(--dark);
+    }
+    :host(.discrete) &::before {
+        mask: repeating-conic-gradient(
+            from calc(var(--min-deg) - 2deg),
+            black 0deg 4deg,
+            transparent 4deg calc(var(--discrete-void)*1deg)
+        ), conic-gradient(
+            transparent calc(var(--min-deg) - 2deg),
+            black calc(var(--min-deg) - 2deg) calc(var(--max-deg) + 2deg),
+            transparent calc(var(--max-deg) + 2deg)
+        );
+        mask-composite: intersect;
     }
     &::after {
         position: absolute; inset: calc(50% - var(--knob,65)*.5%);
