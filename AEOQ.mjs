@@ -93,7 +93,7 @@ Object.assign(E, {
     ],
     link: ({rel, href, me, ...props}) => E('link', {
       rel: rel ?? 'stylesheet', ...props,
-      href: me && location.hostname == "127.0.0.1" ? href.replace(/^(?:https?:)?\/\/[^\/]+/, location.host) : href
+      href: me && location.hostname == "127.0.0.1" ? href.replace(/^(?:https?:)?\/\/[^\/]+/, location.origin) : href
     }),
     ul: lis => E('ul', lis.filter(li => li).map(li => E('li', li))),
     dl: (obj, attr = {}) => E('dl', attr, (obj instanceof O ? obj : new O(obj))
