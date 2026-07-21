@@ -1,12 +1,13 @@
 :host {
     text-align: center;
     cursor: ns-resize;
-    --glow: oklch(1 0.5 230); --dark: color-mix(in oklch,var(--glow) 40%,black);
+    --color: oklch(1 0.5 230); --dark: color-mix(in oklch,var(--color) 40%,black);
     display: inline-grid; grid-template: 'top' auto 'main' 4em 'void' .2em / 4em; gap: .1em 0;
     touch-action: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
 }
 :host(.animate) {transition: --angle .5s;}
-:host([title])::before {content: attr(title); line-height: 1.1;}
+:host([title])::before {content: attr(title);}
+:host::before {line-height: 1.1;}
 ::slotted(*) {z-index: 1;}
 :host([data-icon])::after,::slotted(.center) {
     content: attr(data-icon);
@@ -14,19 +15,20 @@
     grid-area: main; justify-self: center; align-self: center;
     pointer-events: none;
 }
-:host>input {display: none;}
-output,svg {
+
+output:has(~svg)::before,:host>input {display: none;}
+output,svg,link {
     grid-area: main;
     pointer-events: none;
     overflow: visible;
 }
-circle {
+circle { /*2px=100%*/
     fill: none;
-    --r: calc((1 - var(--track-width, 7.5) / 50 / 2) * 1px); r: var(--r); /*100%=2*/
+    --r: calc((1 - var(--track,7.5) / 50 / 2) * 1px); r: var(--r); 
     --start: var(--min);
     --discrete-void: calc((360 - var(--start) * 2) / var(--count-1)); 
     --sector-angle: calc(clamp(0, var(--angle) - var(--start), 360 - var(--start) * 2)); /*colored*/
-    stroke-width: calc(var(--track-width, 7.5) / 50); stroke-linecap: round;
+    stroke-width: calc(var(--track,7.5) / 50); stroke-linecap: round;
     stroke-dashoffset: calc((90 + var(--start)) / -1);
     stroke-dasharray: var(--sector-angle) calc((360 - var(--sector-angle)));
     
@@ -39,8 +41,8 @@ circle {
         }
     }
     &#fill {
-        stroke: var(--glow); 
-        filter: drop-shadow(0 0 .1px var(--glow));
+        stroke: var(--color); 
+        filter: drop-shadow(0 0 calc(var(--glow,5)/100*2px) var(--color));
     
         :host(.symmetric) & {
             --sector-angle: calc(min(abs(var(--angle) - 180), 180 - var(--min))); /*colored*/
@@ -54,25 +56,47 @@ circle {
         }
     }
 }
-output {
-    font-size:.8em; line-height: 0;
-    display: flex; align-items: end; justify-content: center;
+link::before,output::before { /*4em=100%*/
+    content: '';
+    border-radius: 9em;
+    position: absolute; inset: 0;
+    transform: scale(-1);
+    border: calc(var(--track,7.5)/100*4em/var(--f,1)) solid var(--color);
+    --min-deg: calc(var(--min) * 1deg); 
+    mask: conic-gradient(
+        transparent var(--min-deg), black var(--min-deg) var(--max-deg), transparent var(--max-deg)
+    );
+}
+link { /*4em=100% filter above mask*/ 
     position: relative;
+    filter: drop-shadow(0 0 calc(var(--glow,5)/100*4em) var(--color));
+    --max-deg: calc(var(--angle) * 1deg);
 
-    &::before,&::after {
-        position: absolute;
-        transform: scaleY(-1) rotate(calc(var(--angle)*-1deg));
+    :host(.symmetric) &::before {
+        mask: conic-gradient(
+            transparent min(var(--max-deg),180deg),
+            black min(var(--max-deg),180deg) max(180deg,var(--max-deg)),
+            transparent max(180deg,var(--max-deg))
+        );
+    }
+}
+output { /*no glow*/
+    position: relative;
+    --f: .8; font-size: calc(1em*var(--f)); line-height: 0;
+    display: flex; align-items: end; justify-content: center;
+
+    &::before {
+        --max-deg: calc(360deg - var(--min-deg));
+        --color: var(--dark);
     }
     &::after {
-        content: '·'; font-family: serif; font-size: 1.5em;
-        color: var(--glow); text-shadow: 0 0 .1em var(--glow);
-        inset: calc(60% - var(--knob-size,65)*.5%);
-    }
-    &::before {
-        content: '';
+        position: absolute; inset: calc(50% - var(--knob,65)*.5%);
         border-radius: 9em; background: var(--dark);
-        inset: calc(50% - var(--knob-size,65)*.5%);
+        content: '·'; font-family: serif; 
+        font-size: 1.5em; line-height: .8;
+        color: var(--color); text-shadow: 0 0 .1em var(--color);
         box-shadow: 0 0 .4em rgba(0,0,0,.5);
+        transform: scaleY(-1) rotate(calc(var(--angle)*-1deg));
     }
     input {
         width: 50%;

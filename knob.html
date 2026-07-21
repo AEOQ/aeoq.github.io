@@ -4,14 +4,14 @@ import * as Knob from './knob.mjs'
 </script>
 <style>
     form {background:black; color:white; display:flex; gap:0 .5em; padding:1em;}
-    [name=knob-1] {--glow:lime;}
+    [name=knob-1] {--color:lime;}
     [name=knob-2] {
-        --glow:turquoise;
-        &::part(output)::before {background:conic-gradient(#a3a3a8,#e0eaf1,#a3a3a8,#e0eaf1,#a3a3a8,#e0eaf1,#a3a3a8,#e0eaf1,#a3a3a8,#e0eaf1,#a3a3a8);}
+        --color:turquoise;
+        &::part(output)::after {background:conic-gradient(#a3a3a8,#e0eaf1,#a3a3a8,#e0eaf1,#a3a3a8,#e0eaf1,#a3a3a8,#e0eaf1,#a3a3a8,#e0eaf1,#a3a3a8);}
     }
-    [name=knob-3] {--glow:yellow;}
-    [name=speed] {--glow:magenta;}
-    [name=choice] {--glow:white;}
+    [name=knob-3] {--color:yellow;}
+    [name=speed] {--color:magenta;}
+    [name=choice] {--color:white;}
     textarea {width:100%;height:40em;}
     input {width:26em;}
 </style>
@@ -19,6 +19,13 @@ import * as Knob from './knob.mjs'
     <summary>View source</summary>
     <textarea></textarea>
 </details>
+<form>
+    <drag-knob class="no-svg" name="knob-1" value="43" range="0/100/.01/%" snap="[0,1.1,10.3,99]"></drag-knob>
+    <drag-knob class="no-svg" name="knob-2" value="43" range="-50/50/.01" snap="25"></drag-knob>
+    <drag-knob class="no-svg" name="knob-3" range=".1/.9/.1"><a href="./">Link</a></drag-knob>
+    <drag-knob class="no-svg" title="Choice" name="choice" value="A" range='["A","B","C","D","E"]'></drag-knob>
+    <drag-knob class="no-svg" title="Number" name="speed" range="[8,7,6,5,4]"></drag-knob>
+</form>
 <form>
     <drag-knob name="knob-1" value="43" range="0/100/.01/%" snap="[0,1.1,10.3,99]"></drag-knob>
     <drag-knob name="knob-2" value="43" range="-50/50/.01" snap="25"></drag-knob>
@@ -28,6 +35,7 @@ import * as Knob from './knob.mjs'
     <drag-knob title="Choice" name="choice" value="A" range='["A","B","C","D","E"]'></drag-knob>
     <drag-knob title="Number" name="speed" range="[8,7,6,5,4]"></drag-knob>
 </form>
+
 <button onclick="this.nextElementSibling.value=JSON.stringify([...new FormData(document.forms[0])])">
     [...new FormData(document.forms[0])]
 </button>
