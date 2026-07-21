@@ -1,7 +1,7 @@
 import {A,E,O,Q} from 'https://aeoq.github.io/AEOQ.mjs';
 import PointerInteraction from 'https://aeoq.github.io/pointer-interaction/script.js';
 CSS.registerProperty({
-    name: "--angle",
+    name: "--knob-angle",
     syntax: "<number>",
     inherits: true,
     initialValue: "180",
@@ -111,7 +111,7 @@ class Knob extends HTMLElement {
             this.value = this.convert.from.angle;
         } 
         this.matches('.symmetric') && this.classList.toggle('negative', this.#θ < 180);
-        E(this).set({'--angle': this.#θ});
+        E(this).set({'--knob-angle': this.#θ});
     }
     round ({value, step} = {}) {
         value ??= this.#v, step ??= this.step;

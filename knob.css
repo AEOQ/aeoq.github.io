@@ -1,3 +1,8 @@
+@property --knob-angle {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: 180,
+}
 :host {
     text-align: center;
     cursor: ns-resize;
@@ -5,7 +10,7 @@
     display: inline-grid; grid-template: 'title' auto 'knob' 4em 'void' .2em / 4em; gap: .1em 0;
     touch-action: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
 }
-:host(.animate) {transition: --angle .5s;}
+:host(.animate) {transition: --knob-angle .5s;}
 :host([title])::before,::slotted(*) {
     line-height: 1.1;
     grid-area: title;
@@ -27,14 +32,14 @@ circle { /*2px=100%*/
     fill: none;
     --r: calc((1 - var(--track,7.5) / 50 / 2) * 1px); r: var(--r); 
     --start: var(--min);
-    --sector-angle: calc(clamp(0, var(--angle) - var(--start), 360 - var(--start) * 2)); /*colored*/
+    --sector-angle: calc(clamp(0, var(--knob-angle) - var(--start), 360 - var(--start) * 2)); /*colored*/
     stroke-width: calc(var(--track,7.5) / 50); stroke-linecap: round;
     stroke-dashoffset: calc((90 + var(--start)) / -1);
     stroke-dasharray: var(--sector-angle) calc((360 - var(--sector-angle)));
     
     &#track {
         stroke: var(--dark);
-        --angle: calc(360 - var(--start));
+        --knob-angle: calc(360 - var(--start));
 
         :host(.discrete) & {
             --sector-angle: var(--discrete-void); 
@@ -45,13 +50,13 @@ circle { /*2px=100%*/
         filter: drop-shadow(0 0 calc(var(--glow,5)/100*2px) var(--color));
     
         :host(.symmetric) & {
-            --sector-angle: calc(min(abs(var(--angle) - 180), 180 - var(--min))); /*colored*/
+            --sector-angle: calc(min(abs(var(--knob-angle) - 180), 180 - var(--min))); /*colored*/
             --start: 180;
         } 
         :host(.negative) & {transform: scaleX(-1);}
         :host(.discrete) & {
             --sector-angle: 0; 
-            --discrete-angle: round(var(--angle) - var(--start), var(--discrete-void));
+            --discrete-angle: round(var(--knob-angle) - var(--start), var(--discrete-void));
             stroke-dashoffset: calc((90 + var(--discrete-angle) + var(--start)) / -1);
         }
     }
@@ -70,7 +75,7 @@ link::before,output::before { /*4em=100%*/
 link { /*4em=100% filter above mask*/ 
     position: relative;
     filter: drop-shadow(0 0 calc(var(--glow,5)/100*4em) var(--color));
-    --max-deg: calc(var(--angle) * 1deg);
+    --max-deg: calc(var(--knob-angle) * 1deg);
 
     :host(.symmetric) &::before {
         mask: conic-gradient(
@@ -80,7 +85,7 @@ link { /*4em=100% filter above mask*/
         );
     }
     :host(.discrete) &::before {
-        --max-deg: calc(round(var(--angle), var(--discrete-void)) * 1deg);
+        --max-deg: calc(round(var(--knob-angle), var(--discrete-void)) * 1deg);
         mask: var(--mask, conic-gradient(
             transparent calc(var(--max-deg) - 2deg),
             black calc(var(--max-deg) - 2deg) calc(var(--max-deg) + 2deg),
@@ -116,7 +121,7 @@ output { /*no glow*/
         font-size: 1.5em; line-height: .8;
         color: var(--color); text-shadow: 0 0 .1em var(--color);
         box-shadow: 0 0 .4em rgba(0,0,0,.5);
-        transform: scaleY(-1) rotate(calc(var(--angle)*-1deg));
+        transform: scaleY(-1) rotate(calc(var(--knob-angle)*-1deg));
     }
     input {
         width: 50%;
