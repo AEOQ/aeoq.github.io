@@ -32,8 +32,8 @@ class Knob extends HTMLElement {
         if (Array.isArray(range)) {
             this.classList.add('discrete');
             this.list = range;
-            this.sQ('#track').style.strokeDasharray = Array(this.list.length - 1).fill(`0 var(--arc-length)`).join(' ')
-                + ` 0 calc(2 * var(--start) / 360 * var(--circum))`;
+            this.sQ('#track').style.strokeDasharray = Array(this.list.length - 1).fill(`0 var(--sector-angle)`).join(' ')
+                + ` 0 calc(2 * var(--start) / .9)`;
             E(this).set({'--min': this.minθ ??= 90, '--count-1': this.list.length - 1});
             this.maxθ ??= 360 - this.minθ;
             [this.minV, this.maxV, this.step] = [0, this.list.length - 1, 1];

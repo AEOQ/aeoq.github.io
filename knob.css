@@ -28,7 +28,7 @@ circle {
     --sector-angle: calc(clamp(0, var(--angle) - var(--start), 360 - var(--start) * 2)); /*colored*/
     stroke-width: calc(var(--track-width, 7.5) / 50); stroke-linecap: round;
     stroke-dashoffset: calc((90 + var(--start)) / -.9);
-    stroke-dasharray: var(--sector-angle) calc(360 - var(--sector-angle));
+    stroke-dasharray: calc(var(--sector-angle) / .9) calc((360 - var(--sector-angle)) / .9);
     
     &#track {
         stroke: var(--dark);
@@ -43,7 +43,7 @@ circle {
         filter: drop-shadow(0 0 .1px var(--glow));
     
         :host(.symmetric) & {
-            --sector-angle: calc(min(abs(var(--angle) - 180), 180 - var(--min)) / .9); /*colored*/
+            --sector-angle: calc(min(abs(var(--angle) - 180), 180 - var(--min))); /*colored*/
             --start: 180;
         } 
         :host(.negative) & {transform: scaleX(-1);}
