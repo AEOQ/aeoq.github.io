@@ -15,7 +15,7 @@ class Knob extends HTMLElement {
             /iPad|iPhone|iPod/.test(navigator.userAgent) || 
             navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1 || 
             /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
-        ) ? 1 : .9;
+         ? 1 : .9);
         this.attachShadow({mode: 'open'}).append(
             E('svg', {viewBox: '-1 -1 2 2'}, [E('circle#track', {pathLength}), E('circle#fill', {pathLength})]),
             this.output = E('output', {part: 'output'}),
