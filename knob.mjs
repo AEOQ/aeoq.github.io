@@ -11,10 +11,13 @@ class Knob extends HTMLElement {
     constructor(props = {}) {
         super();
         this.#internals = this.attachInternals();
+        let pathLength = 360 * (
+            /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+            navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1 || 
+            /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+        ) ? 1 : .9;
         this.attachShadow({mode: 'open'}).append(
-            E('svg', {viewBox: '-1 -1 2 2'}, 
-                [E('circle#track', {pathLength: 360}), E('circle#fill', {pathLength: 360})]
-            ),
+            E('svg', {viewBox: '-1 -1 2 2'}, [E('circle#track', {pathLength}), E('circle#fill', {pathLength})]),
             this.output = E('output', {part: 'output'}),
             this.input = E('input', {
                 type: 'number',
@@ -32,8 +35,7 @@ class Knob extends HTMLElement {
         if (Array.isArray(range)) {
             this.classList.add('discrete');
             this.list = range;
-            this.sQ('#track').style.strokeDasharray = Array(this.list.length - 1).fill(`0 var(--sector-angle)`).join(' ')
-                + ` 0 calc(2 * var(--start) / .9)`;
+            this.sQ('#track').style.strokeDasharray = Array(this.list.length - 1).fill(`0 var(--sector-angle)`).join(' ') + ` 0 calc(2 * var(--start))`;
             E(this).set({'--min': this.minθ ??= 90, '--count-1': this.list.length - 1});
             this.maxθ ??= 360 - this.minθ;
             [this.minV, this.maxV, this.step] = [0, this.list.length - 1, 1];

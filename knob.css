@@ -1,12 +1,12 @@
 :host {
     text-align: center;
     cursor: ns-resize;
-    --glow: oklch(1 0.5 230); --dark: color-mix(in oklch,var(--glow) 35%,black);
+    --glow: oklch(1 0.5 230); --dark: color-mix(in oklch,var(--glow) 40%,black);
     display: inline-grid; grid-template: 'top' auto 'main' 4em 'void' .2em / 4em; gap: .1em 0;
     touch-action: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
 }
 :host(.animate) {transition: --angle .5s;}
-:host::before {content: attr(title); line-height: 1.1;}
+:host([title])::before {content: attr(title); line-height: 1.1;}
 ::slotted(*) {z-index: 1;}
 :host([data-icon])::after,::slotted(.center) {
     content: attr(data-icon);
@@ -27,15 +27,15 @@ circle {
     --discrete-void: calc((360 - var(--start) * 2) / var(--count-1)); 
     --sector-angle: calc(clamp(0, var(--angle) - var(--start), 360 - var(--start) * 2)); /*colored*/
     stroke-width: calc(var(--track-width, 7.5) / 50); stroke-linecap: round;
-    stroke-dashoffset: calc((90 + var(--start)) / -.9);
-    stroke-dasharray: calc(var(--sector-angle) / .9) calc((360 - var(--sector-angle)) / .9);
+    stroke-dashoffset: calc((90 + var(--start)) / -1);
+    stroke-dasharray: var(--sector-angle) calc((360 - var(--sector-angle)));
     
     &#track {
         stroke: var(--dark);
         --angle: calc(360 - var(--start));
 
         :host(.discrete) & {
-            --sector-angle: calc(var(--discrete-void) / .9); 
+            --sector-angle: var(--discrete-void); 
         }
     }
     &#fill {
@@ -50,7 +50,7 @@ circle {
         :host(.discrete) & {
             --sector-angle: 0; 
             --discrete-angle: round(var(--angle) - var(--start), var(--discrete-void));
-            stroke-dashoffset: calc((90 + var(--discrete-angle) + var(--start)) / -.9);
+            stroke-dashoffset: calc((90 + var(--discrete-angle) + var(--start)) / -1);
         }
     }
 }
