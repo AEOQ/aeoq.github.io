@@ -85,15 +85,15 @@ Object.assign(E.prototype, {
 });
 Object.assign(E, {
     SVG: [
-      'svg', 'g', 'defs', 'use', 'symbol',
-      'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon',
-      'text', 'tspan', 'textPath',
-      'linearGradient', 'radialGradient', 'stop', 'pattern', 'clipPath', 'mask', 'filter',
-      'image', 'animate', 'animateTransform', 'animateMotion'
+        'svg', 'g', 'defs', 'use', 'symbol',
+        'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon',
+        'text', 'tspan', 'textPath',
+        'linearGradient', 'radialGradient', 'stop', 'pattern', 'clipPath', 'mask', 'filter',
+        'image', 'animate', 'animateTransform', 'animateMotion'
     ],
     link: ({rel, href, me, ...props}) => E('link', {
-      rel: rel ?? 'stylesheet', ...props,
-      href: me && location.hostname == "127.0.0.1" ? href.replace(/^(?:https?:)?\/\/[^\/]+/, location.origin) : href
+        rel: rel ?? 'stylesheet', ...props,
+        href: me && location.hostname == "127.0.0.1" ? href.replace(/^(?:https?:)?\/\/[^\/]+/, '.') : href
     }),
     ul: lis => E('ul', lis.filter(li => li).map(li => E('li', li))),
     dl: (obj, attr = {}) => E('dl', attr, (obj instanceof O ? obj : new O(obj))

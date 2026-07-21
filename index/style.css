@@ -166,7 +166,7 @@ h3 b:last-of-type {
     opacity:var(--value,0);
     mix-blend-mode:difference;
 }
-continuous-knob {
+drag-knob {
     font-size:2em;
 
     &::part(output) {

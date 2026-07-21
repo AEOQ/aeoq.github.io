@@ -34,7 +34,7 @@ const Fader = {
 const BD =  {
     init (diverter) {
         BD.diverter = diverter;
-        BD.control = Q('continuous-knob'), BD.meter = Q('meter');
+        BD.control = Q('drag-knob'), BD.meter = Q('meter');
     },
     get angle() {return E(BD.diverter).get('--angle');},
     set angle(angle) {E(BD.diverter).set({'--angle': angle + 'deg'})},
