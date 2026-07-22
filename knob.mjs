@@ -86,7 +86,7 @@ class Knob extends HTMLElement {
             return typeof this[attr] === 'function' ? null : this[attr];
         let str = this.getAttribute(attr);
         try {return JSON.parse(str);} 
-        catch {return str;}
+        catch {return Knob.toFloat(str);}
     }
     get value () {return this.list?.[this.#v] ?? this.#v;}
     set value (v) {
