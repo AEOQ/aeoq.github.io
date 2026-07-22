@@ -43,26 +43,19 @@ customElements.define('hedron-p', class extends HTMLElement {
     get portion() {return {20:5, 12:6, 8:4, 6:4, 4:3}[this.face];}
     get around()  {return {20:5, 12:5, 8:4, 6:4, 4:3}[this.face];}
     get elements() {
-        const svg = 
-        E('svg', [
+        const defs = E('svg', 
             E(`defs>polygon#${this.side}`, {points: Polygon.points(this.side)}, 
                 E('animate', {attributeName: 'points', dur: '1000ms'})
             )
-        ]);
-        const polygons = n => [...new Array(n)].map(_ => 
-            E('svg', {viewBox: '-1,-1 2,2'}, 
-                E('use', {href: `#${this.side}`})
-            )
         );
+        const uses = n => [...new Array(n)].map(_ => E('svg', {viewBox: '-1,-1 2,2'}, E('use', {href: `#${this.side}`})));
         const figure = E('figure', [
-            ...[...new Array(Math.floor(this.face/this.portion))].map(_ => E('div', polygons(this.portion))),
-            ...polygons(this.face%this.portion)
+            ...[...new Array(Math.floor(this.face/this.portion))].map(_ => E('div', uses(this.portion))),
+            ...uses(this.face%this.portion)
         ]);            
-        for (let i = 1; i <= this.around; i++)
-            figure.Q(`div svg:nth-child(${i})`, svg => E(svg).set({'--centerA': 360/this.around*i + 'deg'}));
         
         this.color(figure);
-        return [svg, figure];
+        return [defs, figure];
     }
     color(place) {
         place.Q(`use`, gon => E(gon).set({'--c': this.getAttribute('color') || Math.random()*360}));
@@ -78,17 +71,12 @@ customElements.define('hedron-p', class extends HTMLElement {
         this.variables();
     }
     
-    variables(...others) {
+    variables() {
         this.gon = new Polygon(this.side, this.stroke);
-        this.constants();
         Object.assign(this.variable, {
+            side: this.gon.side,
+            normal: this.gon.normal,
             stroke : this.stroke,
-            slant : this.face == 12 ? Math.PI - this.constant.foldA : this.constant.slantA,
-            inR : this.constant.inR*this.gon.side,
-            circumR : this.constant.circumR*this.gon.side,
-            extendR : this.gon.side/2/Math.cos(this.constant.foldA/2) + this.gon.normal*Math.tan(this.constant.foldA/2),
-            midSlant : this.face == 20 ? this.constant.foldA - this.constant.slantA : '',
-            ...others
         });
     }
     variable = new Proxy({}, {
@@ -106,23 +94,6 @@ customElements.define('hedron-p', class extends HTMLElement {
             return true;
         }
     })
-    constants() {
-        let inR, circumR, foldA;
-        if (this.face == 20)
-            [inR, circumR, foldA] = [(3*Math.sqrt(3) + Math.sqrt(15))/12, Math.sqrt(10 + 2*Math.sqrt(5))/4, Math.acos(Math.sqrt(5)/-3)];
-        else if (this.face == 12)
-            [inR, circumR, foldA] = [Math.sqrt(250 + 110*Math.sqrt(5))/20, (Math.sqrt(15) + Math.sqrt(3))/4, Math.acos(Math.sqrt(5)/-5)];
-        else if (this.face == 8)
-            [inR, circumR, foldA] = [Math.sqrt(6)/6, Math.sqrt(2)/2, Math.acos(1/-3)];
-        else if (this.face == 6)
-            [inR, circumR, foldA] = [1/2, Math.sqrt(3)/2, Math.PI/2];
-        else if (this.face == 4)
-            [inR, circumR, foldA] = [Math.sqrt(6)/12, Math.sqrt(6)/4, Math.acos(1/3)];
-        this.constant = {
-            inR, circumR, foldA,
-            slantA: Math.PI/2 - Math.asin(inR/circumR),
-        };
-    }
     static observedAttributes = ['stroke', 'color'];
     attributeChangedCallback(attr) {
         attr == 'color' ? this.color(this.shadow) : this.variables();

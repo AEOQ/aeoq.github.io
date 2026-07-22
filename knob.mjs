@@ -7,7 +7,7 @@ CSS.registerProperty({
     initialValue: "180",
 });
 class Knob extends HTMLElement {
-    #internals; #θ; #v;
+    #internals; #θ; #v; temp
     constructor(props = {}) {
         super();
         Knob.isSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -34,26 +34,14 @@ class Knob extends HTMLElement {
 	    );
         Object.assign(this, props);
     }
-    setup () {
-        this.name = this.get('name');
-        let range = this.get('range') || '0/100/.01';
-        if (Array.isArray(range)) {
-            this.classList.add('discrete');
-            this.list = range;
-            this.sQ('#track') && (this.sQ('#track').style.strokeDasharray = 
-                Array(this.list.length - 1).fill(`0 var(--sector-angle)`).join(' ') + ` 0 calc(2 * var(--start))`);
-            E(this).set({'--min': this.minθ ??= 90, '--count-1': this.list.length - 1});
-            this.maxθ ??= 360 - this.minθ;
-            [this.minV, this.maxV, this.step] = [0, this.list.length - 1, 1];
-            this.initialValue = Math.max(this.list.indexOf(this.get('value')), 0);
-        } else {
-            E(this).set({'--min': this.minθ ??= 40 - (Knob.isSafari ? 2.5 : 0)});
-            this.maxθ ??= 360 - this.minθ;
-            [this.minV, this.maxV, this.step, this.unit] = range.split('/').map(v => Knob.toFloat(v));
-            this.minV == this.maxV * -1 && this.classList.add('symmetric');
-            this.initialValue = this.get('value') ?? (this.minV === 0 ? 0 : this.maxV < 1 ? this.minV : Math.max(1, this.minV));
-        }
-        requestAnimationFrame(() => this.#v == null && (this.value = this.initialValue));
+    static observedAttributes = ['name', 'range', 'value'];
+    attributeChangedCallback(attr, v0, v1) {
+        if (v1 === v0) return;
+        if (attr == 'name') return this.name = v1;
+        if (this.#v != null) 
+            return attr == 'value' && (this.value = Knob.parse(v1));
+        this.temp ??= {};
+        this.temp[attr] = Knob.parse(v1);
     }
     connectedCallback() {
         this.setup();
@@ -76,17 +64,35 @@ class Knob extends HTMLElement {
             hold: this.list ? null : hold => hold.for(1).to(() => this.#edit())
         }]]);
 	}
-    attributeChangedCallback(_, v0, v1) {this.isConnected && v1 !== v0 && (this.value = Knob.toFloat(v1));}
+    setup ({range, value} = this.temp) {
+        range ||= this.get('range') || '0/100/.01';
+        value ??= this.get('value');
+        if (Array.isArray(range)) {
+            this.classList.add('discrete');
+            this.list = range;
+            this.sQ('#track') && (this.sQ('#track').style.strokeDasharray = 
+                Array(this.list.length - 1).fill(`0 var(--sector-angle)`).join(' ') + ` 0 calc(2 * var(--start))`);
+            E(this).set({'--min': this.minθ ??= 90, '--count-1': this.list.length - 1});
+            this.maxθ ??= 360 - this.minθ;
+            [this.minV, this.maxV, this.step] = [0, this.list.length - 1, 1];
+            this.initialValue = Math.max(this.list.indexOf(value), 0);
+        } else {
+            E(this).set({'--min': this.minθ ??= 40 - (Knob.isSafari ? 2.5 : 0)});
+            this.maxθ ??= 360 - this.minθ;
+            [this.minV, this.maxV, this.step, this.unit] = range.split('/').map(v => Knob.parse(v));
+            this.minV == this.maxV * -1 && this.classList.add('symmetric');
+            this.initialValue = value ?? (this.minV === 0 ? 0 : this.maxV < 1 ? this.minV : Math.max(1, this.minV));
+        }
+        this.#v == null && requestAnimationFrame(() => this.value = this.initialValue);
+        delete this.temp;
+    }
     formResetCallback() {this.value = this.initialValue;}
-    static observedAttributes = ['value'];
     static formAssociated = true;
 
     get (attr) {
         if (this[attr] !== undefined)
             return typeof this[attr] === 'function' ? null : this[attr];
-        let str = this.getAttribute(attr);
-        try {return JSON.parse(str);} 
-        catch {return Knob.toFloat(str);}
+        return Knob.parse(this.getAttribute(attr));
     }
     get value () {return this.list?.[this.#v] ?? this.#v;}
     set value (v) {
@@ -139,7 +145,10 @@ class Knob extends HTMLElement {
         this.classList.add('animate');
         setTimeout(() => this.classList.remove('animate'), 500);
     }
-    static toFloat = str => str && str.trim() && !isNaN(Number(str)) ? parseFloat(str) : str;
+    static parse (str) {
+        try {return JSON.parse(str);} 
+        catch {return str && str.trim() && !isNaN(Number(str)) ? parseFloat(str) : str;}
+    }
 }
 customElements.define('drag-knob', Knob);
 export default Knob;
