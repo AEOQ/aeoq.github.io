@@ -53,7 +53,7 @@ class Knob extends HTMLElement {
             this.minV == this.maxV * -1 && this.classList.add('symmetric');
             this.initialValue = this.get('value') ?? (this.minV === 0 ? 0 : this.maxV < 1 ? this.minV : Math.max(1, this.minV));
         }
-        requestAnimationFrame(() => this.value = this.initialValue);
+        requestAnimationFrame(() => this.#v == null && (this.value = this.initialValue));
     }
     connectedCallback() {
         this.setup();
@@ -76,7 +76,7 @@ class Knob extends HTMLElement {
             hold: this.list ? null : hold => hold.for(1).to(() => this.#edit())
         }]]);
 	}
-    attributeChangedCallback(_, v0, v1) {v1 != v0 && (this.value = v1);}
+    attributeChangedCallback(_, v0, v1) {this.isConnected && v1 !== v0 && (this.value = Knob.toFloat(v1));}
     formResetCallback() {this.value = this.initialValue;}
     static observedAttributes = ['value'];
     static formAssociated = true;
