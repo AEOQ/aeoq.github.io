@@ -91,9 +91,10 @@ class Knob extends HTMLElement {
     get value () {return this.list?.[this.#v] ?? this.#v;}
     set value (v) {
         if (v == this.convert.from.angle) {
-            this.#v = this.round({value: this.convert.from.angle(this.#θ)});
+            v = this.round({value: this.convert.from.angle(this.#θ)});
+            if (v === this.#v) return; else this.#v = v;
         } else {
-            this.#v = v;
+            if (v === this.#v) return; else this.#v = v;
             this.angle = this.convert.from.value;
         }
         this.#internals.setFormValue(this.value);
