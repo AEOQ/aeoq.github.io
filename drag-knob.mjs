@@ -32,6 +32,7 @@ class Knob extends HTMLElement {
             }),
             E('slot'), 
 	    );
+        this.temp ??= {};
         Object.assign(this, props);
     }
     static observedAttributes = ['name', 'range', 'value'];
@@ -39,7 +40,6 @@ class Knob extends HTMLElement {
         if (v1 === v0) return;
         if (attr == 'name') return this.name = v1;
         if (this.#v != null) return attr == 'value' ? this.value = Knob.parse(v1) : attr == 'range' ? this.setup({range: v1}) : '';
-        this.temp ??= {};
         this.temp[attr] = Knob.parse(v1);
     }
     connectedCallback() {
