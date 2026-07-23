@@ -1,0 +1,21 @@
+:host(:not(:empty)) {
+    padding: calc(var(--side)/4 + 2em) 0;
+    display:grid; grid-template-columns: repeat(auto-fill,var(--side)); justify-content: center;
+    gap: var(--gap);
+    --shift: calc(var(--side)/4 + var(--gap)/4);
+    transition: opacity 1s;
+    
+    ::slotted(*) {
+        text-align: center;
+        width: var(--side); height: var(--side);
+        clip-path: polygon(50% 0%,0% 50%,50% 100%,100% 50%);
+        margin: calc(var(--shift)*-1) 0;
+        transform: translate(calc(var(--shift)*var(--factor,0)));
+        transition: transform .5s, margin .5s;
+    }
+    ::slotted(.DG-left) {--factor: -1;}
+    ::slotted(.DG-right) {--factor: 1;}
+    ::slotted(.DG-center) {--factor: 2}
+    ::slotted(.DG-next) {grid-column: 1}
+}
+:host([hidden]),::slotted([hidden]) {display: none !important;}

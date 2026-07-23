@@ -38,7 +38,7 @@ class Knob extends HTMLElement {
     attributeChangedCallback(attr, v0, v1) {
         if (v1 === v0) return;
         if (attr == 'name') return this.name = v1;
-        if (this.#v != null) return attr == 'value' && (this.value = Knob.parse(v1));
+        if (this.#v != null) return attr == 'value' ? this.value = Knob.parse(v1) : attr == 'range' ? this.setup({range: v1}) : '';
         this.temp ??= {};
         this.temp[attr] = Knob.parse(v1);
     }
@@ -63,9 +63,9 @@ class Knob extends HTMLElement {
             hold: this.list ? null : hold => hold.for(1).to(() => this.#edit())
         }]]);
 	}
-    setup ({range, value} = this.temp) {
-        range ||= this.get('range') || '0/100/.01';
-        value ??= this.get('value');
+    setup (attrs = this.temp) {
+        let range = attrs.range || this.get('range') || '0/100/.01';
+        let value = attrs.value ?? this.get('value');
         if (Array.isArray(range)) {
             this.classList.add('discrete');
             this.list = range;
@@ -82,7 +82,7 @@ class Knob extends HTMLElement {
             this.minV == this.maxV * -1 && this.classList.add('symmetric');
             this.initialValue = value ?? (this.minV === 0 ? 0 : this.maxV < 1 ? this.minV : Math.max(1, this.minV));
         }
-        this.#v == null && requestAnimationFrame(() => this.value = this.initialValue);
+        requestAnimationFrame(() => this.value = this.#v ?? this.initialValue);
         delete this.temp;
     }
     formResetCallback() {this.value = this.initialValue;}
@@ -99,7 +99,7 @@ class Knob extends HTMLElement {
             v = this.round({value: this.convert.from.angle(this.#θ)});
             if (v === this.#v) return; else this.#v = v;
         } else {
-            if (v === this.#v) return; else this.#v = v;
+            this.#v = v;
             this.angle = this.convert.from.value;
         }
         this.#internals.setFormValue(this.value);
