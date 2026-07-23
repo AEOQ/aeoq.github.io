@@ -4,11 +4,12 @@
 <title>diamond-grid</title>
 <script type="module" src="../diamond-grid.mjs"></script>
 <style>
-    diamond-grid {--side:20em;--gap:1em;}
+    :not(:defined) {opacity: 0;}
+    diamond-grid {transition: opacity .5s;}
     diamond-grid div {background:yellow;display:block;}
     textarea {width:100%;height:40em;}
 </style>
-<diamond-grid style="opacity: 0;">
+<diamond-grid>
     <div>owairejg stoirj oer jioaej to ragsjgwag  aw oreitsrjhpeawj pr  PWT JGPAETIJIPSRHA JEP </div>
     <div>1</div>
     <div>2</div>

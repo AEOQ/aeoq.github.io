@@ -3,7 +3,6 @@
     display:grid; grid-template-columns: repeat(auto-fill,var(--side)); justify-content: center;
     gap: var(--gap);
     --shift: calc(var(--side)/4 + var(--gap)/4);
-    transition: opacity 1s;
     
     ::slotted(*) {
         text-align: center;

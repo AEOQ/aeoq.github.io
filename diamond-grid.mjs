@@ -1,7 +1,7 @@
 import {A,E,O,Q} from '../AEOQ.mjs';
 const tagName = 'diamond-grid';
 Q('head').append(E('style', {id: tagName}, `
-    ${tagName} .textShaping {
+    ${tagName} .DG-textShaping {
         width:50%; height:100%;
 
         &:nth-child(1) {
@@ -33,12 +33,11 @@ customElements.define(tagName, class extends HTMLElement {
             if (!newWidth || newWidth === this.#oldWidth) return;
             this.#rearrange();
             this.#oldWidth = newWidth;
-            this.style.opacity = 1;
         }).observe(this);
         new MutationObserver(() => this.#rearrange()).observe(this, {attributeFilter: ['hidden'], subtree: true});
     }
     #shapeText = () => [...this.children].forEach(el => 
-        el.matches('img,:has(.textShaping)') || el.prepend(E('span.textShaping'), E('span.textShaping'))
+        el.matches('img,:has(.DG-textShaping)') || el.prepend(E('span.DG-textShaping'), E('span.DG-textShaping'))
     );
     #rearrange () {
         let items = [...this.children];

@@ -4,6 +4,9 @@
 <title>drag-knob</title>
 <script type="module" src="../drag-knob.mjs"></script>
 <style>
+    :not(:defined) {opacity: 0;}
+    drag-knob {transition: opacity .5s;}
+
     form {background:black; color:white; display:flex; gap:0 .5em; padding:1em;}
     [name=knob-1] {--color:lime;}
     [name=knob-2] {
