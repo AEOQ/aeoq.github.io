@@ -10,7 +10,7 @@
     display: inline-grid; grid-template: 'title' auto 'knob' 4em 'void' .2em / 4em; gap: .1em 0;
     touch-action: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
 }
-:host(.animate) {transition: --knob-angle .5s;}
+:host(.animate) {transition: --knob-angle .5s !important;}
 :host([title])::before,::slotted(*) {
     line-height: 1.1;
     grid-area: title;

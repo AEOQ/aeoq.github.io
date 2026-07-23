@@ -59,7 +59,7 @@ class Knob extends HTMLElement {
                 this.angle = this.convert.from.value;
                 this.lift?.(PI);
             },
-            click: this.list ? null : click => click.for(2).to(PI => (PI.animate = true) && this.#snap()),
+            click: this.list ? null : click => click.for(2).to(() => this.#snap()),
             hold: this.list ? null : hold => hold.for(1).to(() => this.#edit())
         }]]);
 	}
