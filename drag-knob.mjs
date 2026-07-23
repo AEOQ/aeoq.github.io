@@ -26,7 +26,7 @@ class Knob extends HTMLElement {
                 [E('circle#track', {pathLength: 360*.9}), E('circle#fill', {pathLength: 360*.9})]
             ),
             E.link({
-                href: 'https://aeoq.github.io/knob.css',
+                href: 'https://aeoq.github.io/drag-knob.css',
                 style: Knob.isSafari ? {display: 'block'} : {},
                 me: true
             }),
@@ -38,8 +38,7 @@ class Knob extends HTMLElement {
     attributeChangedCallback(attr, v0, v1) {
         if (v1 === v0) return;
         if (attr == 'name') return this.name = v1;
-        if (this.#v != null) 
-            return attr == 'value' && (this.value = Knob.parse(v1));
+        if (this.#v != null) return attr == 'value' && (this.value = Knob.parse(v1));
         this.temp ??= {};
         this.temp[attr] = Knob.parse(v1);
     }
