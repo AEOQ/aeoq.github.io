@@ -7,7 +7,7 @@ CSS.registerProperty({
     initialValue: "180",
 });
 class Knob extends HTMLElement {
-    #internals; #θ; #v; temp
+    #internals; #θ; #v;
     constructor(props = {}) {
         super();
         Knob.isSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -116,7 +116,7 @@ class Knob extends HTMLElement {
             (this.#θ == this.minθ || this.#θ == this.maxθ) && ([PI.$press.y, PI.$press.θ] = [PI.$drag.y, this.#θ]);
             this.value = this.convert.from.angle;
         } 
-        this.matches('.symmetric') && this.classList.toggle('negative', this.#θ < 180);
+        this.matches('.symmetric') && setTimeout(() => this.classList.toggle('negative', this.#θ < 180), this.animating ? 500 : 0);
         E(this).set({'--knob-angle': this.#θ});
     }
     round ({value, step} = {}) {
@@ -141,8 +141,8 @@ class Knob extends HTMLElement {
         this.input.focus();
     }
     #animate () {
-        this.classList.add('animate');
-        setTimeout(() => this.classList.remove('animate'), 500);
+        this.classList.toggle('animate', this.animating = true);
+        setTimeout(() => this.classList.toggle('animate', this.animating = false), 500);
     }
     static parse (str) {
         try {return JSON.parse(str);} 
