@@ -95,16 +95,18 @@ class Knob extends HTMLElement {
     }
     get value () {return this.list?.[this.#v] ?? this.#v;}
     set value (v) {
+        let dragged;
         if (v == this.convert.from.angle) {
             v = this.round({value: this.convert.from.angle(this.#θ)});
-            if (v === this.#v) return; else this.#v = v;
+            if (v === this.#v) return; 
+            this.#v = v; dragged = true;
         } else {
             this.#v = v;
             this.angle = this.convert.from.value;
         }
         this.#internals.setFormValue(this.value);
         this.output.Q('input') || (this.output.value = this.value + (this.unit || ''));
-        this.dispatchEvent(new InputEvent('input', {bubbles: true}));
+        this.dispatchEvent(Object.assign(new InputEvent('input', {bubbles: true, composed: true}), {dragged}));
     }
     set angle (_) {
         if (_ == this.convert.from.value) {
