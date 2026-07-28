@@ -7,7 +7,7 @@ CSS.registerProperty({
     initialValue: "180",
 });
 class Knob extends HTMLElement {
-    #internals; #θ; #v; #flipDelay;
+    #internals; #θ; #v; #ov;
     constructor(props = {}) {
         super();
         Knob.isSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
