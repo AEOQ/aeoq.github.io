@@ -45,6 +45,7 @@ class Knob extends HTMLElement {
     connectedCallback() {
         this.setup();
         this.addEventListener('contextmenu', ev => ev.preventDefault());
+        this.hidden = false;
         PointerInteraction.events([[this, {
             press: PI => (PI.$press.θ = this.#θ, this.press?.(PI)),
             drag: PI => (this.output.Q('input') || Math.abs(PI.$drag.dy) >= 1 && (this.angle = PI), this.drag?.(PI)),

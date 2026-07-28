@@ -28,6 +28,7 @@ customElements.define(tagName, class extends HTMLElement {
         isNaN(E_this.get('--side')) && E_this.set({'--side': '20em'});
         isNaN(E_this.get('--gap')) && E_this.set({'--gap': '.5em'});
         this.#shapeText();
+        this.hidden = false;
         new ResizeObserver(([entry]) => {
             let newWidth = entry.borderBoxSize[0].inlineSize;
             if (!newWidth || newWidth === this.#oldWidth) return;
