@@ -7,7 +7,7 @@ CSS.registerProperty({
     initialValue: "180",
 });
 class Knob extends HTMLElement {
-    #internals; #θ; #v;
+    #internals; #θ; #v; #flipDelay;
     constructor(props = {}) {
         super();
         Knob.isSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -79,7 +79,7 @@ class Knob extends HTMLElement {
             E(this).set({'--min': this.minθ ??= 40 - (Knob.isSafari ? 2.5 : 0)});
             this.maxθ ??= 360 - this.minθ;
             [this.minV, this.maxV, this.step, this.unit] = range.split('/').map(v => Knob.parse(v));
-            this.minV == this.maxV * -1 && this.classList.add('symmetric');
+            this.minV == this.maxV * -1 && (this.symmetric = true) && this.classList.add('symmetric');
             this.initialValue = value ?? (this.minV === 0 ? 0 : this.maxV < 1 ? this.minV : Math.max(1, this.minV));
         }
         requestAnimationFrame(() => this.value = this.#v ?? this.initialValue);
@@ -101,6 +101,7 @@ class Knob extends HTMLElement {
             if (v === this.#v) return; 
             this.#v = v; dragged = true;
         } else {
+            this.symmetric && (this.#ov = this.#v);
             this.#v = v;
             this.angle = this.convert.from.value;
         }
@@ -109,8 +110,9 @@ class Knob extends HTMLElement {
         this.dispatchEvent(Object.assign(new InputEvent('input', {bubbles: true, composed: true}), {dragged}));
     }
     set angle (_) {
+        let flipDelay;
         if (_ == this.convert.from.value) {
-            this.#animate();
+            flipDelay = this.#animate();
             this.#θ = Math.max(0, Math.min(this.convert.from.value(this.round()), 360));
         } else {
             let PI = _;
@@ -118,7 +120,7 @@ class Knob extends HTMLElement {
             (this.#θ == this.minθ || this.#θ == this.maxθ) && ([PI.$press.y, PI.$press.θ] = [PI.$drag.y, this.#θ]);
             this.value = this.convert.from.angle;
         } 
-        this.matches('.symmetric') && setTimeout(() => this.classList.toggle('negative', this.#θ < 180), this.animating ? 500 : 0);
+        this.symmetric && setTimeout(() => this.classList.toggle('negative', this.#θ < 180), flipDelay || 0);
         E(this).set({'--knob-angle': this.#θ});
     }
     round ({value, step} = {}) {
@@ -143,8 +145,9 @@ class Knob extends HTMLElement {
         this.input.focus();
     }
     #animate () {
-        this.classList.toggle('animate', this.animating = true);
-        setTimeout(() => this.classList.toggle('animate', this.animating = false), 500);
+        this.classList.add('animate');
+        setTimeout(() => this.classList.remove('animate'), 500);
+        return this.symmetric && this.#ov != null ? 500 * cubicBezierTime(this.#ov / (this.#ov - this.#v)) : null;
     }
     static parse (str) {
         try {return JSON.parse(str);} 
@@ -153,3 +156,15 @@ class Knob extends HTMLElement {
 }
 customElements.define('drag-knob', Knob);
 export default Knob;
+const cubicBezierTime = (Y, x1 = 0.25, y1 = 0.1, x2 = 0.25, y2 = 1.0) => {
+    let to = (what, t) => 3 * (1 - t) ** 2 * t * (what == 'x' ? x1 : y1) + 3 * (1 - t) * t ** 2 * (what == 'x' ? x2 : y2) + t ** 3;
+    Y = Math.max(0, Math.min(1, Y));
+    let lower = 0, upper = 1, t = 0.5;
+    for (let i = 0; i < 20; i++) {
+        let y = to('y', t);
+        if (Math.abs(y - Y) < 1e-7) break;
+        y < Y ? lower = t : upper = t;
+        t = (lower + upper) / 2;
+    }
+    return to('x', t);
+}
