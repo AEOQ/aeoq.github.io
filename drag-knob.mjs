@@ -125,8 +125,8 @@ class Knob extends HTMLElement {
     }}
     snap () {
         this.#snap ??= this.get('snap') || [Math.max(0, this.minV)];
-        this.value = typeof this.snap == 'number' ? 
-            this.#round({step: this.snap}) : 
+        this.value = typeof this.#snap == 'number' ? 
+            this.#round({step: this.#snap}) : 
             this.#snap.reduce((diff, curr) => Math.abs(curr - this.#v) <= Math.abs(diff - this.#v) ? curr : diff);
     }
     edit (state = 'begin') {
