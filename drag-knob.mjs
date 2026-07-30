@@ -7,7 +7,7 @@ CSS.registerProperty({
     initialValue: "180",
 });
 class Knob extends HTMLElement {
-    #internals; #θ; #v; #ov;
+    #internals; #θ; #v; #ov; #snap;
     constructor(props = {}) {
         super();
         Knob.isSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -17,11 +17,7 @@ class Knob extends HTMLElement {
         this.#internals = this.attachInternals();
         this.attachShadow({mode: 'open'}).append(
             this.output = E('output', {part: 'output'}),
-            this.input = E('input', {
-                type: 'number',
-                onchange: ev => this.value = ev.target.value === '' ? ev.target.getAttribute('value') : ev.target.value,
-                onblur: ev => (this.shadowRoot.append(ev.target), ev.target.onchange(ev)),
-            }),
+            this.input = E('input', {type: 'hidden'}),
             Knob.isSafari ? '' : E('svg', {viewBox: '-1 -1 2 2'},
                 [E('circle#track', {pathLength: 360*.9}), E('circle#fill', {pathLength: 360*.9})]
             ),
@@ -44,14 +40,19 @@ class Knob extends HTMLElement {
     }
     connectedCallback() {
         this.setup();
-        this.addEventListener('contextmenu', ev => ev.preventDefault());
         this.hidden = false;
+        E(this.sQ('input')).set({
+            onchange: ev => this.edit('change'),
+            onblur: ev => this.edit('finish'),
+            onkeydown: ev => ev.key == 'Enter' ? ev.target.blur() : '',
+        });
+        this.addEventListener('contextmenu', ev => ev.preventDefault());
         PointerInteraction.events([[this, {
             press: PI => (PI.$press.θ = this.#θ, this.press?.(PI)),
             drag: PI => (this.output.Q('input') || Math.abs(PI.$drag.dy) >= 1 && (this.angle = PI), this.drag?.(PI)),
             lift: PI => (PI.animate = false, this.lift?.(PI)),
-            click: this.list ? null : click => click.for(2).to(() => this.#snap()),
-            hold: this.list ? null : hold => hold.for(1).to(() => this.#edit())
+            click: this.list ? null : click => click.for(2).to(() => this.snap()),
+            hold: this.list ? null : hold => hold.for(1).to(() => this.edit())
         }]]);
 	}
     setup (attrs = this.temp) {
@@ -86,14 +87,14 @@ class Knob extends HTMLElement {
     }
     get value () {return this.list?.[this.#v] ?? this.#v;}
     set value (v) {
-        if (v == this.#convert.from.angle) {
-            v = this.#round({value: this.#convert.from.angle(this.#θ)});
+        if (v == this.convert.from.angle) {
+            v = this.#round({value: this.convert.from.angle(this.#θ)});
             if (v === this.#v) return; 
             this.#v = v;
         } else {
             this.symmetric && (this.#ov = this.#v);
             this.#v = v;
-            this.angle = this.#convert.from.value;
+            this.angle = this.convert.from.value;
         }
         this.#internals.setFormValue(this.value);
         this.output.Q('input') || (this.output.value = this.value + (this.unit || ''));
@@ -101,14 +102,14 @@ class Knob extends HTMLElement {
     }
     set angle (_) {
         let flipDelay;
-        if (_ == this.#convert.from.value) {
+        if (_ == this.convert.from.value) {
             flipDelay = this.#animate();
-            this.#θ = Math.max(0, Math.min(this.#convert.from.value(this.#round()), 360));
+            this.#θ = Math.max(0, Math.min(this.convert.from.value(this.#round()), 360));
         } else {
             let PI = _;
             this.#θ = Math.max(this.minθ, Math.min(PI.$press.θ - PI.$drag.dy * (this.matches('.fine') ? .1 : 1), this.maxθ));
             (this.#θ == this.minθ || this.#θ == this.maxθ) && ([PI.$press.y, PI.$press.θ] = [PI.$drag.y, this.#θ]);
-            this.value = this.#convert.from.angle;
+            this.value = this.convert.from.angle;
         } 
         this.symmetric && setTimeout(() => this.classList.toggle('negative', this.#θ < 180), flipDelay || 0);
         E(this).set({'--knob-angle': this.#θ});
@@ -118,21 +119,29 @@ class Knob extends HTMLElement {
         value = Math.round(value / step) * step;
         return parseFloat(value.toFixed(`${step}`.split('.')[1]?.length ?? 0));
     }
-    #convert = {from: { 
+    convert = {from: { 
         value: value => (value - this.minV) / (this.maxV - this.minV) * (this.maxθ - this.minθ) + this.minθ,
         angle: angle => (angle - this.minθ) / (this.maxθ - this.minθ) * (this.maxV - this.minV) + this.minV
     }}
-    #snap () {
-        this.snap ??= this.get('snap') || [Math.max(0, this.minV)];
+    snap () {
+        this.#snap ??= this.get('snap') || [Math.max(0, this.minV)];
         this.value = typeof this.snap == 'number' ? 
             this.#round({step: this.snap}) : 
-            this.snap.reduce((diff, curr) => Math.abs(curr - this.#v) <= Math.abs(diff - this.#v) ? curr : diff);
+            this.#snap.reduce((diff, curr) => Math.abs(curr - this.#v) <= Math.abs(diff - this.#v) ? curr : diff);
     }
-    #edit () {
-        this.input.setAttribute('value', parseFloat(this.output.value));
-        this.input.step = this.step;
-        this.output.replaceChildren(this.input);
-        this.input.focus();
+    edit (state = 'begin') {
+        if (state == 'begin') {
+            this.input.setAttribute('value', this.value);
+            this.input.type = 'number';
+            this.input.step = this.step;
+            this.output.replaceChildren(this.input);
+            this.input.focus();
+        } else if (state == 'change') {
+            this.value = this.input.value;
+        } else if (state == 'finish') {
+            this.shadowRoot.append(this.input);
+            this.input.value === '' ? this.input.getAttribute('value') : this.edit('change');
+        }
     }
     #animate () {
         this.classList.add('animate');
