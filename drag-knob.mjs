@@ -86,19 +86,18 @@ class Knob extends HTMLElement {
     }
     get value () {return this.list?.[this.#v] ?? this.#v;}
     set value (v) {
-        let dragged;
         if (v == this.convert.from.angle) {
             v = this.round({value: this.convert.from.angle(this.#θ)});
             if (v === this.#v) return; 
-            this.#v = v; dragged = true;
+            this.#v = v;
         } else {
             this.symmetric && (this.#ov = this.#v);
             this.#v = v;
-            this.angle = this.convert.from.value;
+            this.angle = this.#convert.from.value;
         }
         this.#internals.setFormValue(this.value);
         this.output.Q('input') || (this.output.value = this.value + (this.unit || ''));
-        this.dispatchEvent(Object.assign(new InputEvent('input', {bubbles: true, composed: true}), {dragged}));
+        this.pause || this.dispatchEvent(new InputEvent('input', {bubbles: true}));
     }
     set angle (_) {
         let flipDelay;
@@ -109,27 +108,27 @@ class Knob extends HTMLElement {
             let PI = _;
             this.#θ = Math.max(this.minθ, Math.min(PI.$press.θ - PI.$drag.dy * (this.matches('.fine') ? .1 : 1), this.maxθ));
             (this.#θ == this.minθ || this.#θ == this.maxθ) && ([PI.$press.y, PI.$press.θ] = [PI.$drag.y, this.#θ]);
-            this.value = this.convert.from.angle;
+            this.value = this.#convert.from.angle;
         } 
         this.symmetric && setTimeout(() => this.classList.toggle('negative', this.#θ < 180), flipDelay || 0);
         E(this).set({'--knob-angle': this.#θ});
     }
-    round ({value, step} = {}) {
+    #round ({value, step} = {}) {
         value ??= this.#v, step ??= this.step;
         value = Math.round(value / step) * step;
         return parseFloat(value.toFixed(`${step}`.split('.')[1]?.length ?? 0));
     }
-    convert = {from: { 
+    #convert = {from: { 
         value: value => (value - this.minV) / (this.maxV - this.minV) * (this.maxθ - this.minθ) + this.minθ,
         angle: angle => (angle - this.minθ) / (this.maxθ - this.minθ) * (this.maxV - this.minV) + this.minV
     }}
-    #snap () {
+    snap () {
         this.snap ??= this.get('snap') || [Math.max(0, this.minV)];
         this.value = typeof this.snap == 'number' ? 
-            this.round({step: this.snap}) : 
+            this.#round({step: this.snap}) : 
             this.snap.reduce((diff, curr) => Math.abs(curr - this.#v) <= Math.abs(diff - this.#v) ? curr : diff);
     }
-    #edit () {
+    edit () {
         this.input.setAttribute('value', parseFloat(this.output.value));
         this.input.step = this.step;
         this.output.replaceChildren(this.input);
