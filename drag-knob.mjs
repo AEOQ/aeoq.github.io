@@ -80,11 +80,7 @@ class Knob extends HTMLElement {
     formResetCallback() {this.value = this.initialValue;}
     static formAssociated = true;
 
-    get (attr) {
-        if (this[attr] !== undefined)
-            return typeof this[attr] === 'function' ? null : this[attr];
-        return Knob.parse(this.getAttribute(attr));
-    }
+    get = attr => Knob.parse(this.getAttribute(attr))
     get value () {return this.list?.[this.#v] ?? this.#v;}
     set value (v) {
         if (v == this.convert.from.angle) {
