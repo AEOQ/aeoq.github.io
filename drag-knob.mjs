@@ -86,8 +86,8 @@ class Knob extends HTMLElement {
     }
     get value () {return this.list?.[this.#v] ?? this.#v;}
     set value (v) {
-        if (v == this.convert.from.angle) {
-            v = this.round({value: this.convert.from.angle(this.#θ)});
+        if (v == this.#convert.from.angle) {
+            v = this.#round({value: this.#convert.from.angle(this.#θ)});
             if (v === this.#v) return; 
             this.#v = v;
         } else {
@@ -101,9 +101,9 @@ class Knob extends HTMLElement {
     }
     set angle (_) {
         let flipDelay;
-        if (_ == this.convert.from.value) {
+        if (_ == this.#convert.from.value) {
             flipDelay = this.#animate();
-            this.#θ = Math.max(0, Math.min(this.convert.from.value(this.round()), 360));
+            this.#θ = Math.max(0, Math.min(this.#convert.from.value(this.#round()), 360));
         } else {
             let PI = _;
             this.#θ = Math.max(this.minθ, Math.min(PI.$press.θ - PI.$drag.dy * (this.matches('.fine') ? .1 : 1), this.maxθ));
@@ -122,13 +122,13 @@ class Knob extends HTMLElement {
         value: value => (value - this.minV) / (this.maxV - this.minV) * (this.maxθ - this.minθ) + this.minθ,
         angle: angle => (angle - this.minθ) / (this.maxθ - this.minθ) * (this.maxV - this.minV) + this.minV
     }}
-    snap () {
+    #snap () {
         this.snap ??= this.get('snap') || [Math.max(0, this.minV)];
         this.value = typeof this.snap == 'number' ? 
             this.#round({step: this.snap}) : 
             this.snap.reduce((diff, curr) => Math.abs(curr - this.#v) <= Math.abs(diff - this.#v) ? curr : diff);
     }
-    edit () {
+    #edit () {
         this.input.setAttribute('value', parseFloat(this.output.value));
         this.input.step = this.step;
         this.output.replaceChildren(this.input);
