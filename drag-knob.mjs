@@ -1,11 +1,6 @@
 import {A,E,O,Q} from 'https://aeoq.github.io/AEOQ.mjs';
 import PointerInteraction from 'https://aeoq.github.io/pointer-interaction/script.js';
-CSS.registerProperty({
-    name: "--knob-angle",
-    syntax: "<number>",
-    inherits: true,
-    initialValue: "180",
-});
+
 class Knob extends HTMLElement {
     #internals; #θ; #v; #ov; #snap;
     constructor(props = {}) {
