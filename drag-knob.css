@@ -117,8 +117,8 @@ output { /*no glow*/
     &::after {
         position: absolute; inset: calc(50% - var(--knob,65)*.5%);
         border-radius: 9em; background: var(--dark);
-        content: '·'; font-family: Arial, Helvetica, sans-serif; 
-        font-size: 1.5em; line-height: .4;
+        content: '.'; font-family: Arial, Helvetica, sans-serif; 
+        font-size: 1.5em; line-height: 0;
         color: var(--color); text-shadow: 0 0 .1em var(--color);
         box-shadow: 0 0 .4em rgba(0,0,0,.5);
         transform: scaleY(-1) rotate(calc(var(--knob-angle)*-1deg));
