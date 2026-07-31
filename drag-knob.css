@@ -1,7 +1,7 @@
 @property --knob-angle {
     syntax: "<number>";
     inherits: true;
-    initial-value: 180,
+    initial-value: 180;
 }
 :host {
     text-align: center;
