@@ -89,7 +89,7 @@ class Knob extends HTMLElement {
             this.#v = v;
         } else {
             this.symmetric && (this.#preV = this.#v);
-            this.#v = v;
+            this.#v = this.round({value: v});
             this.angle = this.convert.from.value;
         }
         this.#internals.setFormValue(this.value);
