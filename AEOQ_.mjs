@@ -1,53 +1,52 @@
-class A {
-  #arr; #obj;
-  constructor(...stuff) {
-    let { true: objs, false: others } = Object.groupBy(stuff, s => s && Object.getPrototypeOf(s) == Object.prototype);
-    this.#arr = [...others ?? []].flat();
-    this.#obj = Object.assign({}, ...objs ?? []);
-
-    return new Proxy(this, {
-      get: (target, p) =>
-        p === Symbol.iterator ? function* () { yield* target.#arr; } :
-        /^\d+$/.test(p) ? target.#arr[Number(p)] :
-        p in target.#obj ? target.#obj[p] :
-        p == 'length' ? target.#arr[p] : Reflect.get(target, p)
-      ,
-      set: (target, p, v) => 
-        /^\d+$/.test(p) ? (target.#arr[Number(p)] = v, true) :
-        typeof p === 'string' ? (target.#obj[p] = v, true) : Reflect.set(target, p, v)
-      ,
-      ownKeys: target => Object.keys(target.#obj),
-      getOwnPropertyDescriptor: (target, p) =>
-        p in target.#obj ? {
-          enumerable: true,
-          configurable: true
-        } : null
-    });
-  }
-  push(...objs) { return Object.assign(this, ...objs); }
-  static already(...stuff) {
-    let { true: already, false: others } = Object.groupBy(stuff, s => s instanceof A);
-    return already ? Object.assign(already[0], ...others ?? []) : new A(...stuff);
-  }
+class A extends Array {
+    constructor(...args) {
+        super();
+        this.append(...args);
+        return new Proxy(this, this.#proxy);
+    }
+    #proxy = {
+        ownKeys(target) {
+            return Reflect.ownKeys(target).filter(key => typeof key === 'symbol' || isNaN(Number(key)));
+        },
+        getOwnPropertyDescriptor(target, prop) {
+            const desc = Reflect.getOwnPropertyDescriptor(target, prop);
+            return typeof prop != 'string' || isNaN(Number(prop)) ? desc : desc ? {...desc, enumerable: false} : undefined;
+        },
+        get(target, prop, receiver) {
+            const value = Reflect.get(target, prop, receiver);
+            return typeof value === 'function' && prop in Array.prototype ?
+                (...p) => {
+                    const result = value.apply(receiver, p);
+                    return Array.isArray(result) && receiver !== result && !receiver.includes(result) ? 
+                        new A(result, {...receiver}) : result;
+                } : value;
+        }
+    }
+    append(...args) {
+        args.forEach(arg => {
+            Array.isArray(arg) ? super.push(...arg) : ['string', 'number'].includes(typeof arg) ? super.push(arg) : '';
+            (arg instanceof A || [null, Object.prototype].includes(Object.getPrototypeOf(arg))) && Object.assign(this, {...arg});
+        });
+    }
 }
-['map', 'filter'].forEach(f => A.prototype[f] = function (...p) { return new A([...this][f](...p), { ...this }); });
 
-const E = function (el, ...props) {
-    if (!el) return el == null ? undefined : new Text();
-    if (el instanceof Element || el instanceof Text)
-        return new.target ? (this.el = el) && this : new E(el);
-    if (el.includes('>'))
-        return (tags => tags.reverse().slice(1).reduce((tree, tag) => E(tag, tree), E(tags[0], ...props)))(el.split(/ ?> ?/));
+const E = function (tag, ...props) {
+    if (!tag) 
+        return tag == null ? undefined : new Text();
+    if (tag instanceof Node)
+        return new.target ? (this.el = tag) && this : new E(tag);
+    if (tag.includes('>')) {
+        let tags = tag.split(/ ?> ?/);
+        return tags.reverse().slice(1).reduce((child, tag) => E(tag, child), E(tags[0], ...props));
+    }
     let attrs;
-    [el, ...attrs] = el.split(/(?=[#.])/);
-    let {true: id, false: classList} = Object.groupBy(attrs, attr => attr.startsWith('#'));
-    el = E.SVG.includes(el) ? document.createElementNS('http://www.w3.org/2000/svg', el) : document.createElement(el);
-    return E(el).set(
-        el.tagName == 'svg' ? {xmlns: 'http://www.w3.org/2000/svg'} : {},
-        id?.[0].length > 1 ? {id: id[0].substring(1)} : {}, 
-        classList ? {classList: classList.filter(c => c.length > 1).map(c => c.substring(1))} : {},
-        ...props.map(prop => prop instanceof HTMLElement ? [prop] : prop)
-    );
+    [tag, ...attrs] = tag.split(/(?=[#.])/);
+    tag = E.SVG.includes(tag) ? document.createElementNS('http://www.w3.org/2000/svg', tag) : document.createElement(tag);
+    let {true: id, false: classList} = Object.groupBy(attrs, a => a.startsWith('#'));
+    return E(tag).set({
+        id: id?.[0].substring(1) ?? null, 
+        classList: classList?.filter(c => c.length > 1).map(c => c.substring(1)) ?? null,
+    }, ...props.map(prop => prop instanceof Node ? [prop] : prop));
 }
 Object.assign(E.prototype, {
     get (...props) {
@@ -62,18 +61,17 @@ Object.assign(E.prototype, {
         props = new A(...props);
         props.length && this.el.replaceChildren(...props.filter(el => el));
 
-        this.el.tagName == 'IMG' && props.push(
-            {alt: (this.el.alt || props.alt) ?? (this.el.src || props.src)?.match(/([^/.]+)(\.[^/.]+)$/)?.[1]}, 
-            props.onerror ? null : {onerror: ev => ev.target.remove()}
-        );
         Array.isArray(props.classList) && (props.classList = [...new Set(props.classList)].filter(c => c).join(' '));
-
-        let {true: vari, false: attr} = new O({...props}).groupBy(([a]) => a.includes('--'));
-        vari?.each(([a, v]) => this.el.style.setProperty(a, v));
-        attr?.each(([a, v]) => 
+        this.el.tagName == 'svg' && props.append({xmlns: 'http://www.w3.org/2000/svg'});
+        if (this.el.tagName == 'IMG') {
+            this.el.alt || (props.alt ||= (this.el.src || props.src)?.match(/([^/.]+)(\.[^/.]+)$/)?.[1]);
+            this.el.onerror ?? (props.onerror ??= ev => ev.target.remove());
+        }
+        Object.entries({...props}).forEach(([a, v]) => {
+            a.startsWith('--') ? this.el.style.setProperty(a, v) :
             typeof v == 'object' ? Object.assign(this.el[a], v) : 
-            this.el instanceof SVGElement && a != 'classList' ? this.el.setAttribute(a, v) : this.el[a] = v
-        );
+            !a.startsWith('#') && this.el[a] === undefined ? this.el.setAttribute(a, v) : this.el[a] = v
+        });
         return this.el;
     },
     contains ({x, y}) {
@@ -92,6 +90,7 @@ Object.assign(E, {
         'linearGradient', 'radialGradient', 'stop', 'pattern', 'clipPath', 'mask', 'filter',
         'image', 'animate', 'animateTransform', 'animateMotion'
     ],
+    F: (...children) => E(new DocumentFragment()).set(...children),
     link: ({rel, href, me, ...props}) => E('link', {
         rel: rel ?? 'stylesheet', ...props,
         href: me && location.hostname == "127.0.0.1" ? href.replace(/^(?:https?:)?\/\/[^\/]+/, '') : href,
@@ -99,15 +98,13 @@ Object.assign(E, {
     }),
     img: src => new Promise(res => E('img', {
         src, crossOrigin: 'anonymous', referrerPolicy: 'no-referrer', 
-        onload: function() {res(this)}, onerror: () => res(this.remove())
+        onload: function() {res(this)}, onerror: function() {res(this.remove())}
     })),
+    labels: labels => [labels].flat().map(l => E('label', [...[l].flat(), E('input', {...l})])),
     ul: lis => E('ul', lis.filter(li => li).map(li => E('li', li))),
     dl: (obj, attr = {}) => E('dl', attr, (obj instanceof O ? obj : new O(obj))
-        .flatMap(([dt, dds]) => [E('dt', dt), ...[dds].flat().map(dd => E('dd', dd instanceof HTMLElement ? [dd] : dd))])),
+        .flatMap(([dt, dds]) => [E('dt', dt), ...[dds].flat().map(dd => E('dd', dd))])),
 
-    fieldset: (obj, attr = {}) => E('fieldset', attr, (obj instanceof O ? obj : new O(obj))
-        .flatMap(([legend, labels]) => [E('legend', legend), ...labels])),
-    
     input (...stuff) {
         stuff = A.already(...stuff);
         let {input: order, label, ...other} = stuff;
@@ -200,10 +197,9 @@ class O extends Map {
 ['map','filter'].forEach(f => O.prototype[f] = function(...p) {return new O([...this][f](...p));});
 ['flatMap','every'].forEach(f => O.prototype[f] = function(...p) {return [...this][f](...p);});
 
-const Q = Node.prototype.Q = function(el, func) {
-    let els = this?.querySelectorAll?.(el) ?? document.querySelectorAll(el);
-    return typeof func == 'function' ? els.forEach(func) : Array.isArray(func) || els.length > 1 ? [...els] : els[0];
+const Q = Node.prototype.Q = function(selector, func) {
+    let nodes = this?.querySelectorAll?.(selector) ?? document.querySelectorAll(selector);
+    return typeof func == 'function' ? nodes.forEach(func) : Array.isArray(func) || nodes.length > 1 ? [...nodes] : nodes[0];
 }
 Node.prototype.sQ = function(...p) {return this.shadowRoot.Q(...p);}
-
-export {A,E,O,Q};
+export {A,E,O,Q}

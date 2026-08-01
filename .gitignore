@@ -3,3 +3,6 @@
 /output-meter
 /pointer-interaction
 /web-synth
+/node_modules
+/package-lock.json
+/package.json
