@@ -4,7 +4,7 @@ CSS.registerProperty({
     name: "--knob-angle",
     syntax: "<number>",
     inherits: true,
-    iniV: "180",
+    initialValue: "180",
 });
 class Knob extends HTMLElement {
     #internals; #θ; #v; #preV; #snap;
