@@ -4,10 +4,10 @@ CSS.registerProperty({
     name: "--knob-angle",
     syntax: "<number>",
     inherits: true,
-    initialValue: "180",
+    iniV: "180",
 });
 class Knob extends HTMLElement {
-    #internals; #θ; #v; #ov; #snap;
+    #internals; #θ; #v; #preV; #snap;
     constructor(props = {}) {
         super();
         Knob.isSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -66,18 +66,18 @@ class Knob extends HTMLElement {
             E(this).set({'--min': this.minθ ??= 90, '--count-1': this.list.length - 1});
             this.maxθ ??= 360 - this.minθ;
             [this.minV, this.maxV, this.step] = [0, this.list.length - 1, 1];
-            this.initialValue = Math.max(this.list.indexOf(value), 0);
+            this.iniV = Math.max(this.list.indexOf(value), 0);
         } else {
             E(this).set({'--min': this.minθ ??= 40 - (Knob.isSafari ? 2.5 : 0)});
             this.maxθ ??= 360 - this.minθ;
             [this.minV, this.maxV, this.step, this.unit] = range.split('/').map(v => Knob.parse(v));
             this.minV == this.maxV * -1 && (this.symmetric = true) && this.classList.add('symmetric');
-            this.initialValue = value ?? (this.minV === 0 ? 0 : this.maxV < 1 ? this.minV : Math.max(1, this.minV));
+            this.iniV = value ?? (this.symmetric || this.minV === 0 ? 0 : this.maxV < 1 ? this.minV : Math.max(1, this.minV));
         }
-        requestAnimationFrame(() => this.value = this.#v ?? this.initialValue);
+        requestAnimationFrame(() => this.value = this.#v ?? this.iniV);
         delete this.temp;
     }
-    formResetCallback() {this.value = this.initialValue;}
+    formResetCallback() {this.value = this.iniV;}
     static formAssociated = true;
 
     get = attr => Knob.parse(this.getAttribute(attr))
@@ -88,7 +88,7 @@ class Knob extends HTMLElement {
             if (v === this.#v) return; 
             this.#v = v;
         } else {
-            this.symmetric && (this.#ov = this.#v);
+            this.symmetric && (this.#preV = this.#v);
             this.#v = v;
             this.angle = this.convert.from.value;
         }
@@ -142,7 +142,7 @@ class Knob extends HTMLElement {
     #animate () {
         this.classList.add('animate');
         setTimeout(() => this.classList.remove('animate'), 500);
-        return this.symmetric && this.#ov != null ? 500 * cubicBezierTime(this.#ov / (this.#ov - this.#v)) : null;
+        return this.symmetric && this.#preV != null ? 500 * cubicBezierTime(this.#preV / (this.#preV - this.#v)) : null;
     }
     static parse (str) {
         try {return JSON.parse(str);} 
