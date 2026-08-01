@@ -42,7 +42,7 @@ circle { /*2px=100%*/
     }
     &#fill {
         stroke: var(--color); 
-        filter: drop-shadow(0 0 calc(var(--glow,4)/100*2px) var(--color));
+        filter: drop-shadow(0 0 calc(var(--glow,3)/100*2px) var(--color));
     
         :host(.symmetric) & {
             --sector-angle: calc(min(abs(var(--knob-angle) - 180), 180 - var(--min))); /*colored*/
@@ -69,7 +69,7 @@ link::before,output::before { /*4em=100%*/
 }
 link { /*4em=100% filter above mask*/ 
     position: relative;
-    filter: drop-shadow(0 0 calc(var(--glow,4)/100*4em) var(--color));
+    filter: drop-shadow(0 0 calc(var(--glow,3)/100*4em) var(--color));
     --max-deg: calc(var(--knob-angle) * 1deg);
 
     :host(.symmetric) &::before {
@@ -114,7 +114,7 @@ output { /*no glow*/
         border-radius: 9em; background: var(--dark);
         content: '.'; font-family: Arial, Helvetica, sans-serif; 
         font-size: 1.5em; line-height: 0;
-        color: var(--color); text-shadow: 0 0 .1em var(--color);
+        color: var(--color); text-shadow: 0 0 .2em var(--color);
         box-shadow: 0 0 .4em rgba(0,0,0,.5);
         transform: scaleY(-1) rotate(calc(var(--knob-angle)*-1deg));
     }
