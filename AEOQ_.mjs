@@ -20,11 +20,12 @@ class A extends Array {
     append(...args) {
         args.filter(arg => arg != null).forEach(arg => {
             const plain = [null, Object.prototype].includes(Object.getPrototypeOf(arg));
-            Array.isArray(arg) ? this.push(...arg) : !plain ? this.push(arg) : '';
+            Array.isArray(arg) ? super.push(...arg) : !plain ? super.push(arg) : ''; //
             (arg instanceof A || plain) && Object.assign(this, {...arg});
         });
         return this;
     }
+    push {this.append(...args)} //
     static #copying = new Set(['filter','slice','concat','map','flat','flatMap','with','toReversed','toSorted','toSpliced'])
 }
 
@@ -196,8 +197,8 @@ class O extends Map {
     append (...objs) {return this.#proxy.map(([k, v]) => [k, v + objs.reduce((sum, o) => sum + (o?.[k] ?? ''), '')])}
     prepend(...objs) {return this.#proxy.map(([k, v]) => [k, objs.reduce((sum, o) => (o?.[k] ?? '') + sum, '') + v])}
 
-    flatten(transformation) {return this.reshape(transformation)}
-    at(path) {return this.#proxy[path];}
+    flatten(transformation) {return this.reshape(transformation)}//
+    at(path) {return this.#proxy[path];}//
 }
 
 const Q = Node.prototype.Q = function(selector, func) {
