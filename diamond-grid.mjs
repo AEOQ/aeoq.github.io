@@ -1,4 +1,4 @@
-import {A,E,O,Q} from '../AEOQ.mjs';
+import {E,Q} from '../AEOQ_.mjs';
 const tagName = 'diamond-grid';
 Q('head').append(E('style', {id: tagName}, `
     ${tagName} .DG-textShaping {

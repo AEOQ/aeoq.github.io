@@ -54,7 +54,7 @@ Object.assign(E.prototype, {
         if (Array.isArray(props[0]))
             return props[0].map(p => this.get(p));
         let value = this.node.getAttribute(props[0]) || getComputedStyle(this.node).getPropertyValue(props[0]);
-        return value && isNaN(parseFloat(value)) ? value : parseFloat(value);
+        return isNaN(parseFloat(value)) ? value : parseFloat(value);
     },
     set (...props) {
         props = new A(...props);

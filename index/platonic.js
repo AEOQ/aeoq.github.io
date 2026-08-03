@@ -1,4 +1,4 @@
-import {A,E,O,Q} from '../AEOQ.mjs';
+import {E} from '../AEOQ_.mjs';
 class Polygon {
     constructor(n, stroke = 0, r = 1) {
         this.n = n;

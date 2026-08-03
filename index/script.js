@@ -1,4 +1,4 @@
-import {A,E,O,Q} from '../AEOQ.mjs';
+import {E,O,Q} from '../AEOQ_.mjs';window.E=E;
 import Polygon from "./platonic.js";
 const Knob = {
     init (knob) {
@@ -36,7 +36,7 @@ const BD =  {
         BD.diverter = diverter;
         BD.control = Q('drag-knob'), BD.meter = Q('meter');
     },
-    get angle() {return E(BD.diverter).get('--angle');},
+    get angle() {return E(BD.diverter).get('--angle') || 0;},
     set angle(angle) {E(BD.diverter).set({'--angle': angle + 'deg'})},
     spin (time) {
         if (Q('#bd.seeing:not(.blurred)')) {

@@ -1,4 +1,4 @@
-import {A,E,O,Q} from '../AEOQ.mjs';
+import {E} from '../AEOQ_.mjs';
 import Polygon from "./platonic.js";
 customElements.define('great-icosahedron', class extends HTMLElement {
     constructor() {
