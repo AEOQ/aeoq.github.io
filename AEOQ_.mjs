@@ -25,7 +25,7 @@ class A extends Array {
         });
         return this;
     }
-    push(...args) {this.append(...args)} //
+    push(...args) {return this.append(...args)} //
     static #copying = new Set(['filter','slice','concat','map','flat','flatMap','with','toReversed','toSorted','toSpliced'])
 }
 
