@@ -176,7 +176,7 @@ class O extends Map {
     let result = new O({});
     let enter = (current, oldPath = []) => {
       if (current && (current instanceof O || Object.getPrototypeOf(current) == Object.prototype)) {
-        new O(current).each(([key, value]) => enter(value, oldPath.push(key)));
+        new O(current).each(([key, value]) => enter(value, oldPath.concat(key)));
       } else {
         let newPath = transformation([...oldPath]).filter(k => k);
         newPath.some(k => k.includes('undefined')) && (newPath = oldPath);
