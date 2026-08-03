@@ -157,7 +157,8 @@ class O extends Map {
                 target.set(prop, value);
             return true;
         }
-    })
+    });
+    [Symbol.toPrimitive](type) {return type == 'string' && [...this.keys()].join('')}
     each(f) {this.forEach((v, k) => f([k, v]))}
     find(...targets) {
         if (targets.length === 1 && typeof targets[0] == 'function') 
