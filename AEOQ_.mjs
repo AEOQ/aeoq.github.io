@@ -19,8 +19,9 @@ class A extends Array {
     })
     append(...args) {
         args.filter(arg => arg != null).forEach(arg => {
-            Array.isArray(arg) ? this.push(...arg) : ['string', 'number'].includes(typeof arg) ? this.push(arg) : '';
-            (arg instanceof A || [null, Object.prototype].includes(Object.getPrototypeOf(arg))) && Object.assign(this, {...arg});
+            const plain = [null, Object.prototype].includes(Object.getPrototypeOf(arg));
+            Array.isArray(arg) ? this.push(...arg) : !plain ? this.push(arg) : '';
+            (arg instanceof A || plain) && Object.assign(this, {...arg});
         });
         return this;
     }
