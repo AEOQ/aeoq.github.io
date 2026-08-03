@@ -57,7 +57,7 @@ Object.assign(E.prototype, {
     },
     set (...props) {
         props = new A(...props);
-        props.length && this.node.replaceChildren(...props.filter(node => node));
+        props.length && this.node.replaceChildren(...props.filter(node => node != null));
 
         Array.isArray(props.classList) && (props.classList = [...new Set(props.classList)].filter(c => c).join(' '));
         this.node.tagName == 'svg' && props.append({xmlns: 'http://www.w3.org/2000/svg'});
