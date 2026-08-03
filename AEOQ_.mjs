@@ -197,7 +197,6 @@ class O extends Map {
     at(path) {return this.#proxy[path];}
 }
 
-const Node={prototype:{}};
 const Q = Node.prototype.Q = function(selector, func) {
     let nodes = this?.querySelectorAll?.(selector) ?? document.querySelectorAll(selector);
     return typeof func == 'function' ? nodes.forEach(func) : Array.isArray(func) || nodes.length > 1 ? [...nodes] : nodes[0];
