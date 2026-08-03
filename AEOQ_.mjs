@@ -18,7 +18,7 @@ class A extends Array {
         }
     })
     append(...args) {
-        args.forEach(arg => {
+        args.filter(arg => arg != null).forEach(arg => {
             Array.isArray(arg) ? this.push(...arg) : ['string', 'number'].includes(typeof arg) ? this.push(arg) : '';
             (arg instanceof A || [null, Object.prototype].includes(Object.getPrototypeOf(arg))) && Object.assign(this, {...arg});
         });
@@ -67,7 +67,7 @@ Object.assign(E.prototype, {
         Object.entries({...props}).forEach(([a, v]) => {
             a.startsWith('--') ? this.node.style.setProperty(a, v) :
             typeof v == 'object' ? Object.assign(this.node[a], v) : 
-            this.node instanceof SVGElement || this.node[a] === undefined ? this.node.setAttribute(a, v) : this.node[a] = v
+            this.node instanceof SVGElement && a != 'classList' || this.node[a] === undefined ? this.node.setAttribute(a, v) : this.node[a] = v
         });
         return this.node;
     },
