@@ -67,7 +67,7 @@ Object.assign(E.prototype, {
         Object.entries({...props}).forEach(([a, v]) => {
             a.startsWith('--') ? this.node.style.setProperty(a, v) :
             typeof v == 'object' ? Object.assign(this.node[a], v) : 
-            !a.startsWith('#') && this.node[a] === undefined ? this.node.setAttribute(a, v) : this.node[a] = v
+            this.node instanceof SVGElement || this.node[a] === undefined ? this.node.setAttribute(a, v) : this.node[a] = v
         });
         return this.node;
     },
