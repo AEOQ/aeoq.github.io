@@ -119,7 +119,8 @@ Object.assign(E, {
 class O extends Map {
     constructor(...objs) {
         super();
-        objs.flatMap(obj => [...Symbol.iterator in obj ? obj : Object.entries(obj)]).forEach(pair => this.set(...pair));
+        objs.flatMap(obj => [...Symbol.iterator in obj ? obj : Object.entries(obj)])
+            .forEach(([k, v]) => this.set(k, v && Object.getPrototypeOf(v) == Object.prototype ? new O(v) : v));
         return this.#proxy;
     }
     #plain;
