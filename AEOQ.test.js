@@ -1,4 +1,4 @@
-import {A,E,O,Q} from './AEOQ_.mjs'; 
+import {A,E,O,Q} from './AEOQ.mjs'; 
 
 describe('Class A (Associative Array)', () => {
     let aa;

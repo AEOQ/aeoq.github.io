@@ -1,4 +1,4 @@
-import {E,O,Q} from '../AEOQ_.mjs';window.E=E;
+import {E,O,Q} from '../AEOQ.mjs';
 import Polygon from "./platonic.js";
 const Knob = {
     init (knob) {

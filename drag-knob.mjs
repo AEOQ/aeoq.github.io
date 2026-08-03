@@ -1,4 +1,4 @@
-import {E} from 'https://aeoq.github.io/AEOQ_.mjs';
+import {E} from 'https://aeoq.github.io/AEOQ.mjs';
 import PointerInteraction from 'https://aeoq.github.io/pointer-interaction/script.js';
 CSS.registerProperty({
     name: "--knob-angle",
