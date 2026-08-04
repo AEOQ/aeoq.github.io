@@ -18,7 +18,7 @@ customElements.define(tagName, class extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({mode: 'open'}).append(
-            E.link({href: 'https://aeoq.github.io/diamond-grid.css', me: true}),
+            E('link', {href: 'https://aeoq.github.io/diamond-grid.css', me: true}),
             E('slot')
         );
     }
