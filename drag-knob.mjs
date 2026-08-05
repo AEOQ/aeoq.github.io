@@ -126,7 +126,7 @@ class Knob extends HTMLElement {
     }
     edit (state = 'begin') {
         if (state == 'begin') {
-            this.input.setAttribute('value', this.value);
+            this.input.setAttribute('value', this.input.value = this.value);
             this.input.type = 'number';
             this.input.step = this.step;
             this.output.replaceChildren(this.input);
