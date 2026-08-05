@@ -97,8 +97,9 @@ class Knob extends HTMLElement {
         this.pause || this.dispatchEvent(new InputEvent('input', {bubbles: true}));
     }
     set angle (_) {
+        let delay;
         if (_ == this.convert.from.value) {
-            this.#animate();
+            delay = this.#animate();
             this.#θ = Math.max(0, Math.min(this.convert.from.value(this.#round()), 360));
         } else {
             let PI = _;
@@ -106,7 +107,7 @@ class Knob extends HTMLElement {
             (this.#θ == this.minθ || this.#θ == this.maxθ) && ([PI.$press.y, PI.$press.θ] = [PI.$drag.y, this.#θ]);
             this.value = this.convert.from.angle;
         } 
-        this.symmetric && setTimeout(() => this.classList.toggle('negative', this.#θ < 180), this.#animate.delay || 0);
+        this.symmetric && setTimeout(() => this.classList.toggle('negative', this.#θ < 180), delay || 0);
         E(this).set({'--knob-angle': this.#θ});
     }
     #round ({value, step} = {}) {
@@ -141,7 +142,7 @@ class Knob extends HTMLElement {
     #animate () {
         this.classList.add('animate');
         setTimeout(() => this.classList.remove('animate'), 500);
-        this.#animate.delay = this.symmetric && this.#preV != null ? 500 * cubicBezierTime(this.#preV / (this.#preV - this.#v)) : null;
+        return this.symmetric && this.#preV != null ? 500 * cubicBezierTime(this.#preV / (this.#preV - this.#v)) : null;
     }
     static parse (str) {
         try {return JSON.parse(str);} 
