@@ -1,0 +1,48 @@
+:host([hidden]),::slotted([hidden]) {display: none !important;}
+
+dialog[open] {
+    width: 100%; max-width: 100%; min-height: max(100%, 100dvh); max-height: max(100%, 100dvh);
+    padding: 4rem 0 0 0; margin: 0; box-sizing: border-box;
+    border: none;
+    background:#000000ee;
+
+    &,slot {
+        scrollbar-width: thin; scrollbar-color: rgba(127, 127, 127, .9) transparent;
+    }
+}
+form {
+    position: fixed; top: 0; z-index: 1;
+    width: 100%; height: 4rem;
+    display: flex;
+    background: rgba(90, 90, 90, .9);
+    font-size: 1.25em; color: white;
+    text-align: center; line-height: 4rem;
+
+    button {
+        all: unset; user-select: none;
+        cursor: pointer;
+        padding: 0 .5rem;
+
+        &.close {flex-grow: 1;}
+        &:not(.close) {filter: drop-shadow(0 0 .1em white);}
+    }
+    &:not(:has(~figure)) button:not(.close) {display: none;}
+}
+figure {
+    margin: .5rem 0;
+    font-size: calc(var(--f, 1)*1em);
+
+    slot {
+        display: flex; gap: 0 .5rem;
+        overflow: scroll hidden !important;
+
+        &.PI-dragged {pointer-events: none;}
+    }
+}
+::slotted(img) {
+    user-select: none; -webkit-user-drag: none;
+}
+::slotted(:not(img)) {
+    margin: 1em auto;
+    color: white;
+}
