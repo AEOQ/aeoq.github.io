@@ -31,16 +31,17 @@ customElements.define(tagName, class extends HTMLElement {
         this.hidden = false;
         new ResizeObserver(([entry]) => {
             let newWidth = entry.borderBoxSize[0].inlineSize;
-            if (!newWidth || newWidth === this.#oldWidth) return;
-            this.#rearrange();
+            if (!newWidth || Math.abs(newWidth - this.#oldWidth) < 1) return;
+            this.#arrange();
             this.#oldWidth = newWidth;
         }).observe(this);
-        new MutationObserver(() => this.#rearrange()).observe(this, {attributeFilter: ['hidden'], subtree: true});
+        new MutationObserver(() => this.#arrange())
+        .observe(this, {attributeFilter: ['hidden', 'style'], childList: true, subtree: true});
     }
     #shapeText = () => [...this.children].forEach(el => 
         el.matches('img,:has(.DG-textShaping)') || el.prepend(E('span.DG-textShaping'), E('span.DG-textShaping'))
     );
-    #rearrange () {
+    #arrange () {
         let items = [...this.children];
         items.forEach(item => item.classList.remove('DG-left','DG-right','DG-center','DG-next'));
         items = items.filter(item => !item.hidden);
