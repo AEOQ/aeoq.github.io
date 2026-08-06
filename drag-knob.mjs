@@ -99,7 +99,7 @@ class Knob extends HTMLElement {
     set angle (_) {
         let delay;
         if (_ == this.convert.from.value) {
-            delay = this.#animate();
+            delay = Math.round(this.#animate());
             this.#θ = Math.max(0, Math.min(this.convert.from.value(this.#round()), 360));
         } else {
             let PI = _;
@@ -107,7 +107,7 @@ class Knob extends HTMLElement {
             (this.#θ == this.minθ || this.#θ == this.maxθ) && ([PI.$press.y, PI.$press.θ] = [PI.$drag.y, this.#θ]);
             this.value = this.convert.from.angle;
         } 
-        this.symmetric && delay > 1 && setTimeout(() => this.classList.toggle('negative', this.#θ < 180), delay || 0);
+        this.symmetric && setTimeout(() => this.classList.toggle('negative', this.#θ < 180), delay || 0);
         E(this).set({'--knob-angle': this.#θ});
     }
     #round ({value, step} = {}) {
