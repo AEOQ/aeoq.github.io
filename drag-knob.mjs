@@ -93,9 +93,9 @@ class Knob extends HTMLElement {
             this.angle = this.convert.from.value;
         }
         this.#internals.setFormValue(this.value);
-        this.output.Q('input') || (this.output.value = this.#round() + (this.unit || ''));
         this.pauseEvent || this.dispatchEvent(new InputEvent('input', {bubbles: true}));
-    }
+        setTimeout(() => this.output.Q('input') || (this.output.value = this.#round() + (this.unit || '')));
+	}
     set angle (_) {
         let delay;
         if (_ == this.convert.from.value) {
