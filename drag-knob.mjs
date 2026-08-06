@@ -127,16 +127,17 @@ class Knob extends HTMLElement {
     }
     edit (state = 'begin') {
         if (state == 'begin') {
-            this.input.setAttribute('value', this.input.value = this.value);
-            this.input.type = 'number';
-            this.input.step = this.step;
-            this.output.replaceChildren(this.input);
+            this.output.replaceChildren(E(this.input).set({
+				type: 'number',
+				value: this.value,
+				step: this.step,
+			}));
             this.input.focus();
         } else if (state == 'change') {
             this.value = this.input.value;
         } else if (state == 'finish') {
             this.shadowRoot.append(this.input);
-            this.input.value === '' ? this.input.getAttribute('value') : this.edit('change');
+            this.input.value === '' || this.edit('change');
         }
     }
     #animate () {
