@@ -42,8 +42,8 @@ class Knob extends HTMLElement {
         this.setup();
         this.hidden = false;
         E(this.sQ('input')).set({
-            onchange: ev => this.edit('change'),
-            onblur: ev => this.edit('finish'),
+            onchange: () => this.value = this.input.value || this.value,
+            onblur: () => this.shadowRoot.append(this.input),
             onkeydown: ev => ev.key == 'Enter' ? ev.target.blur() : '',
         });
         this.addEventListener('contextmenu', ev => ev.preventDefault());
@@ -89,7 +89,7 @@ class Knob extends HTMLElement {
             this.#v = v;
         } else {
             this.symmetric && (this.#preV = this.#v);
-            this.#v = v;
+            this.#v = parseFloat(v);
             this.angle = this.convert.from.value;
         }
         this.#internals.setFormValue(this.value);
@@ -125,19 +125,13 @@ class Knob extends HTMLElement {
             this.#round({step: this.#snap}) : 
             this.#snap.reduce((diff, curr) => Math.abs(curr - this.#v) <= Math.abs(diff - this.#v) ? curr : diff);
     }
-    edit (state = 'begin') {
-        if (state == 'begin') {
-            this.output.replaceChildren(E(this.input).set({
-				type: 'number',
-				value: this.value,
-				step: this.step,
-			}));
-            this.input.focus();
-        } else if (state == 'change') {
-            this.input.value && (this.value = this.input.valueAsNumber);
-        } else if (state == 'finish') {
-            this.shadowRoot.append(this.input);
-        }
+    edit () {
+		this.output.replaceChildren(E(this.input).set({
+			type: 'number',
+			value: this.value,
+			step: this.step,
+		}));
+		this.input.focus();
     }
     #animate () {
         this.classList.add('animate');
