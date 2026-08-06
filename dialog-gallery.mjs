@@ -30,10 +30,9 @@ customElements.define(tagName, class extends HTMLElement {
         }
     }
     #arrange() {
+        this.dialog.Q('figure', []).length === 0 && !this.sQ('slot') && this.dialog.append(E('slot'));
         let figures = this.Q('figure', []);
         if (figures.length === 0) return;
-        if (this.dialog.Q('figure', []).length === 0) 
-            return this.dialog.append(E('slot'));
         
         this.Q('figure', []).forEach((fig, i) => {
             this.append(...[...fig.children].map(img => E(img).set({slot: `slot-${this.#counter + i}`})));
