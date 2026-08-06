@@ -134,11 +134,9 @@ class Knob extends HTMLElement {
 			}));
             this.input.focus();
         } else if (state == 'change') {
-            this.value = this.input.valueAsNumber;
+            this.input.value && (this.value = this.input.valueAsNumber);
         } else if (state == 'finish') {
             this.shadowRoot.append(this.input);
-            this.input.value ||= this.value;
-			this.edit('change');
         }
     }
     #animate () {
