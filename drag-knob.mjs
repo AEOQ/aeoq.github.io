@@ -41,10 +41,10 @@ class Knob extends HTMLElement {
     connectedCallback() {
         this.setup();
         this.hidden = false;
-        E(this.sQ('input')).set({
+        E(this.input).set({
             onchange: () => this.value = this.input.value || this.value,
-            onblur: () => this.shadowRoot.append(this.input),
-            onkeydown: ev => ev.key == 'Enter' ? ev.target.blur() : '',
+            onblur: () => this.shadowRoot.appendChild(this.input).onchange(),
+            onkeydown: ev => ev.key == 'Enter' ? this.input.blur() : '',
         });
         this.addEventListener('contextmenu', ev => ev.preventDefault());
         PointerInteraction.events([[this, {
