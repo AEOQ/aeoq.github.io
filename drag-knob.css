@@ -122,6 +122,7 @@ output { /*no glow*/
         width: 50%;
         text-align: center;
         appearance: none; border: none; outline: none;
+        border-radius: 9em;
         padding: 0 .1em;
         transform: translateY(.6em);
     }
