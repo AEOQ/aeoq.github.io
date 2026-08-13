@@ -7,7 +7,7 @@ CSS.registerProperty({
     initialValue: "180",
 });
 class Knob extends HTMLElement {
-    #internals; #θ; #v; #preV; #snap;
+    #internals; #θ; #v; #snap;
     constructor(props = {}) {
         super();
         Knob.isSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -48,13 +48,17 @@ class Knob extends HTMLElement {
         });
         this.addEventListener('contextmenu', ev => ev.preventDefault());
         PointerInteraction.events([[this, {
-            press: PI => (PI.$press.θ = this.#θ, this.press?.(PI)),
-            drag: PI => (this.output.Q('input') || Math.abs(PI.$drag.dy) >= 1 && (this.angle = PI), this.drag?.(PI)),
-            lift: PI => this.lift?.(PI),
+            press: PI => (this.#press(), this.press?.(PI)),
+            drag: PI => (this.#drag(PI), this.drag?.(PI)),
+            lift: PI => (this.#lift(), this.lift?.(PI)),
             click: this.list ? null : click => click.for(2).to(() => this.snap()),
             hold: this.list ? null : hold => hold.for(1).to(() => this.edit())
         }]]);
 	}
+    #press = () => [this.#press.v, this.#press.θ] = [this.#v, this.#θ]
+    #drag = PI => this.output.Q('input') || Math.abs(PI.$drag.dy) >= 1 && (this.angle = PI)
+    #lift = () => this.#press.v != null && this.#press.v !== this.#v && setTimeout(() => this.#dispatch('change'))
+    #dispatch = type => this.dispatchEvent(new (type == 'input' ? InputEvent : Event)(type, {bubbles: true}))
     setup (attrs = this.temp) {
         let range = attrs.range || this.get('range') || '0/100/.01';
         let value = attrs.value ?? this.get('value');
@@ -87,13 +91,14 @@ class Knob extends HTMLElement {
             v = this.#round({value: this.convert.from.angle(this.#θ)});
             if (v === this.#v) return; 
             this.#v = v;
-        } else {
-            this.symmetric && (this.#preV = this.#v);
+        } else { // Enter directly: Dispatch input to show output
+            this.#press();
             this.#v = parseFloat(v);
             this.angle = this.convert.from.value;
+            this.pauseEvent || this.#lift();
         }
         this.#internals.setFormValue(this.value);
-        this.pauseEvent || this.dispatchEvent(new InputEvent('input', {bubbles: true}));
+        this.pauseEvent || this.#dispatch('input');
         setTimeout(() => this.output.Q('input') || (this.output.value = this.#round() + (this.unit || '')));
 	}
     set angle (_) {
@@ -103,8 +108,8 @@ class Knob extends HTMLElement {
             this.#θ = Math.max(0, Math.min(this.convert.from.value(this.#round()), 360));
         } else {
             let PI = _;
-            this.#θ = Math.max(this.minθ, Math.min(PI.$press.θ - PI.$drag.dy * (this.matches('.fine') ? .1 : 1), this.maxθ));
-            (this.#θ == this.minθ || this.#θ == this.maxθ) && ([PI.$press.y, PI.$press.θ] = [PI.$drag.y, this.#θ]);
+            this.#θ = Math.max(this.minθ, Math.min(this.#press.θ - PI.$drag.dy * (this.matches('.fine') ? .1 : 1), this.maxθ));
+            (this.#θ == this.minθ || this.#θ == this.maxθ) && ([PI.$press.y, this.#press.θ] = [PI.$drag.y, this.#θ]);
             this.value = this.convert.from.angle;
         } 
         this.symmetric && setTimeout(() => this.classList.toggle('negative', this.#θ < 180), delay || 0);
@@ -136,7 +141,7 @@ class Knob extends HTMLElement {
     #animate () {
         this.classList.add('animate');
         setTimeout(() => this.classList.remove('animate'), 500);
-        return this.symmetric && this.#preV != null ? 500 * cubicBezierTime(this.#preV / (this.#preV - this.#v)) : null;
+        return this.symmetric && this.#press.v != null ? 500 * cubicBezierTime(this.#press.v / (this.#press.v - this.#v)) : null;
     }
     static parse (str) {
         try {return JSON.parse(str);} 
