@@ -39,3 +39,6 @@
     [...new FormData(document.forms[0])]
 </button>
 <input>
+<script>
+    document.forms[0].onchange = document.forms[1].onchange = console.log;
+</script>
