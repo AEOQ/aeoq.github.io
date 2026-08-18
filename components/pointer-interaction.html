@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<title>Pointer Interaction</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+    *:has(>i) {all: unset; display: flex; gap: .5em;}
+    i {
+        min-width: 3rem; min-height: 3rem; max-height: 3rem; display: inline-block;
+        background: var(--bg,silver);
+        border: .2rem solid; box-sizing: border-box;
+
+        b {display: inline-block; font-size: 2em; transform: rotate(-45deg);}
+    }
+    section {
+        padding: 3rem;
+        width: 12rem;
+        position: relative;
+        overflow: hidden;
+
+        &::after {
+            content: '';
+            position: absolute; 
+            transform: translate(-50%, -50%); top: 50%; left: 50%;
+            width: 3rem; height: 3rem;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, .5);
+            pointer-events: none;
+        }
+        div {
+            width: 3rem; height: 3rem;
+            position: relative;
+            margin: auto;
+
+            menu {
+                position: absolute;
+                left: 50%; top: 0; transform: translateX(-50%);
+                z-index: 0 !important;
+            }
+        }
+    }
+    nav {
+        display:inline-flex; gap:.5em; flex-direction: column;
+        transform:translateY(calc(-100% + 3em));
+        margin-bottom:-13em;
+
+        &::after,a {
+            width:3em; height:3em;
+            background:lightcoral;
+        } 
+    }
+
+    #stock {
+        padding:2em 0;
+    }
+    .zone {
+        background:silver;
+        min-height:5em;
+        padding:1em 0; margin:5em 0;
+        flex-wrap:wrap;
+    }
+    .red {border-color:red;}
+    .lime {border-color:lime;}
+    .blue {border-color:blue;}
+    .aqua {border-color:aqua;}
+    .magenta {border-color:magenta;}
+    .yellow {border-color:yellow;}
+    .PI-target {background:lightgoldenrodyellow;}
+    .PI-selected {background: yellow;}
+    .PI-reached {outline:.2em solid chartreuse;}
+    .red.PI-target {background:hsl(var(--hue,0),100%,50%);}
+    .red.held {background:green;}
+    .PI-receiving {background:chartreuse;}
+    div:has(.zone) {padding:1em; background: gray;}
+</style>
+
+<nav><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i></nav>
+<section><div>
+    <menu><i>1</i><i>2</i><i>3</i><i>4</i></menu>
+</div></section>
+<output></output>
+<custom-menu></custom-menu>
+<pre>
+    '.lime': {
+        drag: PI => PI.drag.to.translate(),
+        drop: {onto: '.zone,div'},
+        lift: (PI,_,onto) =>  PI.lift.to.revert()
+    },
+    '.blue': {
+        drop: { onto: '.zone' },
+        drag: { x: false, y: { min: PI => PI.$drag.ty - PI.target.getBoundingClientRect().top - scrollY } },
+        lift: PI => PI.lift.to.clone()
+    },
+    '.magenta,.zone i': {
+        drop: { onto: 'i' },
+        lift: PI => PI.lift.to.swap()
+    },
+    '.aqua,.zone i': {
+        drop: { onto: '.zone' },
+        lift: PI => PI.lift.to.transfer()
+    },
+    '.yellow': {
+        click: click => click
+            .for(2).to((_, target) => target.style.transform = null).abort()
+            .for(3).to((_, target) => target.style.borderRadius = '9em')
+            .for(2).to((_, target) => target.style.color = 'blue'),
+    },
+    '.red': {
+        hold: hold => hold
+            .for(0.5).to(PI => PI.target.classList.add('held'))
+            .for(1.5).to(PI => PI.target.style.background = 'black'),
+        drop: { onto: '.zone' },
+        drag: PI => PI.target.style.setProperty('--hue', PI.$drag.x - PI.$press.x),
+        lift: PI => PI.target.matches('.held') && PI.lift.to.clone()
+    },
+</pre>
+<ul id="stock"></ul>
+<h2>Zone 1</h2>
+<ul class="zone"></ul>
+<h2>Zone 2</h2>
+<div><ul class="zone"></ul></div>
+<h2>Zone 3</h2>
+<ul class="zone"></ul>
+
+<script type="module">
+import {A,E,O,Q} from '../AEOQ.mjs';window.E=E;
+customElements.define('custom-menu', class extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({mode: 'open'}).replaceChildren(
+            E('style', ':host {display:block} span {font-size:2em}'),
+            'Drag to reorder', E('slot'),
+            ...[...Array(3)].map((_, i) => E('span', i+3))
+        );
+        this.append(E('style', 'custom-menu span {font-size:2em}'), ...[...Array(3)].map((_, i) => E('span', i)))
+    }
+});
+for (let i = 0; i <= 50; i++) Q('#stock').append(
+    E(`i.${['red','lime','blue','aqua','magenta','yellow'][Math.floor(Math.random()*6)]}`, 
+        {style: {transform: `translateY(${Math.random()*20-5}px) rotate(45deg)`}},
+        E('b', `${i}`),
+    ));
+
+let navMax = Q('nav').getBoundingClientRect().y*-1;
+let spans = [...Q('custom-menu span'), ...Q('custom-menu').sQ('span')];
+let menuMax = Q('menu').parentElement.getBoundingClientRect().x - Q('menu').getBoundingClientRect().x;
+
+import PointerInteraction from '../pointer-interaction.mjs';
+PointerInteraction.events(new O([
+    [spans, { drop: { onto: spans }, lift: PI => PI.lift.to.swap() }],
+    [Q('#stock'), { scroll: { x: true } }],
+    [Q('menu'), {
+        drag: PI => {
+            PI.drag.to.translate({ y: false, x: { max: menuMax, min: -menuMax } }),
+            PI.drag.to.select({ x: PI.target.parentElement.offsetLeft+PI.target.parentElement.offsetWidth/2 }).from();
+        },
+        lift: (PI, _, selected) => Q('output').value = selected?.innerText
+    }],
+    [Q('nav'), {
+        drag: PI => {
+            PI.drag.to.translate({ x: false, y: { max : navMax } });
+            PI.drag.to.select({ y: 0 }).from([...PI.target.children].filter(node => !node.matches(':has(.PI-selected)')));
+        },
+        lift: (PI, _, selected) => Q('output').value = selected?.innerText
+    }]
+], {
+    '.lime': {
+        drag: PI => PI.drag.to.translate(),
+        drop: { onto: '.zone,div' },
+        lift: (PI, _, onto) => PI.lift.to.revert()
+    },
+    '.blue': {
+        drop: { onto: '.zone' },
+        drag: { x: false, y: { min: PI => PI.$drag.ty - PI.target.getBoundingClientRect().top - scrollY } },
+        lift: PI => PI.lift.to.clone()
+    },
+    '.magenta,.zone i': {
+        drop: { onto: 'i' },
+        lift: PI => PI.lift.to.swap()
+    },
+    '.aqua,.zone i': {
+        drop: { onto: '.zone' },
+        lift: PI => PI.lift.to.transfer()
+    },
+    '.yellow': {
+        click: click => click
+            .for(2).to((_, target) => target.style.transform = null).abort()
+            .for(3).to((_, target) => target.style.borderRadius = '9em')
+            .for(2).to((_, target) => target.style.color = 'blue'),
+    },
+    '.red': {
+        hold: hold => hold
+            .for(0.5).to(PI => PI.target.classList.add('held'))
+            .for(1.5).to(PI => PI.target.style.background = 'black'),
+        drop: { onto: '.zone' },
+        drag: PI => PI.target.style.setProperty('--hue', PI.$drag.x - PI.$press.x),
+        lift: PI => PI.target.matches('.held') && PI.lift.to.clone()
+    },
+}));
+</script>
