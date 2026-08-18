@@ -58,6 +58,7 @@ class Knob extends HTMLElement {
     #press = () => [this.#press.v, this.#press.θ] = [this.#v, this.#θ]
     #drag = PI => this.output.Q('input') || Math.abs(PI.$drag.dy) >= 1 && (this.angle = PI)
     #lift = () => this.#press.v != null && this.#press.v !== this.#v && setTimeout(() => this.#dispatch('change'))
+    #dispatch = type => this.dispatchEvent(new (type == 'input' ? InputEvent : Event)(type, {bubbles: true}))
     setup (attrs = this.temp) {
         let range = attrs.range || this.get('range') || '0/100/.01';
         let value = attrs.value ?? this.get('value');
@@ -69,18 +70,18 @@ class Knob extends HTMLElement {
             E(this).set({'--min': this.minθ ??= 90, '--count-1': this.list.length - 1});
             this.maxθ ??= 360 - this.minθ;
             [this.minV, this.maxV, this.step] = [0, this.list.length - 1, 1];
-            this.iniV = Math.max(this.list.indexOf(value), 0);
+            this.initialValue = Math.max(this.list.indexOf(value), 0);
         } else {
             E(this).set({'--min': this.minθ ??= 40 - (Knob.isSafari ? 2.5 : 0)});
             this.maxθ ??= 360 - this.minθ;
             [this.minV, this.maxV, this.step, this.unit] = range.split('/').map(v => Knob.parse(v));
             this.minV == this.maxV * -1 && (this.symmetric = true) && this.classList.add('symmetric');
-            this.iniV = value ?? (this.symmetric || this.minV === 0 ? 0 : this.maxV < 1 ? this.minV : Math.max(1, this.minV));
+            this.initialValue = value ?? (this.symmetric || this.minV === 0 ? 0 : this.maxV < 1 ? this.minV : Math.max(1, this.minV));
         }
-        requestAnimationFrame(() => this.value = this.#v ?? this.iniV);
+        requestAnimationFrame(() => this.value = this.#v ?? this.initialValue);
         delete this.temp;
     }
-    formResetCallback() {this.value = this.iniV;}
+    formResetCallback() {this.value = this.initialValue;}
     static formAssociated = true;
 
     get = attr => Knob.parse(this.getAttribute(attr))
@@ -92,7 +93,7 @@ class Knob extends HTMLElement {
             this.#v = v;
         } else { // Enter directly: Dispatch input to show output
             this.#press();
-            this.#v = parseFloat(v);
+            this.#v = isNaN(parseFloat(v)) ? this.initialValue : parseFloat(v);
             this.angle = this.convert.from.value;
             this.pauseEvent || this.#lift();
         }
@@ -137,7 +138,6 @@ class Knob extends HTMLElement {
 		}));
 		this.input.focus();
     }
-    #dispatch = type => this.dispatchEvent(new (type == 'input' ? InputEvent : Event)(type, {bubbles: true}))
     #animate () {
         this.classList.add('animate');
         setTimeout(() => this.classList.remove('animate'), 500);
