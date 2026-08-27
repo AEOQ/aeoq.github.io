@@ -24,7 +24,7 @@ class DG extends HTMLElement {
     #W; #w; #g;
     arrange (W, g = E(this).get('gap')) {
         let nodes = [...this.children].filter(node => node.offsetWidth);
-        let w = nodes[0].offsetWidth;
+        let w = nodes[0]?.offsetWidth;
         if (!nodes.length || !W && !this.#W || W === this.#W && w === this.#w && g === this.#g) return;
         nodes.forEach(node => {
             node.classList.remove('DG-left', 'DG-right', 'DG-center', 'DG-next');
