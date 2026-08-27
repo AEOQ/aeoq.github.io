@@ -14,7 +14,7 @@
     }
     ::slotted(.DG-left) {--factor: -1;}
     ::slotted(.DG-right) {--factor: 1;}
-    ::slotted(.DG-center) {--factor: 2}
-    ::slotted(.DG-next) {grid-column: 1}
+    ::slotted(.DG-center) {--factor: 2;}
+    ::slotted(.DG-next) {grid-column: 1;}
 }
 :host([hidden]),::slotted([hidden]) {display: none !important;}
