@@ -23,29 +23,27 @@ class DG extends HTMLElement {
     })
     #W; #w; #g;
     arrange (W, g = E(this).get('gap')) {
-        let items = [...this.children];
-        let w = items[0].offsetWidth;
-        if (!W && !this.#W || W === this.#W && w === this.#w && g === this.#g) return;
-        items.forEach(node => {
+        let nodes = [...this.children].filter(node => node.offsetWidth);
+        let w = nodes[0].offsetWidth;
+        if (!nodes.length || !W && !this.#W || W === this.#W && w === this.#w && g === this.#g) return;
+        nodes.forEach(node => {
             node.classList.remove('DG-left', 'DG-right', 'DG-center', 'DG-next');
             node.matches('img,:has(.DG-textShaping)') || node.prepend(E('span.DG-textShaping'), E('span.DG-textShaping'));
             DG.ReOb.observe(node);
         });
-        items = items.filter(node => !node.hidden && node.style.display != 'none');
-        if (!items.length) return;
 
         this.#w = w, this.#g = g;
         W ? this.#W = W : W = this.#W;
         let more = Math.floor((W + g) / (w + g)),
             less = Math.floor((2 * W - w + g) / 2 / (w + g));
         if (more === less)
-            return items.forEach((node, i) => node.classList.add(Math.ceil((i + 1) / more) % 2 === 0 ? 'DG-right' : 'DG-left'));
+            return nodes.forEach((node, i) => node.classList.add(Math.ceil((i + 1) / more) % 2 === 0 ? 'DG-right' : 'DG-left'));
 
         let n = 1, i;
-        while (items[i = (more + less) * n - less]) {
+        while (nodes[i = (more + less) * n - less]) {
             let j = 0;
-            while (j <= more - 1 && items[i + j]) {
-                items[i + j].classList.add(j < more - 1 ? 'DG-center' : 'DG-next');
+            while (j <= more - 1 && nodes[i + j]) {
+                nodes[i + j].classList.add(j < more - 1 ? 'DG-center' : 'DG-next');
                 j++;
             }
             n++;
