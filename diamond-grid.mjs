@@ -3,7 +3,7 @@ class DG extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({mode: 'open'}).append(
-            E('link', {rel: 'stylesheet',href: '../diamond-grid.css', me: true}),
+            E('link', {rel: 'stylesheet',href: 'https://aeoq.github.io/diamond-grid.css', me: true}),
             E('slot', {onslotchange: () => this.arrange(null)}) //for removal
         );
     }
