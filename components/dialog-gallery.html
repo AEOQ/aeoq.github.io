@@ -6,12 +6,14 @@
 <style>
     img {height: 10em;}
 </style>
-<a href="#gallery">OPEN</a>
-<dialog-gallery id="gallery">
-</dialog-gallery>
+<a href="#ratchet">RATCHET</a>
+<dialog-gallery id="ratchet"></dialog-gallery>
+<a href="#bit">BIT</a>
+<dialog-gallery id="bit"></dialog-gallery>
 <script type="module">
     import { A, E, O, Q } from 'https://aeoq.github.io/AEOQ.mjs';window.Q=Q;window.E=E;
     for (let h = 50; h <= 85; h += 5) {
-        Q(`#gallery`).append(E('figure', [...Array(10)].map((_, i) => E('img', {src: `https://go-shoot.github.io/x/img/ratchet/${i}-${h}.png`}))))
+        Q(`#ratchet`).append(E('figure', [...Array(10)].map((_, i) => E('img', {src: `https://go-shoot.github.io/x/img/ratchet/${i}-${h}.png`}))))
     }
+    Q(`#bit`).append(...[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].map(i => E('img', {src: `https://go-shoot.github.io/x/img/bit/${i}.png`})))
 </script>
