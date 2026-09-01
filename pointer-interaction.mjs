@@ -42,14 +42,13 @@ class Π { // #private  $data  _user
         ...w == 'ancestor' ? {sx: this.#ancestor.x?.scrollLeft, sy: this.#ancestor.y?.scrollTop} : {}
     }]))
     #press (ev) {
-        this.event = ev;
         if (!this.target || this.target.Q('.PI-target') || this._scroll && ev.pointerType != 'mouse') 
             return this.#reset();
         this.target.classList.add('PI-target');
 
         this.#ancestor = Π.findScrollable(this.target);
         this.$press = {
-            x: ev.clientX, y: ev.clientY, scrollY: window.scrollY,
+            event: ev, x: ev.clientX, y: ev.clientY, scrollY: window.scrollY,
             snapshot: this.#snapshot('target', 'ancestor')
         };
         (this._drag || this._drop) && this.target.setPointerCapture(ev.pointerId);
@@ -62,13 +61,12 @@ class Π { // #private  $data  _user
         this.#events.pointerup = this.#events.pointercancel = ev => this.#lift(ev);
     }
     #drag (ev) {
-        this.event = ev;
         ev.preventDefault();
         if (this.target.Q('.PI-target')) return this.#reset();
 
         this.$drag = {
             ...this.$drag ?? {tx: 0, ty: 0},
-            x: ev.clientX, y: ev.clientY, 
+            event: ev, x: ev.clientX, y: ev.clientY, 
             dx: ev.clientX - this.$press.x, dy: ev.clientY - this.$press.y,
         };
         if (Math.hypot(this.$drag.dx, this.$drag.dy) < 5) return;
@@ -146,7 +144,6 @@ class Π { // #private  $data  _user
         }
     }}
     #lift (ev) {
-        this.event = ev;
         this._scroll && ev.pointerType == 'mouse' && Math.hypot(this.$drag?.dx, this.$drag?.dy) >= 5 && ev.stopPropagation();
         if (!this.target) return this.#reset();
 
@@ -190,9 +187,8 @@ class Π { // #private  $data  _user
         Π.autoscroll = cancelAnimationFrame(Π.autoscroll);
         this.#hold.timer?.forEach(clearTimeout);
         let {target, onto} = this;
-        this.target = this.onto = this.event = null;
+        this.target = this.onto = this.$drag = null; //keep $press for swap snapshot
         this.#events.remove();
-        this.$drag = null;
         target?.classList.remove(...Π.classes.target);
         this.#drop?.onto?.forEach(el => el.classList.remove(...Π.classes.onto));
         target?.matches('.PI-animate') && setTimeout(() => {
@@ -257,10 +253,7 @@ Object.assign(Π, {
                 node = node.parentElement ?? document.documentElement;
             }
         };
-        return {
-            x: iterate(target.parentElement, 'x'),
-            y: iterate(target.parentElement, 'y')
-        };
+        return Object.fromEntries(['x', 'y'].map(a => [a, iterate(target.parentElement, a)]));
     },
     css: new CSSStyleSheet().replace(`
         .PI-draggable,.PI-target {
@@ -299,7 +292,7 @@ class Hold extends HoldClick {
     schedule = () => this.actions.map(([t, action]) => setTimeout(() => {
         this.π.target.classList.add('PI-held');
         typeof action == 'function' ? 
-            action(this.π, this.π.target) : new Π(this.π.target, action).execute(this.π.event, this.π.target);
+            action(this.π, this.π.target) : new Π(this.π.target, action).execute(this.π.$press.event, this.π.target);
     }, t*1000));
 }
 class Click extends HoldClick {
@@ -313,5 +306,4 @@ class Click extends HoldClick {
             this.#timers.push([this.count, setTimeout(() => action(this.π, target), abort ? 350 : 0)]));
     }
 }
-const PointerInteraction = Π
-export default PointerInteraction
+export default Π
