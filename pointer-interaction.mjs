@@ -2,8 +2,9 @@ import {E,O,Q} from '../AEOQ.mjs';
 
 class Π { // #private  $data  _user
     #click; #hold = {}; #drop = {}; #scrollable;
-    constructor (targets, actions) {
-        Object.assign(this, new O(actions).map(([k, v]) => [`_${k}`, v]));
+    constructor (targets, config) {
+        this._config = config;
+        Object.assign(this, new O(config).map(([k, v]) => [`_${k}`, v]));
         [targets].flat().flatMap(node => typeof node == 'string' ? Q(node) : node).forEach(node => {
             if (!node) return;
             Π.roots.add(node.getRootNode());
@@ -195,12 +196,13 @@ class Π { // #private  $data  _user
         Π.transform.revert([target, this.$lift.snapshot.onto], [onto, this.$press.snapshot.target]);
         Π.swapping = false;
     }
-    static events (config) {
+    static events (...configs) {
         Π.config ??= new Map();
-        new O(config).each(([targets, conf]) => { // config can be instance O
+        configs.flatMap(config => Array.isArray(config) ? config : Object.entries(config))
+        .forEach(([targets, conf]) => {
             let πs = Π.config.get(targets) ?? [];
             πs.length === 0 && Π.config.set(targets, πs);
-            πs.push(new Π(targets, conf));
+            πs.some(π => π._config == conf) || πs.push(new Π(targets, conf));
         });
         Π.css.then(css => Π.roots.forEach(root => {
             if (root.adoptedStyleSheets.includes(css)) return;
@@ -209,11 +211,12 @@ class Π { // #private  $data  _user
         }));
     }
     static #pointerdown = ev => Π.config.forEach((πs, node) => { // map: {[node]: πs}
+        let target = ev.target.assignedSlot ?? ev.target;
         if (typeof node == 'string')
-            node = ev.target.closest(node);
+            node = target.closest(node);
         else {
             node = [node].flat();
-            node = node.includes(ev.target) ? ev.target : node.find(n => n.contains(ev.target));
+            node = node.includes(target) ? target : node.find(n => n.contains(target));
         }
         node && πs.forEach(π => π.execute(ev, node));
     });
