@@ -222,7 +222,7 @@ class Π { // #private  $data  _user
     });
 }
 Object.assign(Π, {
-    roots: new Set(),
+    roots: new Set([document]),
     classes: {
         target: ['PI-target', 'PI-dragged', 'PI-reached'],
         onto: ['PI-droppable', 'PI-receiving']
