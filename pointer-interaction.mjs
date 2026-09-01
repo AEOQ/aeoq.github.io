@@ -51,7 +51,6 @@ class Π { // #private  $data  _user
             event: ev, x: ev.clientX, y: ev.clientY, scrollY: window.scrollY,
             snapshot: this.#snapshot('target', 'ancestor')
         };
-        (this._drag || this._drop) && this.target.setPointerCapture(ev.pointerId);
         this._hold && (this.#hold.timer = this._hold(new Hold(this)).schedule());
         this._drop?.onto && this.#setup.droppable(this._drop.onto);
         typeof this._press == 'function' && this._press(this, this.target);
@@ -152,7 +151,6 @@ class Π { // #private  $data  _user
         
         typeof this._lift == 'function' && this._lift(this, this.target, this.onto);
         this._revert && !Π.swapping && this.lift.to.revert();
-        this.target.releasePointerCapture(ev.pointerId);
         this.#reset();
     }
     lift = {to: {
