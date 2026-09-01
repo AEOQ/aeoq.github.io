@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-    *:has(>i) {all: unset; display: flex; gap: .5em;}
+    :not(body):has(>i) {all: unset; display: flex; gap: .5em;}
     i {
         min-width: 3rem; min-height: 3rem; max-height: 3rem; display: inline-block;
         background: var(--bg,silver);
@@ -37,7 +37,7 @@
             }
         }
     }
-    nav {
+    #nav {
         display:inline-flex; gap:.5em; flex-direction: column;
         transform:translateY(calc(-100% + 3em));
         margin-bottom:-13em;
@@ -47,10 +47,9 @@
             background:lightcoral;
         } 
     }
-
-    #stock {
-        padding:2em 0;
-    }
+    pre {overflow: scroll;}
+    output i.held {background: lightcoral !important;}
+    #stock {padding:2em 0;}
     .zone {
         background:silver;
         min-height:5em;
@@ -72,11 +71,11 @@
     div:has(.zone) {padding:1em; background: gray;}
 </style>
 
-<nav><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i></nav>
+<nav id="nav"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i></nav>
 <section><div>
     <menu><i>1</i><i>2</i><i>3</i><i>4</i></menu>
 </div></section>
-<output></output>
+<i><output></output></i>
 <custom-menu></custom-menu>
 <pre>
     '.lime': {
@@ -126,11 +125,14 @@ customElements.define('custom-menu', class extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({mode: 'open'}).replaceChildren(
-            E('style', ':host {display:block} span {font-size:2em}'),
-            'Drag to reorder', E('slot'),
-            ...[...Array(3)].map((_, i) => E('span', i+3))
+            E('style', `i {
+        min-width: 3rem; min-height: 3rem; max-height: 3rem; display: inline-block;
+        background: var(--bg,silver);
+        border: .2rem solid; box-sizing: border-box;
+}`), E('slot'),
+            ...[...Array(3)].map((_, i) => E('i', i+3))
         );
-        this.append(E('style', 'custom-menu span {font-size:2em}'), ...[...Array(3)].map((_, i) => E('span', i)))
+        this.append(...[...Array(3)].map((_, i) => E('i', i)))
     }
 });
 for (let i = 0; i <= 50; i++) Q('#stock').append(
@@ -140,10 +142,10 @@ for (let i = 0; i <= 50; i++) Q('#stock').append(
     ));
 
 let navMax = Q('nav').getBoundingClientRect().y*-1;
-let spans = [...Q('custom-menu span'), ...Q('custom-menu').sQ('span')];
+let spans = [...Q('custom-menu i'), ...Q('custom-menu').sQ('i')];
 let menuMax = Q('menu').parentElement.getBoundingClientRect().x - Q('menu').getBoundingClientRect().x;
 
-import PI from '../pointer-interaction.mjs';
+import PI from '../pointer-interaction.mjs'; window.PI = PI;    
 PI.events([
     [spans, { drop: { onto: spans }, lift: PI => PI.lift.to.swap() }],
     [Q('#stock'), { scroll: { x: true } }],
@@ -160,6 +162,10 @@ PI.events([
             PI.drag.to.select({ y: 0 }).from([...PI.target.children].filter(node => !node.matches(':has(.PI-selected)')));
         },
         lift: (PI, _, selected) => Q('output').value = selected?.innerText
+    }],
+    [Q('i:has(output)'), {
+        drag: PI => PI.target.matches('.PI-held') || PI.drag.to.scroll.ancestor(),
+        hold: hold => hold.for(1).to({drag: PI => PI.drag.to.translate()}),
     }]
 ], {
     '.lime': {
@@ -195,4 +201,5 @@ PI.events([
         lift: PI => PI.target.matches('.held') && PI.lift.to.clone()
     },
 });
+oncontextmenu = () => false
 </script>

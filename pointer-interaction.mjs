@@ -1,7 +1,7 @@
 import {E,O,Q} from '../AEOQ.mjs';
 
 class Π { // #private  $data  _user
-    #click; #hold = {}; #drop = {}; #scrollable;
+    #click; #hold = {}; #drop = {}; #ancestor;
     constructor (targets, config) {
         this._config = config;
         Object.assign(this, new O(config).map(([k, v]) => [`_${k}`, v]));
@@ -26,33 +26,33 @@ class Π { // #private  $data  _user
             });
             node.addEventListener('scroll', () => E(node).set({'--scrolledX': node.scrollLeft, '--scrolledY': node.scrollTop}));
         },
-        droppable: (node, target = this.target) => {
+        droppable: node => {
             this.#drop.onto = typeof node == 'string' ? Q(node, []) : node;
             this.#drop.onto.forEach(el => el.classList.add('PI-droppable'));
-            console.log(this.#scrollable = Π.findScrollable(target));
         }
     }
     execute (ev, target) {
         this.target = target ?? ev.target;
         this.#press(ev);
     }
-    #snapshot = which => ({
-        [which]: {
-            transform: new DOMMatrix(E(this[which]).get('transform')),
-            ...which == 'target' ? E(this.target).getBoundingPageRect() : {},
-            ...which == 'target' ? {sx: this.target.scrollLeft, sy: this.target.scrollTop} : {},
-        }
-    })
+    #snapshot = (...what) => Object.fromEntries(what.map(w => [w, {
+        transform: this[w] ? new DOMMatrix(E(this[w]).get('transform')) : {},
+        ...w == 'target' ? E(this.target).getBoundingPageRect() : {},
+        ...w == 'target' ? {sx: this.target.scrollLeft, sy: this.target.scrollTop} : {},
+        ...w == 'ancestor' ? {sx: this.#ancestor.x?.scrollLeft, sy: this.#ancestor.y?.scrollTop} : {}
+    }]))
     #press (ev) {
         this.event = ev;
         if (!this.target || this.target.Q('.PI-target') || this._scroll && ev.pointerType != 'mouse') 
             return this.#reset();
         this.target.classList.add('PI-target');
 
+        this.#ancestor = Π.findScrollable(this.target);
         this.$press = {
             x: ev.clientX, y: ev.clientY, scrollY: window.scrollY,
-            snapshot: this.#snapshot('target')
+            snapshot: this.#snapshot('target', 'ancestor')
         };
+        (this._drag || this._drop) && this.target.setPointerCapture(ev.pointerId);
         this._hold && (this.#hold.timer = this._hold(new Hold(this)).schedule());
         this._drop?.onto && this.#setup.droppable(this._drop.onto);
         typeof this._press == 'function' && this._press(this, this.target);
@@ -75,28 +75,40 @@ class Π { // #private  $data  _user
         this.target.classList.add('PI-dragged');
 
         this.#hold.timer?.forEach(clearTimeout);
-        this._scroll && this.drag.to.scroll(this._scroll === true ? undefined : this._scroll);
+        this._scroll && this.drag.to.scroll.self(this._scroll === true ? undefined : this._scroll);
         if (this._drop) {
             this.drag.to.translate({x: this._drag?.x, y: this._drag?.y});
-            this.drag.to.autoscroll();
+            this.drag.to.scroll.ancestor(true);
             this.drag.to.findOnto();
         }
         typeof this._drag == 'function' && this._drag(this, this.target, this.onto);
     }
     drag = {to: {
-        scroll: (axis = {x: true, y: true}) => this.target.scrollTo(
-            this.$press.snapshot.target.sx - (axis.x ? this.$drag.dx : 0), 
-            this.$press.snapshot.target.sy - (axis.y ? this.$drag.dy : 0)
-        ),
-        autoscroll: (scrollable = this.#scrollable) => {
-            if (scrollable.y) {
-                let ratio = this.$drag.y / scrollable.y.clientHeight;
-                let bottomed = scrollable.y.scrollTop + scrollable.y.clientHeight >= document.body.offsetHeight + 100;
-                let y = ratio < .05 ? -4 : ratio > .95 && !bottomed ? 4 : 0;
-                if (!y) return Π.autoscroll &&= cancelAnimationFrame(Π.autoscroll);
+        scroll: {
+            self: (axis = {x: true, y: true}) => this.target.scrollTo(
+                this.$press.snapshot.target.sx - (axis.x ? this.$drag.dx : 0), 
+                this.$press.snapshot.target.sy - (axis.y ? this.$drag.dy : 0)
+            ),
+            ancestor: (auto = false, ancestor = this.#ancestor) => {
+                if (!auto) {
+                    let {$press: {snapshot: {ancestor: snapshot}}} = this;
+                    ancestor.x && (ancestor.x.scrollLeft = snapshot.sx + this.$press.x - this.$drag.x);
+                    ancestor.y && (ancestor.y.scrollTop = snapshot.sy + this.$press.y - this.$drag.y);
+                    return;
+                }
+                let d = {x: ['Width', 'Left'], y: ['Height', 'Top']};
+                let s = new O(['x', 'y'].map(a => {
+                    if (!ancestor[a]) return [a, undefined];
+                    let {[`scroll${d[a][1]}`]: scrollPos, [`scroll${d[a][0]}`]: scrollSize, [`client${d[a][0]}`]: clientSize} = ancestor[a];
+                    let ratio = this.$drag[a] / clientSize;
+                    let ended = Math.abs(scrollSize - clientSize - scrollPos) <= 1;
+                    return [a, ratio < .05 ? -4 : ratio > .95 && !ended ? 4 : 0];
+                }));
+                if (!s.x && !s.y) return Π.autoscroll &&= cancelAnimationFrame(Π.autoscroll);
                 let loop = (() => {
-                    scrollable.y.scrollBy(0, y);
-                    this.drag.to.translate({y: true});
+                    s.x && ancestor.x.scrollBy(s.x, 0);
+                    s.y && ancestor.y.scrollBy(0, s.y);
+                    this.drag.to.translate({x: true, y: true});
                     Π.autoscroll = requestAnimationFrame(loop);
                 });
                 Π.autoscroll || loop();
@@ -140,9 +152,10 @@ class Π { // #private  $data  _user
 
         this.onto && (this.$lift = {snapshot: this.#snapshot('onto')});
         this._click && !this.target.matches('.PI-dragged') && this.lift.to.click();
-
+        
         typeof this._lift == 'function' && this._lift(this, this.target, this.onto);
         this._revert && !Π.swapping && this.lift.to.revert();
+        this.target.releasePointerCapture(ev.pointerId);
         this.#reset();
     }
     lift = {to: {
@@ -210,21 +223,23 @@ class Π { // #private  $data  _user
             root.addEventListener('pointerdown', ev => ev.stopPropagation() ?? Π.#pointerdown(ev));
         }));
     }
-    static #pointerdown = ev => Π.config.forEach((πs, node) => { // map: {[node]: πs}
-        let target = ev.target.assignedSlot ?? ev.target;
-        if (typeof node == 'string')
-            node = target.closest(node);
-        else {
-            node = [node].flat();
-            node = node.includes(target) ? target : node.find(n => n.contains(target));
-        }
-        node && πs.forEach(π => π.execute(ev, node));
-    });
+    static #pointerdown = ev => {
+        let nodes = [ev.target, ev.target.assignedSlot].filter(n => n);
+        Π.config.forEach((πs, target) => { // map: {[node]: πs}
+            typeof target == 'string' || (target = [target].flat());
+            for (let node of nodes) {
+                let targetNode = typeof target == 'string' ? node.closest(target) : 
+                    target.includes(node) ? node : target.find(n => n?.contains(node));
+                targetNode && πs.forEach(π => π.execute(ev, targetNode));
+                if (targetNode) break;
+            }
+        });
+    }
 }
 Object.assign(Π, {
     roots: new Set([document]),
     classes: {
-        target: ['PI-target', 'PI-dragged', 'PI-reached'],
+        target: ['PI-target', 'PI-dragged', 'PI-reached', 'PI-held'],
         onto: ['PI-droppable', 'PI-receiving']
     },
     transform: {
@@ -232,17 +247,19 @@ Object.assign(Π, {
         revert: (...pairs) => pairs.forEach(([node, snapshot]) => node.style.transform = snapshot.transform)
     },
     findScrollable (target) {
-        let iterating = (node, axis) => {
+        let iterate = (node, axis) => {
             let dimension = axis == 'x' ? 'Width' : 'Height';
             while (node) {
-                if (node[`scroll${dimension}`] > node[`client${dimension}`]) return node;
-                if (node == document.documentElement) return;
+                let oversize = node[`scroll${dimension}`] > node[`client${dimension}`];
+                if (node == document.documentElement) return oversize ? node : null;
+                let overflow = getComputedStyle(node)[`overflow${axis.toUpperCase()}`];
+                if (oversize && ['auto', 'scroll'].includes(overflow)) return node;
                 node = node.parentElement ?? document.documentElement;
             }
         };
         return {
-            x: iterating(target.parentElement, 'x'),
-            y: iterating(target.parentElement, 'y')
+            x: iterate(target.parentElement, 'x'),
+            y: iterate(target.parentElement, 'y')
         };
     },
     css: new CSSStyleSheet().replace(`
@@ -279,7 +296,11 @@ class HoldClick {
 }
 class Hold extends HoldClick {
     constructor(π) {super(π);}
-    schedule = () => this.actions.map(([s, action]) => setTimeout(() => action(this.π, this.π.target), s*1000));
+    schedule = () => this.actions.map(([t, action]) => setTimeout(() => {
+        this.π.target.classList.add('PI-held');
+        typeof action == 'function' ? 
+            action(this.π, this.π.target) : new Π(this.π.target, action).execute(this.π.event, this.π.target);
+    }, t*1000));
 }
 class Click extends HoldClick {
     #timers = [];
