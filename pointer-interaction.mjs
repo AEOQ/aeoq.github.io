@@ -14,7 +14,7 @@ class Π { // #private  $data  _user
     }
     #events = new Proxy(
         Object.defineProperty({}, 'remove', {value() {Object.entries(this).forEach(p => removeEventListener(...p))}}),
-        {set: (target, ...p) => (addEventListener(...p), Reflect.set(target, ...p))}
+        {set: (target, ...p) => (addEventListener(...p, {passive: true}), Reflect.set(target, ...p))}
     )
     #setup = {
         scrollable (node) {
@@ -24,21 +24,20 @@ class Π { // #private  $data  _user
                     ev.deltaY > 0 && Math.ceil(node.scrollLeft) < node.scrollWidth - node.clientWidth) 
                     (node.scrollLeft += ev.deltaY > 0 ? 100 : -100) && ev.preventDefault();
             });
-            node.addEventListener('scroll', () => E(node).set({'--scrolledX': node.scrollLeft, '--scrolledY': node.scrollTop}));
+            node.addEventListener('scroll', () => {
+                let {e, f} = new DOMMatrix(E(node).get('transform'));
+                E(node).set({'--tx': e - node.scrollLeft, '--ty': f - node.scrollTop});
+            });
         },
         droppable: node => {
-            this.#drop.onto = typeof node == 'string' ? Q(node, []) : node;
+            this.#drop.onto = [typeof node == 'string' ? Q(node) : node].flat();
             this.#drop.onto.forEach(el => el.classList.add('PI-droppable'));
         }
     }
-    execute (ev, target) {
-        this.target = target ?? ev.target;
-        this.#press(ev);
-    }
+    execute = (ev, target) => (this.target = target ?? ev.target) && this.#press(ev)
     #snapshot = (...what) => Object.fromEntries(what.map(w => [w, {
         transform: this[w] ? new DOMMatrix(E(this[w]).get('transform')) : {},
-        ...w == 'target' ? E(this.target).getBoundingPageRect() : {},
-        ...w == 'target' ? {sx: this.target.scrollLeft, sy: this.target.scrollTop} : {},
+        ...w == 'target' ? {sx: this.target.scrollLeft, sy: this.target.scrollTop, ...E(this.target).getBoundingPageRect()} : {},
         ...w == 'ancestor' ? {sx: this.#ancestor.x?.scrollLeft, sy: this.#ancestor.y?.scrollTop} : {}
     }]))
     #press (ev) {
@@ -48,7 +47,7 @@ class Π { // #private  $data  _user
 
         this.#ancestor = Π.findScrollable(this.target);
         this.$press = {
-            event: ev, x: ev.clientX, y: ev.clientY, scrollY: window.scrollY,
+            event: ev, x: ev.clientX, y: ev.clientY, scrollX, scrollY,
             snapshot: this.#snapshot('target', 'ancestor')
         };
         this._hold && (this.#hold.timer = this._hold(new Hold(this)).schedule());
@@ -60,7 +59,6 @@ class Π { // #private  $data  _user
         this.#events.pointerup = this.#events.pointercancel = ev => this.#lift(ev);
     }
     #drag (ev) {
-        ev.preventDefault();
         if (this.target.Q('.PI-target')) return this.#reset();
 
         this.$drag = {
@@ -123,11 +121,11 @@ class Π { // #private  $data  _user
         translate: (axis = {x: true, y: true}, target = this.target) => {
             let bound = (a, f) => typeof axis[a]?.[f] == 'function' ? 
                     axis[a][f](this, this.target, this.onto) : axis[a]?.[f] ?? (f == 'min' ? -Infinity : Infinity);
-            let [x, y] = ['x', 'y'].map(a => 
+            [this.$drag.tx, this.$drag.ty] = ['x', 'y'].map(a => 
                 Math.max(bound(a, 'min'), Math.min(axis[a] === false ? 0 : this.$drag[`d${a}`], bound(a, 'max')))
+                + (Π.swapping ? 0 : window[`scroll${a.toUpperCase()}`] - this.$press[`scroll${a.toUpperCase()}`])
             );
             this._revert ??= true;
-            [this.$drag.tx, this.$drag.ty] = [x, y + (Π.swapping ? 0 : scrollY - this.$press.scrollY)];
             E(target).get('display') == 'inline' && (target.style.display = 'inline-block');
             Π.transform.add(target, this.$press.snapshot.target.transform, {x: this.$drag.tx, y: this.$drag.ty});
         },
@@ -145,8 +143,8 @@ class Π { // #private  $data  _user
     #lift (ev) {
         this._scroll && ev.pointerType == 'mouse' && Math.hypot(this.$drag?.dx, this.$drag?.dy) >= 5 && ev.stopPropagation();
         if (!this.target) return this.#reset();
-
-        this.onto && (this.$lift = {snapshot: this.#snapshot('onto')});
+        
+        this.$lift = {event: ev, ...this.onto ? {snapshot: this.#snapshot('onto')} : {}};
         this._click && !this.target.matches('.PI-dragged') && this.lift.to.click();
         
         typeof this._lift == 'function' && this._lift(this, this.target, this.onto);
@@ -205,8 +203,7 @@ class Π { // #private  $data  _user
     }
     static events (...configs) {
         Π.config ??= new Map();
-        configs.flatMap(config => Array.isArray(config) ? config : Object.entries(config))
-        .forEach(([targets, conf]) => {
+        configs.flatMap(confs => Array.isArray(confs) ? confs : Object.entries(confs)).forEach(([targets, conf]) => {
             let πs = Π.config.get(targets) ?? [];
             πs.length === 0 && Π.config.set(targets, πs);
             πs.some(π => π._config == conf) || πs.push(new Π(targets, conf));
@@ -214,7 +211,7 @@ class Π { // #private  $data  _user
         Π.css.then(css => Π.roots.forEach(root => {
             if (root.adoptedStyleSheets.includes(css)) return;
             root.adoptedStyleSheets.push(css);
-            root.addEventListener('pointerdown', ev => ev.stopPropagation() ?? Π.#pointerdown(ev));
+            root.addEventListener('pointerdown', ev => ev.stopPropagation() ?? Π.#pointerdown(ev), {passive: true});
         }));
     }
     static #pointerdown = ev => {
@@ -273,7 +270,7 @@ Object.assign(Π, {
             
             &:has(.PI-target,.PI-animate) {
                 overflow: visible;
-                transform: translate(calc(var(--scrolledX,0)*-1px), calc(var(--scrolledY,0)*-1px));
+                transform: translate(calc(var(--tx,0)*1px), calc(var(--ty,0)*1px)) !important;
             }
         }
     `)
