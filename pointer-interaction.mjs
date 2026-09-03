@@ -38,7 +38,6 @@ class Π { // #private  $data  _user
     #snapshot = (...what) => Object.fromEntries(what.map(w => [w, {
         transform: this[w] ? new DOMMatrix(E(this[w]).get('transform')) : {},
         ...w == 'target' ? {sx: this.target.scrollLeft, sy: this.target.scrollTop, ...E(this.target).getBoundingPageRect()} : {},
-        ...w == 'ancestor' ? {sx: this.#ancestor.x?.scrollLeft, sy: this.#ancestor.y?.scrollTop} : {}
     }]))
     #press (ev) {
         if (!this.target || this.target.Q('.PI-target') || this._scroll && ev.pointerType != 'mouse') 
@@ -48,7 +47,7 @@ class Π { // #private  $data  _user
         this.#ancestor = Π.findScrollable(this.target);
         this.$press = {
             event: ev, x: ev.clientX, y: ev.clientY, scrollX, scrollY,
-            snapshot: this.#snapshot('target', 'ancestor')
+            snapshot: this.#snapshot('target')
         };
         this._hold && (this.#hold.timer = this._hold(new Hold(this)).schedule());
         this._drop?.onto && this.#setup.droppable(this._drop.onto);
@@ -85,25 +84,22 @@ class Π { // #private  $data  _user
                 this.$press.snapshot.target.sy - (axis.y ? this.$drag.dy : 0)
             ),
             ancestor: (auto = false, ancestor = this.#ancestor) => {
-                if (!auto) {
-                    let {$press: {snapshot: {ancestor: snapshot}}} = this;
-                    ancestor.x && (ancestor.x.scrollLeft = snapshot.sx + this.$press.x - this.$drag.x);
-                    ancestor.y && (ancestor.y.scrollTop = snapshot.sy + this.$press.y - this.$drag.y);
-                    return;
-                }
-                let d = {x: ['Width', 'Left'], y: ['Height', 'Top']};
-                let s = new O(['x', 'y'].map(a => {
-                    if (!ancestor[a]) return [a, undefined];
-                    let {[`scroll${d[a][1]}`]: scrollPos, [`scroll${d[a][0]}`]: scrollSize, [`client${d[a][0]}`]: clientSize} = ancestor[a];
-                    let ratio = this.$drag[a] / clientSize;
-                    let ended = Math.abs(scrollSize - clientSize - scrollPos) <= 1;
-                    return [a, ratio < .05 ? -4 : ratio > .95 && !ended ? 4 : 0];
-                }));
+                let d = {x: ['Width', 'Left'], y: ['Height', 'Top']}, s = {};
+                ['x','y'].forEach(a => {
+                    if (!ancestor[a]) return;
+                    if (auto) {
+                        let {[`scroll${d[a][1]}`]: scrollPos, [`scroll${d[a][0]}`]: scrollSize, [`client${d[a][0]}`]: clientSize} = ancestor[a];
+                        let ratio = this.$drag[a] / clientSize;
+                        let ended = Math.abs(scrollSize - clientSize - scrollPos) <= 1;
+                        s[a] = ratio < .05 ? -4 : ratio > .95 && !ended ? 4 : 0;
+                    } else 
+                        s[a] = this.$press[a] - this.$drag[a];
+                });
                 if (!s.x && !s.y) return Π.autoscroll &&= cancelAnimationFrame(Π.autoscroll);
                 let loop = (() => {
                     s.x && ancestor.x.scrollBy(s.x, 0);
                     s.y && ancestor.y.scrollBy(0, s.y);
-                    this.drag.to.translate({x: true, y: true});
+                    auto && this.drag.to.translate({x: true, y: true});
                     Π.autoscroll = requestAnimationFrame(loop);
                 });
                 Π.autoscroll || loop();
@@ -257,16 +253,15 @@ Object.assign(Π, {
             a&,img&,a,img {-webkit-user-drag: none;}
         }
         .PI-dragged,.PI-scrollable:has(:is(.PI-dragged,.PI-animate)) {
-            z-index: 1; position: relative;
+            z-index: 1; position: relative; cursor: grab;
         }
         .PI-animate {
-            z-index: 2; position: relative;
-            transition: transform .5s;
+            z-index: 2; position: relative; transition: transform .5s;
         }
         .PI-dragged,.PI-animate,.PI-receiving :not(.PI-droppable) {pointer-events: none;}
         .PI-scrollable {
             overflow: scroll; scrollbar-width: none;
-            contain: layout;
+            contain: layout; cursor: grab;
             
             &:has(.PI-target,.PI-animate) {
                 overflow: visible;
