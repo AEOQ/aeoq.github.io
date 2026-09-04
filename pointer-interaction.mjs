@@ -37,7 +37,7 @@ class Π { // #private  $data  _user
     execute = (ev, target) => (this.target = target ?? ev.target) && this.#press(ev)
     #snapshot = (...what) => Object.fromEntries(what.map(w => [w, {
         transform: this[w] ? new DOMMatrix(E(this[w]).get('transform')) : {},
-        ...w == 'target' ? {sx: this.target.scrollLeft, sy: this.target.scrollTop, ...E(this.target).getBoundingPageRect()} : {},
+        ...w == 'target' ? E(this.target).getBoundingPageRect() : {},
     }]))
     #press (ev) {
         if (!this.target || this.target.Q('.PI-target') || this._scroll && ev.pointerType != 'mouse') 
@@ -62,47 +62,50 @@ class Π { // #private  $data  _user
 
         this.$drag = {
             ...this.$drag ?? {tx: 0, ty: 0},
-            event: ev, x: ev.clientX, y: ev.clientY, 
+            event: ev, x: ev.clientX, y: ev.clientY, mx: ev.movementX, my: ev.movementY,
             dx: ev.clientX - this.$press.x, dy: ev.clientY - this.$press.y,
         };
         if (Math.hypot(this.$drag.dx, this.$drag.dy) < 5) return;
         this.target.classList.add('PI-dragged');
 
         this.#hold.timer?.forEach(clearTimeout);
-        this._scroll && this.drag.to.scroll.self(this._scroll === true ? undefined : this._scroll);
+        this._scroll && this.drag.to.scroll('self', this._scroll === true ? undefined : this._scroll);
         if (this._drop) {
             this.drag.to.translate({x: this._drag?.x, y: this._drag?.y});
-            this.drag.to.scroll.ancestor(true);
+            this.drag.to.scroll('ancestor', true);
             this.drag.to.findOnto();
         }
         typeof this._drag == 'function' && this._drag(this, this.target, this.onto);
     }
     drag = {to: {
-        scroll: {
-            self: (axis = {x: true, y: true}) => this.target.scrollTo(
-                this.$press.snapshot.target.sx - (axis.x ? this.$drag.dx : 0), 
-                this.$press.snapshot.target.sy - (axis.y ? this.$drag.dy : 0)
-            ),
-            ancestor: (auto = false, ancestor = this.#ancestor) => {
-                let d = {x: ['Width', 'Left'], y: ['Height', 'Top']}, s = {};
-                ['x','y'].forEach(a => {
-                    if (!ancestor[a]) return;
-                    if (auto) {
-                        let {[`scroll${d[a][1]}`]: scrollPos, [`scroll${d[a][0]}`]: scrollSize, [`client${d[a][0]}`]: clientSize} = ancestor[a];
-                        let ratio = this.$drag[a] / clientSize;
-                        let ended = Math.abs(scrollSize - clientSize - scrollPos) <= 1;
-                        s[a] = ratio < .05 ? -4 : ratio > .95 && !ended ? 4 : 0;
-                    } else 
-                        s[a] = this.$press[a] - this.$drag[a];
-                });
-                if (!s.x && !s.y) return Π.autoscroll &&= cancelAnimationFrame(Π.autoscroll);
+        scroll: (which, auto = false) => {
+            let target = which == 'ancestor' ? this.#ancestor : this.target;
+            let scroll = (x, y) => {
+                (target.x ?? target).scrollBy?.({left: x, behavior: 'instant'});
+                (target.y ?? target).scrollBy?.({top: y, behavior: 'instant'});
+            }
+            if (auto === true) {
+                let client = {x: target.x?.clientWidth, y: target.y?.clientHeight}, s = {};
                 let loop = (() => {
-                    s.x && ancestor.x.scrollBy(s.x, 0);
-                    s.y && ancestor.y.scrollBy(0, s.y);
-                    auto && this.drag.to.translate({x: true, y: true});
-                    Π.autoscroll = requestAnimationFrame(loop);
+                    ['x', 'y'].forEach(a => {
+                        if (!target[a]) return;
+                        let ratio = this.$drag[a] / client[a];
+                        s[a] = Math.max(0, (Math.abs(ratio - .5) - .2) * 30);
+                        s[a] = Math.round(s[a] * Math.sign(ratio - .5));
+                    });
+                    if (!s.x && !s.y) return Π.loop &&= cancelAnimationFrame(Π.loop);
+                    scroll(s.x, s.y);
+                    this.drag.to.translate(this._drag ?? {x: true, y: true});
+                    Π.loop = requestAnimationFrame(loop);
                 });
-                Π.autoscroll || loop();
+                Π.loop || loop();
+            } else {
+                this.$drag.pendingx = auto === false || auto.x ? (this.$drag.pendingx ?? 0) - this.$drag.mx : 0;
+                this.$drag.pendingy = auto === false || auto.y ? (this.$drag.pendingy ?? 0) - this.$drag.my : 0;
+                Π.loop ||= requestAnimationFrame(() => {
+                    scroll(this.$drag.pendingx, this.$drag.pendingy);
+                    Π.loop = this.$drag.pendingx = this.$drag.pendingy = 0;
+                });
             }
         },
         select: bullseye => {
@@ -116,7 +119,7 @@ class Π { // #private  $data  _user
         },
         translate: (axis = {x: true, y: true}, target = this.target) => {
             let bound = (a, f) => typeof axis[a]?.[f] == 'function' ? 
-                    axis[a][f](this, this.target, this.onto) : axis[a]?.[f] ?? (f == 'min' ? -Infinity : Infinity);
+                axis[a][f](this, this.target, this.onto) : axis[a]?.[f] ?? (f == 'min' ? -Infinity : Infinity);
             [this.$drag.tx, this.$drag.ty] = ['x', 'y'].map(a => 
                 Math.max(bound(a, 'min'), Math.min(axis[a] === false ? 0 : this.$drag[`d${a}`], bound(a, 'max')))
                 + (Π.swapping ? 0 : window[`scroll${a.toUpperCase()}`] - this.$press[`scroll${a.toUpperCase()}`])
@@ -176,10 +179,10 @@ class Π { // #private  $data  _user
         }
     }}
     #reset () {
-        Π.autoscroll = cancelAnimationFrame(Π.autoscroll);
+        Π.loop &&= cancelAnimationFrame(Π.loop);
         this.#hold.timer?.forEach(clearTimeout);
         let {target, onto} = this;
-        this.target = this.onto = this.$drag = null; //keep $press for swap snapshot
+        this.target = this.onto = this.$drag = null; //keep $press,$lift for swap snapshot
         this.#events.remove();
         target?.classList.remove(...Π.classes.target);
         this.#drop?.onto?.forEach(el => el.classList.remove(...Π.classes.onto));
@@ -195,7 +198,7 @@ class Π { // #private  $data  _user
         onto.before(target);
         marker.replaceWith(onto);
         Π.transform.revert([target, this.$lift.snapshot.onto], [onto, this.$press.snapshot.target]);
-        Π.swapping = false;
+        Π.swapping = this.$press = this.$lift = null;
     }
     static events (...configs) {
         Π.config ??= new Map();

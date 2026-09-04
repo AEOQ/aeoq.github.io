@@ -164,7 +164,7 @@ PI.events([
         lift: (PI, _, selected) => Q('output').value = selected?.innerText
     }],
     [Q('i:has(output)'), {
-        drag: PI => PI.target.matches('.PI-held') || PI.drag.to.scroll.ancestor(),
+        drag: PI => PI.target.matches('.PI-held') || PI.drag.to.scroll('ancestor'),
         hold: hold => hold.for(1).to({drag: PI => PI.drag.to.translate()}),
     }]
 ], {
