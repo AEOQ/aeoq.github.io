@@ -1,12 +1,12 @@
 import {E} from 'https://aeoq.github.io/AEOQ.mjs';
-import PointerInteraction from 'https://aeoq.github.io/pointer-interaction/script.js';
+import PI from '../pointer-interaction.mjs';
 CSS.registerProperty({
     name: "--knob-angle",
     syntax: "<number>",
     inherits: true,
     initialValue: "180",
 });
-class Knob extends HTMLElement {
+customElements.define('drag-knob', class Knob extends HTMLElement {
     #internals; #θ; #v; #snap;
     constructor(props = {}) {
         super();
@@ -21,7 +21,7 @@ class Knob extends HTMLElement {
             Knob.isSafari ? '' : E('svg', {viewBox: '-1 -1 2 2'},
                 [E('circle#track', {pathLength: 360*.9}), E('circle#fill', {pathLength: 360*.9})]
             ),
-            E('link', {rel: 'stylesheet',
+            E.link({
                 href: 'https://aeoq.github.io/drag-knob.css',
                 style: Knob.isSafari ? {display: 'block'} : {},
                 me: true
@@ -47,7 +47,7 @@ class Knob extends HTMLElement {
             onkeydown: ev => ev.key == 'Enter' ? this.input.blur() : '',
         });
         this.addEventListener('contextmenu', ev => ev.preventDefault());
-        PointerInteraction.events([[this, {
+        PI.events([[this, {
             press: PI => (this.#press(), this.press?.(PI)),
             drag: PI => (this.#drag(PI), this.drag?.(PI)),
             lift: PI => (this.#lift(), this.lift?.(PI)),
@@ -147,9 +147,7 @@ class Knob extends HTMLElement {
         try {return JSON.parse(str);} 
         catch {return str && str.trim() && !isNaN(Number(str)) ? parseFloat(str) : str;}
     }
-}
-customElements.define('drag-knob', Knob);
-export default Knob;
+});
 const cubicBezierTime = (Y, x1 = 0.25, y1 = 0.1, x2 = 0.25, y2 = 1.0) => {
     let to = (what, t) => 3 * (1 - t) ** 2 * t * (what == 'x' ? x1 : y1) + 3 * (1 - t) * t ** 2 * (what == 'x' ? x2 : y2) + t ** 3;
     Y = Math.max(0, Math.min(1, Y));

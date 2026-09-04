@@ -1,9 +1,9 @@
-import {E,Q} from '../AEOQ.mjs';
-class DG extends HTMLElement {
+import {E} from '../AEOQ.mjs';
+customElements.define('diamond-grid', class DG extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({mode: 'open'}).append(
-            E('link', {rel: 'stylesheet',href: 'https://aeoq.github.io/diamond-grid.css', me: true}),
+            E.link({href: 'https://aeoq.github.io/diamond-grid.css', me: true}),
             E('slot', {onslotchange: () => this.arrange(null)}) //for removal
         );
     }
@@ -19,7 +19,7 @@ class DG extends HTMLElement {
     static ReOb = new ResizeObserver(entries => {
         let [grid, child] = [true, false].map(b => entries.find(en => en.target instanceof DG === b));
         let width = child ? null : grid.borderBoxSize[0].inlineSize;
-        (entries.length === 1 || grid) && entries[0].target.closest(DG.tagName)?.arrange(width);
+        (entries.length === 1 || grid) && entries[0].target.closest('diamond-grid')?.arrange(width);
     })
     #W; #w; #g;
     arrange (W, g = E(this).get('gap')) {
@@ -49,16 +49,14 @@ class DG extends HTMLElement {
             n++;
         }
     }
-    static tagName = 'diamond-grid'
     static #css = new CSSStyleSheet()
     static {
-        this.#css.replaceSync(`
-            span.DG-textShaping {width: 50%; height: 100%;}
-            span:nth-child(1 of .DG-textShaping) {float: left; shape-outside: polygon(0 0,100% 0,0 50%,100% 100%,0 100%);}
-            span:nth-child(2 of .DG-textShaping) {float: right; shape-outside: polygon(100% 0,0 0,100% 50%,0 100%,100% 100%);}
+        DG.#css.replaceSync(`
+            .DG-textShaping {width: 50%; height: 100%;}
+            :nth-child(1 of .DG-textShaping) {float: left; shape-outside: polygon(0 0,100% 0,0 50%,100% 100%,0 100%);}
+            :nth-child(2 of .DG-textShaping) {float: right; shape-outside: polygon(100% 0,0 0,100% 50%,0 100%,100% 100%);}
         `)
     }
-}
-customElements.define(DG.tagName, DG);
+});
 //nw+(n-1)g=W, n=(W+g)/(w+g)
 //nw+(n-1)g=W-(w+g/2), n=(2W-w+g)/2(w+g)  
