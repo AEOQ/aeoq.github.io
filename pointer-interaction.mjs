@@ -76,8 +76,8 @@ class Π { // #private  $data  _user
         this.#hold.timer?.forEach(clearTimeout);
         this._scroll && this.drag.to.scroll.self(this._scroll === true ? undefined : this._scroll);
         if (this._drop) {
+            this._drop.autoscroll !== false && this.drag.to.scroll.ancestor();
             this.drag.to.translate({x: this._drag?.x, y: this._drag?.y});
-            this.drag.to.scroll.ancestor();
             this.drag.to.findOnto();
         }
         typeof this._drag == 'function' && this._drag(this, this.target, this.onto);
