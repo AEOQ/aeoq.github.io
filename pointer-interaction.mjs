@@ -186,6 +186,7 @@ class Π { // #private  $data  _user
         this.#drop?.onto?.forEach(el => el.classList.remove(...Π.classes.onto));
         target?.matches('.PI-animate') && setTimeout(() => {
             Π.swapping && this.#commitSwap(target, onto);
+            [target, onto].forEach(node => node?.classList.remove('PI-animate'));
             typeof this._callback == 'function' && this._callback(this, target, onto);
         }, 500);
     }
@@ -195,7 +196,6 @@ class Π { // #private  $data  _user
         onto.before(target);
         marker.replaceWith(onto);
         Π.transform.revert([target, this.$lift.snapshot.onto], [onto, this.$press.snapshot.target]);
-        [target, onto].forEach(node => node?.classList.remove('PI-animate'));
         Π.swapping = this.$press = this.$lift = null;
     }
     static events (...configs) {
