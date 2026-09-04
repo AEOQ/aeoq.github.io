@@ -14,7 +14,7 @@ class Π { // #private  $data  _user
     }
     #events = new Proxy(
         Object.defineProperty({}, 'remove', {value() {Object.entries(this).forEach(p => removeEventListener(...p))}}),
-        {set: (target, type, f) => (addEventListener(type, f, {passive: type != 'touchmove'}), Reflect.set(target, type, f))}
+        {set: (target, type, f) => (addEventListener(type, f, {passive: !['touchmove','contextmenu'].includes(type)}), Reflect.set(target, type, f))}
     )
     #setup = {
         scrollable (node) {
