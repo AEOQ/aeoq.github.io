@@ -1,20 +1,20 @@
 import {E,O,Q} from '../AEOQ.mjs';
 
 class Π { // #private  $data  _user
-    #click; #hold = {}; #drop = {}; #ancestor;
+    #click; #hold = {}; #drop = {};
     constructor (targets, config) {
         this._config = config;
         Object.assign(this, new O(config).map(([k, v]) => [`_${k}`, v]));
         [targets].flat().flatMap(node => typeof node == 'string' ? Q(node) : node).forEach(node => {
             if (!node) return;
             Π.roots.add(node.getRootNode());
-            (this._drag || this._drop) && node.classList.add('PI-draggable');
+            (this._drag || this._drop) && !node.matches('.PI-held') && node.classList.add('PI-draggable');
             this._scroll && this.#setup.scrollable(node);
         });
     }
     #events = new Proxy(
         Object.defineProperty({}, 'remove', {value() {Object.entries(this).forEach(p => removeEventListener(...p))}}),
-        {set: (target, ...p) => (addEventListener(...p, {passive: true}), Reflect.set(target, ...p))}
+        {set: (target, type, f) => (addEventListener(type, f, {passive: type != 'touchmove'}), Reflect.set(target, type, f))}
     )
     #setup = {
         scrollable (node) {
@@ -24,10 +24,11 @@ class Π { // #private  $data  _user
                     ev.deltaY > 0 && Math.ceil(node.scrollLeft) < node.scrollWidth - node.clientWidth) 
                     (node.scrollLeft += ev.deltaY > 0 ? 100 : -100) && ev.preventDefault();
             });
-            node.addEventListener('scroll', () => {
+            node.addEventListener('scroll', () => Π.loop ||= requestAnimationFrame(() => {
                 let {e, f} = new DOMMatrix(E(node).get('transform'));
                 E(node).set({'--tx': e - node.scrollLeft, '--ty': f - node.scrollTop});
-            });
+                Π.loop = false;
+            }));
         },
         droppable: node => {
             this.#drop.onto = [typeof node == 'string' ? Q(node) : node].flat();
@@ -44,7 +45,6 @@ class Π { // #private  $data  _user
             return this.#reset();
         this.target.classList.add('PI-target');
 
-        this.#ancestor = Π.findScrollable(this.target);
         this.$press = {
             event: ev, x: ev.clientX, y: ev.clientY, scrollX, scrollY,
             snapshot: this.#snapshot('target')
@@ -69,43 +69,40 @@ class Π { // #private  $data  _user
         this.target.classList.add('PI-dragged');
 
         this.#hold.timer?.forEach(clearTimeout);
-        this._scroll && this.drag.to.scroll('self', this._scroll === true ? undefined : this._scroll);
+        this._scroll && this.drag.to.scroll.self(this._scroll === true ? undefined : this._scroll);
         if (this._drop) {
             this.drag.to.translate({x: this._drag?.x, y: this._drag?.y});
-            this.drag.to.scroll('ancestor', true);
+            this.drag.to.scroll.ancestor();
             this.drag.to.findOnto();
         }
         typeof this._drag == 'function' && this._drag(this, this.target, this.onto);
     }
     drag = {to: {
-        scroll: (which, auto = false) => {
-            let target = which == 'ancestor' ? this.#ancestor : this.target;
-            let scroll = (x, y) => {
-                (target.x ?? target).scrollBy?.({left: x, behavior: 'instant'});
-                (target.y ?? target).scrollBy?.({top: y, behavior: 'instant'});
-            }
-            if (auto === true) {
-                let client = {x: target.x?.clientWidth, y: target.y?.clientHeight}, s = {};
+        scroll: {
+            self: (axis = {x: true, y: true}, target = this.target) => {
+                this.$drag.pendingx = axis === false || axis.x ? (this.$drag.pendingx ?? 0) - this.$drag.mx : 0;
+                this.$drag.pendingy = axis === false || axis.y ? (this.$drag.pendingy ?? 0) - this.$drag.my : 0;
+                Π.loop ||= requestAnimationFrame(() => {
+                    target.scrollBy({left: this.$drag.pendingx, top: this.$drag.pendingy, behavior: 'instant'});
+                    Π.loop = this.$drag.pendingx = this.$drag.pendingy = 0;
+                });
+            },
+            ancestor: (target = this.ancestor ??= Π.findScrollable(this.target)) => {
+                let size = {x: target.x?.clientWidth, y: target.y?.clientHeight}, s = {};
                 let loop = (() => {
                     ['x', 'y'].forEach(a => {
                         if (!target[a]) return;
-                        let ratio = this.$drag[a] / client[a];
+                        let ratio = this.$drag[a] / size[a];
                         s[a] = Math.max(0, (Math.abs(ratio - .5) - .2) * 30);
                         s[a] = Math.round(s[a] * Math.sign(ratio - .5));
                     });
                     if (!s.x && !s.y) return Π.loop &&= cancelAnimationFrame(Π.loop);
-                    scroll(s.x, s.y);
+                    target.x?.scrollBy({left: s.x, behavior: 'instant'});
+                    target.y?.scrollBy({top: s.y, behavior: 'instant'});
                     this.drag.to.translate(this._drag ?? {x: true, y: true});
                     Π.loop = requestAnimationFrame(loop);
                 });
                 Π.loop || loop();
-            } else {
-                this.$drag.pendingx = auto === false || auto.x ? (this.$drag.pendingx ?? 0) - this.$drag.mx : 0;
-                this.$drag.pendingy = auto === false || auto.y ? (this.$drag.pendingy ?? 0) - this.$drag.my : 0;
-                Π.loop ||= requestAnimationFrame(() => {
-                    scroll(this.$drag.pendingx, this.$drag.pendingy);
-                    Π.loop = this.$drag.pendingx = this.$drag.pendingy = 0;
-                });
             }
         },
         select: bullseye => {
@@ -118,6 +115,7 @@ class Π { // #private  $data  _user
             }};
         },
         translate: (axis = {x: true, y: true}, target = this.target) => {
+            this.#events.touchmove ??= ev => ev.cancelable && ev.preventDefault();
             let bound = (a, f) => typeof axis[a]?.[f] == 'function' ? 
                 axis[a][f](this, this.target, this.onto) : axis[a]?.[f] ?? (f == 'min' ? -Infinity : Infinity);
             [this.$drag.tx, this.$drag.ty] = ['x', 'y'].map(a => 
@@ -153,8 +151,7 @@ class Π { // #private  $data  _user
     lift = {to: {
         click: () => {
             this.#click ??= this._click(new Click(this));
-            this.#click.count = new Date() - this.#click.lastClicked <= 350 ? this.#click.count + 1 : 1;
-            this.#click.lastClicked = new Date();
+            this.#click.count = new Date() - this.#click.lastClicked <= 350 ? this.#click.count + 1 : 1, this.#click.lastClicked = new Date();
             this.#click.fire(this.#click.count);
         },
         transfer: cloned => {
@@ -169,7 +166,7 @@ class Π { // #private  $data  _user
             Π.swapping = true;
             [this.target, this.onto].forEach(node => node.classList.add('PI-animate'));
             let {x, y} = E(this.onto).getBoundingPageRect();
-            x -= this.$press.snapshot.target.x; y -= this.$press.snapshot.target.y;
+            x -= this.$press.snapshot.target.x, y -= this.$press.snapshot.target.y;
             Π.transform.add(this.target, this.$press.snapshot.target.transform, {x, y});
             Π.transform.add(this.onto, this.$lift.snapshot.onto.transform, {x: -x, y: -y});
         },
@@ -182,13 +179,13 @@ class Π { // #private  $data  _user
         Π.loop &&= cancelAnimationFrame(Π.loop);
         this.#hold.timer?.forEach(clearTimeout);
         let {target, onto} = this;
-        this.target = this.onto = this.$drag = null; //keep $press,$lift for swap snapshot
+        this.target = this.onto = this.$drag = null;
+        Π.swapping || (this.$press = this.$lift = null);
         this.#events.remove();
         target?.classList.remove(...Π.classes.target);
         this.#drop?.onto?.forEach(el => el.classList.remove(...Π.classes.onto));
         target?.matches('.PI-animate') && setTimeout(() => {
             Π.swapping && this.#commitSwap(target, onto);
-            [target, onto].forEach(node => node?.classList.remove('PI-animate'));
             typeof this._callback == 'function' && this._callback(this, target, onto);
         }, 500);
     }
@@ -198,6 +195,7 @@ class Π { // #private  $data  _user
         onto.before(target);
         marker.replaceWith(onto);
         Π.transform.revert([target, this.$lift.snapshot.onto], [onto, this.$press.snapshot.target]);
+        [target, onto].forEach(node => node?.classList.remove('PI-animate'));
         Π.swapping = this.$press = this.$lift = null;
     }
     static events (...configs) {

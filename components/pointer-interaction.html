@@ -145,7 +145,7 @@ let navMax = Q('nav').getBoundingClientRect().y*-1;
 let spans = [...Q('custom-menu i'), ...Q('custom-menu').sQ('i')];
 let menuMax = Q('menu').parentElement.getBoundingClientRect().x - Q('menu').getBoundingClientRect().x;
 
-import PI from '../pointer-interaction.mjs'; window.PI = PI;    
+import PI from '../pointer-interaction.mjs'; window.PI = PI;
 PI.events([
     [spans, { drop: { onto: spans }, lift: PI => PI.lift.to.swap() }],
     [Q('#stock'), { scroll: { x: true } }],
@@ -164,7 +164,6 @@ PI.events([
         lift: (PI, _, selected) => Q('output').value = selected?.innerText
     }],
     [Q('i:has(output)'), {
-        drag: PI => PI.target.matches('.PI-held') || PI.drag.to.scroll('ancestor'),
         hold: hold => hold.for(1).to({drag: PI => PI.drag.to.translate()}),
     }]
 ], {
