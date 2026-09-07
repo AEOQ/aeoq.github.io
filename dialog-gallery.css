@@ -15,7 +15,7 @@ form {
     text-align: center; line-height: 4rem;
 
     button {
-        all: unset; user-select: none;
+        all: unset; user-select: none; -webkit-user-select: none;
         cursor: pointer;
         padding: 0 .5rem;
 

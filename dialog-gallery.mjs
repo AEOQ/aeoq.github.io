@@ -38,7 +38,7 @@ customElements.define('dialog-gallery', class DG extends HTMLElement {
     static #css = new CSSStyleSheet()
     static {
         DG.#css.replaceSync(`
-            dialog-gallery img {user-select: none; -webkit-user-drag: none;}
+            dialog-gallery img {user-select: none; -webkit-user-select: none; -webkit-user-drag: none;}
             dialog-gallery figure>:not(img) {margin: 1em auto; color: white;}
         `)
     }
