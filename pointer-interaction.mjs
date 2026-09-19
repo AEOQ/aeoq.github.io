@@ -162,8 +162,8 @@ class Π { // #private  $data  _user
         transfer: cloned => {
             if (!this.onto || this.onto == this.target.parentElement) return;
             let appended = this.onto.appendChild(cloned ?? this.target);
-            appended.classList.remove(...Π.classes.target);
             appended.style.transform = this.$press.snapshot.target.transform;
+            setTimeout(() => appended.classList.remove(...Π.classes.target));
         },
         clone: () => this.lift.to.transfer(this.target.cloneNode(true)),
         swap: () => {
@@ -187,8 +187,10 @@ class Π { // #private  $data  _user
         this.target = this.onto = this.$drag = null;
         Π.swapping || (this.$press = this.$lift = null);
         this.#events.remove();
-        target?.classList.remove(...Π.classes.target);
-        this.#drop?.onto?.forEach(el => el.classList.remove(...Π.classes.onto));
+        setTimeout(() => {
+            target?.classList.remove(...Π.classes.target);
+            this.#drop?.onto?.forEach(el => el.classList.remove(...Π.classes.onto));
+        });
         target?.classList.contains('PI-animate') && setTimeout(() => {
             Π.swapping && this.#commitSwap(target, onto);
             [target, onto].forEach(node => node?.classList.remove('PI-animate'));
