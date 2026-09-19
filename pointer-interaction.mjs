@@ -169,14 +169,14 @@ class Π { // #private  $data  _user
         swap: () => {
             if (!this.onto) return;
             Π.swapping = true;
-            [this.target, this.onto].forEach(node => node.classList.add('PI-animate'));
+            [this.target, this.onto].forEach(node => node.classList.add('PI-animating'));
             let {x, y} = E(this.onto).getBoundingPageRect();
             x -= this.$press.snapshot.target.x, y -= this.$press.snapshot.target.y;
             Π.transform.add(this.target, this.$press.snapshot.target.transform, {x, y});
             Π.transform.add(this.onto, this.$lift.snapshot.onto.transform, {x: -x, y: -y});
         },
         revert: () => {
-            Math.hypot(this.$drag?.dx, this.$drag?.dy) >= 1 && this.target.classList.add('PI-animate');
+            Math.hypot(this.$drag?.dx, this.$drag?.dy) >= 1 && this.target.classList.add('PI-animating');
             Π.transform.revert([this.target, this.$press.snapshot.target]);
         }
     }}
@@ -191,9 +191,9 @@ class Π { // #private  $data  _user
             target?.classList.remove(...Π.classes.target);
             this.#drop?.onto?.forEach(el => el.classList.remove(...Π.classes.onto));
         });
-        target?.classList.contains('PI-animate') && setTimeout(() => {
+        target?.classList.contains('PI-animating') && setTimeout(() => {
             Π.swapping && this.#commitSwap(target, onto);
-            [target, onto].forEach(node => node?.classList.remove('PI-animate'));
+            [target, onto].forEach(node => node?.classList.remove('PI-animating'));
             typeof this._callback == 'function' && this._callback(this, target, onto);
         }, 500);
     }
@@ -260,18 +260,18 @@ Object.assign(Π, {
             
             a&,img&,a,img {-webkit-user-drag: none;}
         }
-        .PI-dragged,.PI-scrollable:has(:is(.PI-dragged,.PI-animate)) {
+        .PI-dragged,.PI-scrollable:has(:is(.PI-dragged,.PI-animating)) {
             z-index: 1; position: relative; cursor: grab;
         }
-        .PI-animate {
+        .PI-animating {
             z-index: 2; position: relative; transition: transform .5s;
         }
-        .PI-dragged,.PI-animate,.PI-receiving :not(.PI-droppable) {pointer-events: none;}
+        .PI-dragged,.PI-animating,.PI-receiving :not(.PI-droppable) {pointer-events: none;}
         .PI-scrollable {
             overflow: scroll; scrollbar-width: none;
             contain: layout; cursor: grab;
             
-            &:has(.PI-target,.PI-animate) {
+            &:has(.PI-target,.PI-animating) {
                 overflow: visible;
                 transform: translate(calc(var(--tx,0)*1px), calc(var(--ty,0)*1px)) !important;
             }
